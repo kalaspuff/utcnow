@@ -1,6 +1,6 @@
 name: Python package
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -9,7 +9,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v1
@@ -31,6 +31,6 @@ jobs:
     - name: Type check with mypy
       run: |
         PACKAGENAME=$(poetry version | awk {'print $1'}) poetry run mypy $PACKAGENAME/
-#    - name: Codecov
-#      run: |
-#        poetry run codecov --token=${{ secrets.CODECOV_TOKEN }}
+    - name: Codecov
+      run: |
+        poetry run codecov --token=${{ secrets.CODECOV_TOKEN }}
