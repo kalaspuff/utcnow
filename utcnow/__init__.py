@@ -178,7 +178,6 @@ _actual_module = sys.modules[__name__]  # noqa
 _module_value.__spec__ = _actual_module.__spec__  # type: ignore
 _module_value.__path__ = _actual_module.__path__  # type: ignore
 _module_value.__all__ = _actual_module.__all__  # type: ignore
-_module_value.__all__ = _actual_module.__all__  # type: ignore
 _module_value.__cached__ = _actual_module.__cached__  # type: ignore
 _module_value.__dict__ = _actual_module.__dict__
 _module_value.__doc__ = _actual_module.__doc__
