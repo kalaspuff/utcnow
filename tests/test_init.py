@@ -1,4 +1,5 @@
 import datetime
+import json
 
 import pytest
 
@@ -228,3 +229,47 @@ def test_to_string_values(value: str, expected_output: str, expect_error: bool) 
     assert utcnow.as_string(expected_output) == expected_output
     assert utcnow.as_string(expected_output) == utcnow.as_string(expected_output)
     assert utcnow.as_datetime(value) == utcnow.as_datetime(expected_output)
+
+
+def test_fstring() -> None:
+    import utcnow
+
+    result = f"Current server time is {utcnow}"
+    assert result.count("-") == 2
+    assert result.count(":") == 2
+    assert result.count("T") == 1
+    assert result.count("Z") == 1
+    assert result.endswith("Z")
+    assert "Current server time is 2" in result
+
+    result = f"Current server time is {utcnow.utcnow}"
+    assert result.count("-") == 2
+    assert result.count(":") == 2
+    assert result.count("T") == 1
+    assert result.count("Z") == 1
+    assert result.endswith("Z")
+    assert "Current server time is 2" in result
+
+
+def test_as_reference() -> None:
+    import utcnow
+
+    dict1 = {"timestamp": str(utcnow)}
+    a = str(dict1)
+    b = str(dict1)
+    assert a == b
+
+    dict2 = {"timestamp": utcnow}
+    a = str(dict2)
+    b = str(dict2)
+    assert a != b
+
+
+def test_json() -> None:
+    import utcnow
+
+    result = json.dumps({"timestamp": str(utcnow)}).encode()
+    assert utcnow.as_string(json.loads(result).get("timestamp")) == json.loads(result).get("timestamp")
+
+    with pytest.raises(TypeError):
+        json.dumps({"timestamp": utcnow})
