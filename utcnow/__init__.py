@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime as datetime_, timezone as timezone_
 import sys
-from typing import Any, Dict, Literal, Tuple, Type, Union, cast
+from datetime import datetime as datetime_
+from datetime import timezone as timezone_
+from typing import Any, Dict, Tuple, Type, Union, cast
 
 from .__version_data__ import __version__, __version_info__
 
@@ -55,7 +56,9 @@ def _transform_value(value: Union[str_, datetime_, object] = _SENTINEL) -> str_:
             continue
 
         if ends_with_utc and dt_value.tzinfo:
-            raise ValueError(f"Input value '{value}' (type: {value.__class__}) uses double timezone declaration: 'UTC' and '{dt_value.tzinfo}'")
+            raise ValueError(
+                f"Input value '{value}' (type: {value.__class__}) uses double timezone declaration: 'UTC' and '{dt_value.tzinfo}'"
+            )
 
         break
 

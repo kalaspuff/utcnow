@@ -3,8 +3,38 @@ import datetime
 import pytest
 
 
+def test_init() -> None:
+    import utcnow
+    from utcnow import __version__, __version_info__
+
+    assert utcnow
+
+    assert isinstance(utcnow.__version_info__, tuple)
+    assert utcnow.__version_info__
+    assert isinstance(utcnow.__version__, str)
+    assert len(utcnow.__version__)
+
+    assert isinstance(__version_info__, tuple)
+    assert __version_info__
+    assert isinstance(__version__, str)
+    assert len(__version__)
+
+    from utcnow.__version__ import __version__ as __version2__, __version_info__ as __version_info2__  # isort:skip
+
+    assert isinstance(__version_info2__, tuple)
+    assert __version_info2__
+    assert isinstance(__version2__, str)
+    assert len(__version2__)
+
+
 def test_module() -> None:
     import utcnow
+
+    # Test types
+    assert type(utcnow) is utcnow._module
+    assert len(str(utcnow)) == 27
+    assert isinstance(repr(utcnow), str)
+    assert len(repr(utcnow)) == 27
 
     # Modules aren't callable, but this one is – it's frowned upon and bad practice.
     assert utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"  # type: ignore
@@ -38,29 +68,65 @@ def test_module() -> None:
     assert datetime.datetime.strptime(utcnow.utcnow.str(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(str(utcnow.utcnow), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert utcnow.utcnow(datetime.datetime(2021, 4, 30, 8, 0)) == "2021-04-30T08:00:00.000000Z"
-    assert utcnow.as_datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
-    assert utcnow.as_date("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
-    assert utcnow.datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
-    assert utcnow.date("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
-    assert utcnow.utcnow.as_datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
-    assert utcnow.utcnow.as_date("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
-    assert utcnow.utcnow.datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
-    assert utcnow.utcnow.date("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
+    assert utcnow.as_datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.as_date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.utcnow.as_datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.utcnow.as_date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.utcnow.datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.utcnow.date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
 
     # Timezone test
-    assert utcnow.as_datetime("2021-04-30T09:00:00.000000+01:00") == datetime.datetime(2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc)
-    assert utcnow.as_datetime("2021-04-30T08:00:00.000000+00:00") == datetime.datetime(2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc)
-    assert utcnow.as_datetime("2021-04-30T08:00:00.000000-00:00") == datetime.datetime(2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc)
-    assert utcnow.as_datetime("2021-04-30T07:00:00.000000-01:00") == datetime.datetime(2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc)
-    assert utcnow.as_datetime("2021-04-30T08:00:00.000000 UTC") == datetime.datetime(2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc)
-    assert utcnow.as_datetime("2021-04-30T08:00:00.000000") == datetime.datetime(2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc)
+    assert utcnow.as_datetime("2021-04-30T09:00:00.000000+01:00") == datetime.datetime(
+        2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.as_datetime("2021-04-30T08:00:00.000000+00:00") == datetime.datetime(
+        2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.as_datetime("2021-04-30T08:00:00.000000-00:00") == datetime.datetime(
+        2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.as_datetime("2021-04-30T07:00:00.000000-01:00") == datetime.datetime(
+        2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.as_datetime("2021-04-30T08:00:00.000000 UTC") == datetime.datetime(
+        2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.as_datetime("2021-04-30T08:00:00.000000") == datetime.datetime(
+        2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
+    )
     assert utcnow.as_datetime("2021-04-30T08:00:00.000000 UTC") != datetime.datetime(2021, 4, 30, 8, 0)
-    assert utcnow.as_datetime("2021-04-30T08:00:00.000000 UTC") == utcnow.as_datetime(datetime.datetime(2021, 4, 30, 8, 0))
-    assert utcnow.as_datetime("2021-04-30T08:00:00.000000 UTC") != utcnow.as_datetime(datetime.datetime(2021, 4, 30, 8, 1))
-    assert utcnow.as_string(utcnow.as_datetime("2021-04-30T08:00:00.000000 UTC")) == utcnow.utcnow(utcnow.as_datetime(datetime.datetime(2021, 4, 30, 8, 0)))
+    assert utcnow.as_datetime("2021-04-30T08:00:00.000000 UTC") == utcnow.as_datetime(
+        datetime.datetime(2021, 4, 30, 8, 0)
+    )
+    assert utcnow.as_datetime("2021-04-30T08:00:00.000000 UTC") != utcnow.as_datetime(
+        datetime.datetime(2021, 4, 30, 8, 1)
+    )
+    assert utcnow.as_string(utcnow.as_datetime("2021-04-30T08:00:00.000000 UTC")) == utcnow.utcnow(
+        utcnow.as_datetime(datetime.datetime(2021, 4, 30, 8, 0))
+    )
 
     # Testing function imports
-    from utcnow import as_string, as_str, string, str as str_
+    from utcnow import as_str, as_string
+    from utcnow import str as str_
+    from utcnow import string
 
     assert as_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert as_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
@@ -86,10 +152,18 @@ def test_module() -> None:
     assert datetime.datetime.strptime(utcnow_.str(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(str(utcnow_), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert utcnow_(datetime.datetime(2021, 4, 30, 8, 0)) == "2021-04-30T08:00:00.000000Z"
-    assert utcnow_.as_datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
-    assert utcnow_.as_date("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
-    assert utcnow_.datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
-    assert utcnow_.date("2021-04-30T08:00:10.000000Z") == datetime.datetime(2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc)
+    assert utcnow_.as_datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow_.as_date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow_.datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow_.date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
 
 
 @pytest.mark.parametrize(
@@ -106,7 +180,6 @@ def test_module() -> None:
         # This represents the leap second inserted at the end of 1990. However this will fail since we can't handle
         # second number 60.
         ("1990-12-31T15:59:60-08:00", "1990-12-31T23:59:60.000000Z", True),
-
         # Other tests for allowed input formats
         ("2021-02-18", "2021-02-18T00:00:00.000000Z", False),
         ("2021-02-18 01:00", "2021-02-18T01:00:00.000000Z", False),
@@ -124,6 +197,15 @@ def test_module() -> None:
         ("2021-02-28 10:10:59.123987+00:00", "2021-02-28T10:10:59.123987Z", False),
         ("2021-02-28 10:10:59.123987Z", "2021-02-28T10:10:59.123987Z", False),
         ("2021-02-28 10:10:59.123987 UTC", "2021-02-28T10:10:59.123987Z", False),
+        # Not allowed input formats
+        ("2021-02-28 10:10:59.123987+00:00 UTC", "", True),
+        ("2021-02-28 10:10:59.123987 Europe/Stockholm", "", True),
+        ("2021/02/28", "", True),
+        ("21-02-28 10:10:59.123987+00:00", "", True),
+        ("2021", "", True),
+        ("2021-02", "", True),
+        ("2021-02-30", "", True),
+        ("1900-01-01 20:30.123", "", True),
     ],
 )
 def test_to_string_values(value: str, expected_output: str, expect_error: bool) -> None:
