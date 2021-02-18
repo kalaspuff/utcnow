@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "utcnow"
-version = "0.0.1"
-description = "Just timestamps as RFC 3339 (Date and Time on the Internet) formatted strings"
+version = "0.1.0"
+description = "Timestamps as opinionated RFC 3339 (Date and Time on the Internet) formatted strings"
 authors = ["Carl Oscar Aaro <hello@carloscar.com>"]
 homepage = "https://github.com/kalaspuff/izakaya"
 repository = "https://github.com/kalaspuff/izakaya"
