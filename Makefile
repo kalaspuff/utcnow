@@ -24,7 +24,8 @@ mypy:
 	poetry run mypy ${PACKAGENAME}/
 
 version:
-	poetry version `python ${PACKAGENAME}/__version__.py`
+	PYTHONPATH=. poetry run python -m ${PACKAGENAME}.__version__ > /dev/null
+	poetry version `PYTHONPATH=. poetry run python -m ${PACKAGENAME}.__version__`
 
 black:
 	poetry run black ${PACKAGENAME}/ tests/
@@ -43,10 +44,10 @@ release:
 	make mypy
 	make version
 	make build
-	poetry publish
+	twine upload dist/${PACKAGENAME}-`PYTHONPATH=. poetry run python -m ${PACKAGENAME}.__version__`*
 	git add pyproject.toml ${PACKAGENAME}/__version__.py
 	git commit -m "Bumped version" --allow-empty
-	git tag -a `python ${PACKAGENAME}/__version__.py` -m `python ${PACKAGENAME}/__version__.py`
+	git tag -a `PYTHONPATH=. poetry run python -m ${PACKAGENAME}.__version__` -m `PYTHONPATH=. poetry run python -m ${PACKAGENAME}.__version__`
 	git push
 	git push --tags
 
