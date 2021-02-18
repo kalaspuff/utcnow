@@ -12,7 +12,7 @@ default:
 	@echo "- make release      | upload dist and push tag"
 
 pytest:
-	PYTHONPATH=. poetry run pytest --cov-report term-missing --cov=${PACKAGENAME}
+	PYTHONPATH=. poetry run pytest --cov=./ tests -v
 
 flake8:
 	poetry run flake8 ${PACKAGENAME}/ tests/

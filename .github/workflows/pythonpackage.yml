@@ -24,7 +24,7 @@ jobs:
         poetry install
     - name: Test with pytest
       run: |
-        PYTHONPATH=. PACKAGENAME=$(poetry version | awk {'print $1'}) poetry run pytest --cov=$PACKAGENAME/
+        PYTHONPATH=. PACKAGENAME=$(poetry version | awk {'print $1'}) poetry run pytest --cov=./ tests -v
     - name: Lint with flake8
       run: |
         PACKAGENAME=$(poetry version | awk {'print $1'}) poetry run flake8 $PACKAGENAME/ tests/
