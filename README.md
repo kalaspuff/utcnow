@@ -71,13 +71,30 @@ result = utcnow.as_string("2077-10-27")
 ```
 
 ```python
-# It's also possible to transform datetime values into timestamp strings
+# Simple exmple of converting a naive datetime value, assuming UTC
 
 import datetime
 from utcnow import utcnow
-dt = datetime.datetime.utcnow()
+dt = datetime.datetime(1984, 8, 1, 13, 38, 0, 4711)
 result = utcnow.as_string(dt)
-# '2021-02-18T08:24:48.382262Z'
+# '1984-08-01T13:38:00.004711Z'
+# for non-tz-aware datetimes, the same result would be returned by both:
+# 1. utcnow.as_string(dt)
+# 2. dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+```
+
+```python
+# It's also possible to transform datetime values with timezone offsets into timestamp strings
+
+import datetime
+from utcnow import utcnow
+tz_EDT = datetime.timezone(offset=datetime.timedelta(hours=-4))
+dt = datetime.datetime(1997, 8, 4, 2, 14, tzinfo=tz_EDT)
+result = utcnow.as_string(dt)
+# '1997-08-04T06:14:00.000000Z'
+# for timezone-aware datetimes, the same result would be returned by both:
+# 1. utcnow.as_string(dt)
+# 2. dt.astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 ```
 
 ```python
@@ -91,9 +108,18 @@ result = utcnow.as_datetime("1984-08-01T13:38:00.123450Z")
 ```python
 # Getting the current server time in UTC as a timestamp string
 
-from utcnow import utcnow
-utcnow()
+import utcnow
+utcnow.utcnow()
 # '2021-02-18T08:24:48.382262Z'
+# same thing can be accomplished using datetime and all of these calls returns the same str value:
+# 1. utcnow.utcnow()
+# 2. str(utcnow)
+# 3. str(utcnow.utcnow)
+# 4. utcnow.as_string()
+# 5. utcnow.utcnow.as_string()
+# 6. datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+# 7. datetime.datetime.utcnow().isoformat() + "Z"
+# 8. datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 ```
 
 ```python
@@ -102,10 +128,13 @@ utcnow()
 from utcnow import utcnow
 utcnow.as_datetime()
 # datetime.datetime(2021, 2, 18, 8, 24, 48, 382262, tzinfo=datetime.timezone.utc)
+# this is merely a convinience, as the same value would be returned by both:
+# 1. utcnow.as_datetime()
+# 2. datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
 ```
 
 ```python
-# Just another way of getting the current server timestamp as an RFC 3339 timestamp in UTC
+# As described – current server timestamp as a RFC 3339 timestamp in UTC
 
 import utcnow
 result = str(utcnow)

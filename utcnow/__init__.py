@@ -66,8 +66,8 @@ def _transform_value(value: Union[str_, datetime_, object] = _SENTINEL) -> str_:
         raise ValueError(f"Input value '{value}' (type: {value.__class__}) does not match allowed input format")
 
     if not dt_value.tzinfo:
-        # Timezone declaration missing, assuming UTC
-        dt_value = datetime_.strptime(dt_value.strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z", "%Y-%m-%dT%H:%M:%S.%f%z")
+        # Timezone declaration missing, skipping tz application and blindly assuming UTC
+        return dt_value.strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
 
     return dt_value.astimezone(timezone_.utc).strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
 
