@@ -11,6 +11,9 @@ default:
 	@echo "- make black        | run black -l 120"
 	@echo "- make release      | upload dist and push tag"
 
+install:
+	poetry install
+
 pytest:
 	PYTHONPATH=. poetry run pytest --cov=${PACKAGENAME}/ tests -v
 
@@ -34,6 +37,7 @@ build:
 	poetry build
 
 release:
+	make install
 	make pytest
 	make flake8
 	make mypy
