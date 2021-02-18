@@ -45,7 +45,7 @@ release:
 	make version
 	make build
 	twine upload dist/${PACKAGENAME}-`PYTHONPATH=. poetry run python -m ${PACKAGENAME}.__version__`*
-	git add pyproject.toml ${PACKAGENAME}/__version__.py
+	git add pyproject.toml ${PACKAGENAME}/__version__.py ${PACKAGENAME}/__version_data__.py
 	git commit -m "Bumped version" --allow-empty
 	git tag -a `PYTHONPATH=. poetry run python -m ${PACKAGENAME}.__version__` -m `PYTHONPATH=. poetry run python -m ${PACKAGENAME}.__version__`
 	git push
