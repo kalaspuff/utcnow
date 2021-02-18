@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "utcnow"
+version = "0.0.1"
+description = "Just timestamps as RFC 3339 (Date and Time on the Internet) formatted strings"
+authors = ["Carl Oscar Aaro <hello@carloscar.com>"]
+homepage = "https://github.com/kalaspuff/izakaya"
+repository = "https://github.com/kalaspuff/izakaya"
+keywords = ["utcnow", "utc timestamp", "rfc 3339", "rfc3339", "timestamp", "date and time on the internet", "datetime"]
+readme = "README.md"
+license = "MIT"
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Intended Audience :: Developers",
+    "Typing :: Typed",
+    "License :: OSI Approved :: MIT License"
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+[tool.poetry.dev-dependencies]
+flake8 = { version = ">=3.8.4", markers = "sys_platform != \"win32\"" }
+flake8-black = { version = ">=0.2.0", markers = "sys_platform != \"win32\"" }
+flake8-isort = { version = ">=4.0.0", markers = "sys_platform != \"win32\"" }
+isort = { version = ">=5.6.0", markers = "sys_platform != \"win32\"" }
+pytest = { version = ">=6.1.0", markers = "sys_platform != \"win32\"" }
+pytest-cov = { version = ">=2.10.0", markers = "sys_platform != \"win32\"" }
+black = { version = "*", markers = "sys_platform != \"win32\"", allow-prereleases = true }
+mypy = { version = ">=0.800", markers = "sys_platform != \"win32\"" }
+codecov = { version = ">=2.1.10", markers = "sys_platform != \"win32\"" }
+
+[tool.black]
+line-length = 120
+target_version = ["py37", "py38"]
+include = '\.pyi?$'
+exclude = '\.eggs/|\.egg-info/|\.git/|\.github/|\.mypy_cache/|\.venv/|\.pytest_cache/|\.vscode/|__pycache__/|build/|dist/|setup\.py'
+
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = "utcnow"
+skip = ".mypy_cache,__pycache__,.pytest_cache,.eggs,.venv,.git,.vscode,.github,dist"
