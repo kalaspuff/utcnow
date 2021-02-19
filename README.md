@@ -10,15 +10,15 @@
 from utcnow import utcnow
 
 utcnow.as_string("1997-08-04T02:14:00.53-04:00")
-# "1997-08-04T06:14:00.530000Z" | Timezones in UTC for aligned data.
+# "1997-08-04T06:14:00.530000Z" | Timezones as UTC for aligned and clean interfaces.
 
 utcnow.as_string("1989-12-13 08:35 UTC")
-# "1989-12-13T08:35:00.000000Z" | Converts from several input formats.
+# "1989-12-13T08:35:00.000000Z" | Converts from different input formats and patterns.
 
 utcnow.as_string()
-# "2077-03-01T09:33:07.139361Z" | The current server time as a timestamp.
+# "2077-03-01T09:33:07.139361Z" | Most common use-case – the current server time.
 
-# 👋 Additional examples of other types of input further down.
+# 👋 Look at the additional code examples of other types of input values further down.
 ``` 
 
 ## The elevator pitch – purpose for devs and our sanity
