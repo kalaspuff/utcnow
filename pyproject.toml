@@ -5,11 +5,11 @@ description = "Timestamps as opinionated RFC 3339 (Date and Time on the Internet
 authors = ["Carl Oscar Aaro <hello@carloscar.com>"]
 homepage = "https://github.com/kalaspuff/utcnow"
 repository = "https://github.com/kalaspuff/utcnow"
-keywords = ["utcnow", "utc timestamp", "rfc 3339", "rfc3339", "timestamp", "date and time on the internet", "datetime"]
+keywords = ["utcnow", "utc timestamp", "modern timestamp", "rfc 3339", "rfc3339", "timestamp", "timestamps", "date and time on the internet", "datetime", "zulu time"]
 readme = "README.md"
 license = "MIT"
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 3 - Alpha",
     "Topic :: Software Development",
     "Topic :: Software Development :: Libraries",
     "Programming Language :: Python",
