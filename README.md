@@ -4,8 +4,20 @@
 [![Type hinted - mypy validated](https://img.shields.io/badge/typehinted-yes-teal)](https://github.com/kalaspuff/utcnow)
 [![MIT License](https://img.shields.io/github/license/kalaspuff/utcnow.svg)](https://github.com/kalaspuff/utcnow/blob/master/LICENSE)
 
-*Timestamps as RFC 3339 (Date and Time on the Internet) formatted strings with conversion from other timestamps in similar formats or from datetime objects or other date libraries that uses values convertable to strings and are compatible with RFC 3339. There's no other external dependencies required.*
+*Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion from timestamps using old patterns or other timezones, also conversions from datetimes and from other common date utilities. Let's follow modern practices for developing API interfaces.*
 
+```python
+from utcnow import utcnow
+
+utcnow.as_string("1997-08-04T02:14:00.53-04:00")
+# "1997-08-04T06:14:00.530000Z" | timezones in UTC for aligned data
+
+utcnow.as_string("1989-12-13 08:35 UTC")
+# "1989-12-13T08:35:00.000000Z" | converts from many input formats
+
+utcnow.as_string()
+# "2077-03-01T09:33:07.139361Z" | timestamp from just now
+``` 
 
 ## The elevator pitch – purpose for devs and our sanity
 
@@ -56,7 +68,7 @@ Note that this library is built with backend developers in mind and while there'
 
 This is not a fullblown date library at all – it's simple and basically it just output timestamps into the fixes length string format `YYYY-MM-DDTHH:mm:ss.uuuuuuZ` (or as `%Y-%m-%dT%H:%M:%SZ` as if used with `datetime.datetime.strftime`). Always uses UTC in output and always appends the UTC timezone as a `Z` to the string (instead of using `+00:00` or ` UTC`).
 
-A convenient utility package for when you need to store timestamps in a datastore as a string, adding it to a JSON response or using a shared and common standard in your log outputs. Example output in string format would be `"2021-02-18T08:24:48.382262Z"`.
+There's no other external dependencies required. A convenient utility package for when you need to store timestamps in a datastore as a string, adding it to a JSON response or using a shared and common standard in your log outputs.
 
 It's never too late to start aligning your formatting standards and interfaces.
 
