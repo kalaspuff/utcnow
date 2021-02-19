@@ -10,18 +10,22 @@
 ## The elevator pitch – purpose for devs and our sanity
 
 ##### NOTE – OPINIONATED SOFTWARE
+
 **`utcnow` is opinionated about the format of string based timestamps. For example, that timestamps as strings should be stored using the same formatting and preferably using the same length, as well as adhering to the current best practices – which for computer-to-computer comms should be by following ["RFC 3339 (Date and Time on the Internet: Timestamps)"](https://tools.ietf.org/html/rfc3339).**
 
 ##### TIMESTAMPS SHOULD USE UTC
+
 **String based timestamps that are meant for logs, API responses and database records shall always be stored with timezone UTC.**
 
-> **Someone, Somewhere:** 
+> **Someone – somewhere:** 
 > "Why UTC? It's not even a timezone for our markets."
 
-> **Devs (and documentation):**
-> "UTC (Coordinated Universal Time) is currently the primary time standard and not affected by DST. Modern internet applications shouldn't use any other timezone in their databases, logs, API:s or other computer to computer interfaces."
+> **Devs (and wikipedia):**
+> "_Coordinated Universal Time_ or _Universal Time Coordinated_, UTC for short, is still currently _the primary time standard_ and is not affected by daylight saving time, which is usually not something that servers or software developers would want to work around."
+>
+> "It's pretty simple – modern internet applications shouldn't use any other timezone in their databases, logs, API:s or other computer to computer interfaces."
 
-These are no wild and crazy opinions at all, and generally it'll just be about making it easier to follow common best practices and that some software shouldn't give any room to do something else than the default. Of course, the default configuration will also have to be good enough – `utcnow` doesn't have any configuration or options – shoganai.
+Good timestamps and UTC – really no wild and crazy opinions. Generailly this lib is just about making it ~easier to follow common best practices~ harder to do something wrong – and that's also why `utcnow` doesn't have any configuration options. The library does what it should do – "shoganai".
 
 ##### RULES FOR TIMESTAMPS
 
@@ -43,7 +47,7 @@ Some examples of timestamps where this formatting would be reasonable to use inc
 
 If any of this sounds like the use-cases within your domains, try `utcnow` out – might do the trick.
 
-If your work require a complex mix and match back and forth using different timezones even within internal applications (which may be true for legacy systems or on purely domestic use-cases), then go for `arrow`. Also iterating: Modern internet applications shouldn't use any other timezone than UTC in app-to-app / computer-to-computer interfaces.
+If your work require a complex mix and match back and forth using different timezones even within internal applications (which may be true for legacy systems or on purely domestic use-cases), then go for `arrow`. Also iterating: Modern internet applications shouldn't use any other timezone than UTC in app to app / computer to computer interfaces.
 
 Note that this library is built with backend developers in mind and while there's a good need for human readability and timestamp conversion into local timezones within a service's user interface, frontend applications, etc. Interfaces where conversion into date and time formats meant for human eyes will obviously also reap the benefits from well defined backends that delivers timestamp values in one standardized format.
 
