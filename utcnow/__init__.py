@@ -93,37 +93,23 @@ class utcnow_(_baseclass):
 
         return result
 
-    @staticmethod
-    def as_string(value: Union[str_, datetime_, object] = _SENTINEL) -> str_:
+    def as_string(self, value: Union[str_, datetime_, object] = _SENTINEL) -> str_:
         return _transform_value(value)
 
-    @staticmethod
-    def as_str(value: Union[str_, datetime_, object] = _SENTINEL) -> str_:
-        return _transform_value(value)
+    as_str = as_string
+    to_string = as_string
+    to_str = as_string
+    string = as_string
+    str = as_string
 
-    @staticmethod
-    def string(value: Union[str_, datetime_, object] = _SENTINEL) -> str_:
-        return _transform_value(value)
-
-    @staticmethod
-    def str(value: Union[str_, datetime_, object] = _SENTINEL) -> str_:
-        return _transform_value(value)
-
-    @staticmethod
-    def as_datetime(value: Union[str_, datetime_, object] = _SENTINEL) -> datetime_:
+    def as_datetime(self, value: Union[str_, datetime_, object] = _SENTINEL) -> datetime_:
         return datetime_.strptime(_transform_value(value), "%Y-%m-%dT%H:%M:%S.%f%z")
 
-    @staticmethod
-    def as_date(value: Union[str_, datetime_, object] = _SENTINEL) -> datetime_:
-        return datetime_.strptime(_transform_value(value), "%Y-%m-%dT%H:%M:%S.%f%z")
-
-    @staticmethod
-    def datetime(value: Union[str_, datetime_, object] = _SENTINEL) -> datetime_:
-        return datetime_.strptime(_transform_value(value), "%Y-%m-%dT%H:%M:%S.%f%z")
-
-    @staticmethod
-    def date(value: Union[str_, datetime_, object] = _SENTINEL) -> datetime_:
-        return datetime_.strptime(_transform_value(value), "%Y-%m-%dT%H:%M:%S.%f%z")
+    as_date = as_datetime
+    to_datetime = as_datetime
+    to_date = as_datetime
+    datetime = as_datetime
+    date = as_datetime
 
     def __str__(self) -> str_:
         return self.as_string()
@@ -148,14 +134,20 @@ class _module(utcnow_):
 
 _module_value = _module()
 utcnow = _module_value.utcnow
+
 as_string = _module_value.as_string
-as_str = _module_value.as_str
-string = _module_value.string
-str = _module_value.str
+as_str = as_string
+to_string = as_string
+to_str = as_string
+string = as_string
+str = as_string
+
 as_datetime = _module_value.as_datetime
-as_date = _module_value.as_datetime
-datetime = _module_value.datetime
-date = _module_value.date
+as_date = as_datetime
+to_datetime = as_datetime
+to_date = as_datetime
+datetime = as_datetime
+date = as_datetime
 
 __all__ = [
     "__version__",

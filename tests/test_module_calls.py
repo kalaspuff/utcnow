@@ -24,6 +24,8 @@ def test_module() -> None:
     assert utcnow.utcnow("1984-08-01 12:00:00") != "1984-08-01T00:00:00.000000Z"
     assert utcnow.as_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.as_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.to_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.to_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"
