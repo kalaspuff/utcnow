@@ -27,7 +27,7 @@ utcnow.as_string()
 
 **`utcnow` is opinionated about the format of string based timestamps. For example, that timestamps as strings should be stored using the same formatting and preferably using the same length, as well as adhering to the current best practices – which for computer-to-computer comms should be by following ["RFC 3339 (Date and Time on the Internet: Timestamps)"](https://tools.ietf.org/html/rfc3339).**
 
-##### TIMESTAMPS SHOULD USE UTC
+##### TIMESTAMPS WILL USE UTC
 
 **String based timestamps that are meant for logs, API responses and database records shall always be stored with timezone UTC.**
 
@@ -41,7 +41,7 @@ utcnow.as_string()
 
 Good timestamps and UTC – really no wild and crazy opinions. Generailly this lib is just about making it ~easier to follow common best practices~ harder to do something wrong – and that's also why `utcnow` doesn't have any configuration options. The library does what it should do – "shoganai".
 
-##### RULES FOR TIMESTAMPS
+##### RULES FOR RETURNED TIMESTAMPS
 
 **The following strict rules are applied to timestamps returned by `utcnow` when requesting a string based format:**
 
