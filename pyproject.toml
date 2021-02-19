@@ -1,10 +1,10 @@
 [tool.poetry]
 name = "utcnow"
-version = "0.1.1"
+version = "0.2.0"
 description = "Timestamps as opinionated RFC 3339 (Date and Time on the Internet) formatted strings"
 authors = ["Carl Oscar Aaro <hello@carloscar.com>"]
-homepage = "https://github.com/kalaspuff/izakaya"
-repository = "https://github.com/kalaspuff/izakaya"
+homepage = "https://github.com/kalaspuff/utcnow"
+repository = "https://github.com/kalaspuff/utcnow"
 keywords = ["utcnow", "utc timestamp", "rfc 3339", "rfc3339", "timestamp", "date and time on the internet", "datetime"]
 readme = "README.md"
 license = "MIT"
