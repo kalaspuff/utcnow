@@ -14,7 +14,8 @@ def test_init() -> None:
     assert isinstance(__version__, str)
     assert len(__version__)
 
-    from utcnow.__version__ import __version__ as __version2__, __version_info__ as __version_info2__  # noqa  # isort:skip
+    from utcnow.__version__ import __version__ as __version2__  # noqa  # isort:skip
+    from utcnow.__version__ import __version_info__ as __version_info2__  # noqa  # isort:skip
 
     assert isinstance(__version_info2__, tuple)
     assert __version_info2__
