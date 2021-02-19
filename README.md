@@ -18,7 +18,7 @@ utcnow.as_string("1989-12-13 08:35 UTC")
 utcnow.as_string()
 # "2077-03-01T09:33:07.139361Z" | timestamp from just now
 
-# 👋 Additional examples of other conversions and package use further down.
+# 👋 Additional examples of other types of input further down.
 ``` 
 
 ## The elevator pitch – purpose for devs and our sanity
