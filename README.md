@@ -18,7 +18,7 @@ utcnow.as_string("1989-12-13 08:35 UTC")
 utcnow.as_string()
 # "2077-03-01T09:33:07.139361Z" | Most common use-case – the current server time.
 
-# 👋 Look at the additional code examples of other types of input values further down.
+# 👋 Look further down for additional code examples of other types of input values.
 ``` 
 
 ## The elevator pitch – purpose for devs and our sanity
@@ -110,8 +110,6 @@ utcnow("2022-08-01T13:51Z")            >  utcnow("2022-08-01T13:51:30.000000Z") 
 
 *This shown the returned values from the `utcnow` calls, and for what the comparisons is actually evaluated on.
 ```python
-from utcnow import utcnow
-
 "2022-08-01T23:51:30.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # True  🎉
 "2022-08-01T14:00:10.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # True  ✅
 "2022-08-01T13:00:10.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # False 🥇
