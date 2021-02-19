@@ -17,6 +17,8 @@ utcnow.as_string("1989-12-13 08:35 UTC")
 
 utcnow.as_string()
 # "2077-03-01T09:33:07.139361Z" | timestamp from just now
+
+# 👋 Additional examples of other conversions and package use further down.
 ``` 
 
 ## The elevator pitch – purpose for devs and our sanity
@@ -90,30 +92,30 @@ Here follows a few examples of the problems with having to work with mismatching
 
 *Matching two dates of different formats using strings won't go well at all. All of the following four string comparisons would've given an opposite result if compared as actual timestamps instead of as strings, where comparison is just alphabetic.*
 ```python
-"2022-08-01 23:51:30.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # False :(
-"2022-08-01 14:00:10"                  >  "2022-08-01T13:51:30.000000Z"          # False :(
-"2022-08-01T14:00:10+01:00"            >  "2022-08-01T13:51:30.000000Z"          # True  :(
-"2022-08-01T13:51Z"                    >  "2022-08-01T13:51:30.000000Z"          # True  :(
+"2022-08-01 23:51:30.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # False 😵
+"2022-08-01 14:00:10"                  >  "2022-08-01T13:51:30.000000Z"          # False 😵
+"2022-08-01T14:00:10+01:00"            >  "2022-08-01T13:51:30.000000Z"          # True  😵
+"2022-08-01T13:51Z"                    >  "2022-08-01T13:51:30.000000Z"          # True  😵
 ```
 
 *Using `utcnow` on the same set of timestamps, which returns a string value for comparison.
 ```python
 from utcnow import utcnow
 
-utcnow("2022-08-01 23:51:30.000000Z")  >  utcnow("2022-08-01T13:51:30.000000Z")  # True  :)
-utcnow("2022-08-01 14:00:10")          >  utcnow("2022-08-01T13:51:30.000000Z")  # True  :)
-utcnow("2022-08-01T14:00:10+01:00")    >  utcnow("2022-08-01T13:51:30.000000Z")  # False :)
-utcnow("2022-08-01T13:51Z")            >  utcnow("2022-08-01T13:51:30.000000Z")  # False :)
+utcnow("2022-08-01 23:51:30.000000Z")  >  utcnow("2022-08-01T13:51:30.000000Z")  # True  🎉
+utcnow("2022-08-01 14:00:10")          >  utcnow("2022-08-01T13:51:30.000000Z")  # True  ✅
+utcnow("2022-08-01T14:00:10+01:00")    >  utcnow("2022-08-01T13:51:30.000000Z")  # False 🥇
+utcnow("2022-08-01T13:51Z")            >  utcnow("2022-08-01T13:51:30.000000Z")  # False 😻
 ```
 
 *This shown the returned values from the `utcnow` calls, and for what the comparisons is actually evaluated on.
 ```python
 from utcnow import utcnow
 
-"2022-08-01T23:51:30.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # True  :)
-"2022-08-01T14:00:10.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # True  :)
-"2022-08-01T13:00:10.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # False :)
-"2022-08-01T13:51:00.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # False :)
+"2022-08-01T23:51:30.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # True  🎉
+"2022-08-01T14:00:10.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # True  ✅
+"2022-08-01T13:00:10.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # False 🥇
+"2022-08-01T13:51:00.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # False 😻
 ```
 
 
