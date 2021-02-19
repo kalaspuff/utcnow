@@ -9,15 +9,30 @@
 
 ## The elevator pitch – purpose for devs and our sanity
 
-**Note: `utcnow` is opinionated in the format of timestamps as strings. For example that timestamps as strings shall be stored using the same formatting and preferably using the same length, as well as adhering to best practices and following "RFC 3339 (Date and Time on the Internet: Timestamps)". Also: String based timestamps that may be meant for logs, API responses and database records shall always be stored with timezone UTC.**
+##### NOTE – OPINIONATED SOFTWARE
+**`utcnow` is opinionated about the format of string based timestamps. For example, that timestamps as strings should be stored using the same formatting and preferably using the same length, as well as adhering to the current best practices – which for computer-to-computer comms should be by following ["RFC 3339 (Date and Time on the Internet: Timestamps)"](https://tools.ietf.org/html/rfc3339).**
 
-Why UTC? UTC (Coordinated Universal Time) is currently the primary time standard and not affected by DST. Modern internet applications shouldn't use any other timezone in their databases, logs, API:s or other computer to computer interfaces.
+##### TIMESTAMPS SHOULD USE UTC
+**String based timestamps that are meant for logs, API responses and database records shall always be stored with timezone UTC.**
+
+> **Someone, Somewhere:** 
+> "Why UTC? It's not even a timezone for our markets."
+
+> **Devs (and documentation):**
+> "UTC (Coordinated Universal Time) is currently the primary time standard and not affected by DST. Modern internet applications shouldn't use any other timezone in their databases, logs, API:s or other computer to computer interfaces."
+
+These are no wild and crazy opinions at all, and generally it'll just be about making it easier to follow common best practices and that some software shouldn't give any room to do something else than the default. Of course, the default configuration will also have to be good enough – `utcnow` doesn't have any configuration or options – shoganai.
+
+##### RULES FOR TIMESTAMPS
 
 **The following strict rules are applied to timestamps returned by `utcnow` when requesting a string based format:**
+
 * Timestamps follow RFC 3339 (Date and Time on the Internet: Timestamps): https://tools.ietf.org/html/rfc3339.
 * Timestamps are converted to UTC timezone which we'll note in the timestamp with the "Z" syntax instead of the also accepted "+00:00". "Z" stands for UTC+0 or "Zulu time" and refers to the zone description of zero hours.
 * Timestamps are expressed as a date-time, including the full date (the "T" between the date and the time is optional in RFC 3339 (but not in ISO 8601) and usually describes the beginning of the time part.
-* Timestamps are 27 characters long in the format: "YYYY-MM-DDTHH:mm:ss.ffffffZ". 4 digit year, 2 digit month, 2 digit days. "T", 2 digit hours, 2 digit minutes, 2 digit seconds, 6 fractional second digits (microseconds), followed by the timezone identifier for UTC: "Z".
+* Timestamps are 27 characters long in the format: "YYYY-MM-DDTHH:mm:ss.ffffffZ". 4 digit year, 2 digit month, 2 digit days. "T", 2 digit hours, 2 digit minutes, 2 digit seconds, 6 fractional second digits (microseconds -> nanoseconds), followed by the timezone identifier for UTC: "Z".
+
+`utcnow` is defined to return timestamps with 6 fractional second digits, which means timestamps down to the microsecond level. Having a six-digit fraction of a second is currently the most common way that timestamps are shown at this date.
 
 When using a fixed length return value for string based timestamps it'll even make the returned strings comparable to each other.
 
