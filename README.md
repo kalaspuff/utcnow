@@ -4,7 +4,7 @@
 [![Type hinted - mypy validated](https://img.shields.io/badge/typehinted-yes-teal)](https://github.com/kalaspuff/utcnow)
 [![MIT License](https://img.shields.io/github/license/kalaspuff/utcnow.svg)](https://github.com/kalaspuff/utcnow/blob/master/LICENSE)
 
-*Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion from timestamps using old patterns or other timezones, also conversions from datetimes and from other common date utilities. Let's follow modern practices for developing API interfaces.*
+*Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion functinonality from other timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objets and other common date utilities. Follow modern practices for developing API interfaces.*
 
 ```python
 from utcnow import utcnow
