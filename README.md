@@ -54,7 +54,7 @@ Good timestamps and UTC – really no wild and crazy opinions. Generailly this l
 
 ##### RULES FOR RETURNED TIMESTAMPS
 
-**The following strict rules are applied to timestamps returned by `utcnow` when requesting a string based format:**
+**The following ruleset are applied to timestamps returned by `utcnow` when requesting a string based format:**
 
 * Timestamps follow RFC 3339 (Date and Time on the Internet: Timestamps): https://tools.ietf.org/html/rfc3339.
 * Timestamps are converted to UTC timezone which we'll note in the timestamp with the "Z" syntax instead of the also accepted "+00:00". "Z" stands for UTC+0 or "Zulu time" and refers to the zone description of zero hours.
@@ -75,15 +75,6 @@ If any of this sounds like the use-cases within your domains, try `utcnow` out �
 If your work require a complex mix and match back and forth using different timezones even within internal applications (which may be true for legacy systems or on purely domestic use-cases), then go for `arrow`. Also iterating: Modern internet applications shouldn't use any other timezone than UTC in app to app / computer to computer interfaces.
 
 Note that this library is built with backend developers in mind and while there's a good need for human readability and timestamp conversion into local timezones within a service's user interface, frontend applications, etc. Interfaces where conversion into date and time formats meant for human eyes will obviously also reap the benefits from well defined backends that delivers timestamp values in one standardized format.
-
-
-### Summarizing
-
-This is not a fullblown date library at all – it's simple and basically it just output timestamps into the fixes length string format `YYYY-MM-DDTHH:mm:ss.uuuuuuZ` (or as `%Y-%m-%dT%H:%M:%SZ` as if used with `datetime.datetime.strftime`). Always uses UTC in output and always appends the UTC timezone as a `Z` to the string (instead of using `+00:00` or ` UTC`).
-
-There's no other external dependencies required. A convenient utility package for when you need to store timestamps in a datastore as a string, adding it to a JSON response or using a shared and common standard in your log outputs.
-
-It's never too late to start aligning your formatting standards and interfaces.
 
 
 ## Supported input values for timestamp conversion
@@ -302,3 +293,13 @@ import utcnow
 result = f"Current server time is: '{utcnow}'"
 # "Current server time is: '2021-02-18T08:24:48.382262Z'"
 ```
+
+
+## Finally
+
+This is not a fullblown date library at all – it's simple and basically it just output timestamps into the fixes length string format `YYYY-MM-DDTHH:mm:ss.uuuuuuZ` (or as `%Y-%m-%dT%H:%M:%SZ` as if used with `datetime.datetime.strftime`). Always uses UTC in output and always appends the UTC timezone as a `Z` to the string (instead of using `+00:00` or ` UTC`).
+
+There's no other external dependencies required. A convenient utility package for when you need to store timestamps in a datastore as a string, adding it to a JSON response or using a shared and common standard in your log outputs.
+
+Wether you choose to use this library or anything else, or just specify _this is how we do it_ in a documement, it'll be worth it. It's never too late to start aligning your formatting standards and interfaces.
+
