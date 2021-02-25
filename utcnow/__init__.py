@@ -97,8 +97,14 @@ class utcnow_(_baseclass):
         return _transform_value(value)
 
     as_str = as_string
+    as_timestamp = as_string
     to_string = as_string
     to_str = as_string
+    to_timestamp = as_string
+    get_string = as_string
+    get_str = as_string
+    get_timestamp = as_string
+    get = as_string
     string = as_string
     str = as_string
 
@@ -108,6 +114,8 @@ class utcnow_(_baseclass):
     as_date = as_datetime
     to_datetime = as_datetime
     to_date = as_datetime
+    get_datetime = as_datetime
+    get_date = as_datetime
     datetime = as_datetime
     date = as_datetime
 
@@ -137,8 +145,14 @@ utcnow = _module_value.utcnow
 
 as_string = _module_value.as_string
 as_str = as_string
+as_timestamp = as_string
 to_string = as_string
 to_str = as_string
+to_timestamp = as_string
+get_string = as_string
+get_str = as_string
+get_timestamp = as_string
+get = as_string
 string = as_string
 str = as_string
 
@@ -146,6 +160,8 @@ as_datetime = _module_value.as_datetime
 as_date = as_datetime
 to_datetime = as_datetime
 to_date = as_datetime
+get_datetime = as_datetime
+get_date = as_datetime
 datetime = as_datetime
 date = as_datetime
 
@@ -157,10 +173,21 @@ __all__ = [
     "utcnow",
     "as_string",
     "as_str",
+    "as_timestamp",
+    "to_string",
+    "to_str",
+    "to_timestamp",
+    "get_string",
+    "get_str",
+    "get_timestamp",
     "string",
     "str",
     "as_datetime",
     "as_date",
+    "to_datetime",
+    "to_date",
+    "get_datetime",
+    "get_date",
     "datetime",
     "date",
 ]

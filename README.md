@@ -9,19 +9,26 @@
 ```python
 from utcnow import utcnow
 
-utcnow.as_string("1997-08-04T02:14:00.53-04:00")
+utcnow.get()
+# "2077-03-01T09:33:07.139361Z" | The most common use case – get current server time.
+#                               | Always uses UTC in the returned value.
+
+utcnow.get("2020-02-26 09:10:10+00:00")
+# "2020-02-26T09:10:10.000000Z" | Reformats any valid date-time input to a defined standard.
+#                               | RFC 3339 compliant: YYYY-MM-DDTHH:mm:ss.ffffffZ
+
+utcnow.get("1997-08-04T02:14:00.53-04:00")
 # "1997-08-04T06:14:00.530000Z" | Timezones as UTC for aligned and clean interfaces.
+#                               | Uses "Z", Zulu Time, to specify UTC timezone.
 
-utcnow.as_string("1989-12-13 08:35 UTC")
+utcnow.get("1989-12-13 08:35 UTC")
 # "1989-12-13T08:35:00.000000Z" | Converts from different input formats and patterns.
-
-utcnow.as_string()
-# "2077-03-01T09:33:07.139361Z" | Most common use-case – the current server time.
+#                               | Any other RFC 3339 compliant input is valid + more.
 
 # 👋 Look further down for additional code examples of other types of input values.
-``` 
+```
 
-## The elevator pitch – purpose for devs and our sanity
+## The elevator pitch – purpose for developers – the why
 
 ##### NOTE – OPINIONATED SOFTWARE
 
@@ -31,13 +38,17 @@ utcnow.as_string()
 
 **String based timestamps that are meant for logs, API responses and database records shall always be stored with timezone UTC.**
 
-> **Someone – somewhere:** 
+----
+
+> **Someone – somewhere:**
 > "Why UTC? It's not even a timezone for our markets."
 
 > **Devs (and wikipedia):**
 > "_Coordinated Universal Time_ or _Universal Time Coordinated_, UTC for short, is still currently _the primary time standard_ and is not affected by daylight saving time, which is usually not something that servers or software developers would want to work around."
 >
 > "It's pretty simple – modern internet applications shouldn't use any other timezone in their databases, logs, API:s or other computer to computer interfaces."
+
+----
 
 Good timestamps and UTC – really no wild and crazy opinions. Generailly this lib is just about making it ~easier to follow common best practices~ harder to do something wrong – and that's also why `utcnow` doesn't have any configuration options. The library does what it should do – "shoganai".
 
@@ -55,7 +66,7 @@ Good timestamps and UTC – really no wild and crazy opinions. Generailly this l
 When using a fixed length return value for string based timestamps it'll even make the returned strings comparable to each other.
 
 
-### For what kind of applications or interfaces
+### Where to use this – for what kind of applications or interfaces
 
 Some examples of timestamps where this formatting would be reasonable to use includes, but are not limited to any timestamp that is written to a database / datastore as a string, also when timestamps are used in log output or used within a JSON response for an API such as a REST or GraphQL based API, maybe even using custom DateTime scalars.
 
@@ -84,7 +95,7 @@ This library aims at going for simplicity by being explicit about the choices al
 * As a bonus – Unix time, mainly for convinience (`time.time()`) (we have many names for the things we love: epoch time, posix time, seconds since epoch, 2038-bug on 32-bit unsigned ints to time-travel back to the first radio-transmission across the atlantic, there will be movies about this ).
 
 
-## Comparison as strings
+## A neat side-effect of defaulted string output – comparison as strings
 
 > If date and time components are ordered from least precise to most precise, then a useful property is achieved.  Assuming that the time zones of the dates and times are the same (e.g., all in UTC), expressed using the same string (e.g., all "Z" or all "+00:00"), and all times have the same number of fractional second digits, then the date and time strings may be sorted as strings and a time-ordered sequence will result. he presence of optional punctuation would violate this characteristic.
 
@@ -122,39 +133,38 @@ utcnow("2022-08-01T13:51Z")            >  utcnow("2022-08-01T13:51:30.000000Z") 
 Some additional examples of timestamps and to what they whould be converted. Thre first three examples are from the RFC document.
 
 ```python
+import utcnow
+
 # This represents 20 minutes and 50.52 seconds after the 23rd hour of April 12th, 1985 in UTC.
-from = "1985-04-12T23:20:50.52Z"
-to = "1985-04-12T23:20:50.520000Z"
+utcnow.get("1985-04-12T23:20:50.52Z")           # "1985-04-12T23:20:50.520000Z"
 
 # This represents 39 minutes and 57 seconds after the 16th hour of December 19th, 1996 with an
 # offset of -08:00 from UTC (Pacific Standard Time).  Note that this is equivalent to
 # 1996-12-20T00:39:57Z in UTC.
-from = "1996-12-19T16:39:57-08:00"
-to = "1996-12-20T00:39:57.000000Z"
+utcnow.get("1996-12-19T16:39:57-08:00")         # "1996-12-20T00:39:57.000000Z"
 
 # This represents the same instant of time as noon, January 1, 1937, Netherlands time. Standard
 # time in the Netherlands was exactly 19 minutes and 32.13 seconds ahead of UTC by law from
 # 1909-05-01 through 1937-06-30.
-from = "1937-01-01T12:00:27.87+00:20"
-to = "1937-01-01T11:40:27.870000Z"
+utcnow.get("1937-01-01T12:00:27.87+00:20")      # "1937-01-01T11:40:27.870000Z"
 
 # Examples of other formats of accepted inputs:
-#    from: "2021-02-18"                          |    to: "2021-02-18T00:00:00.000000Z"
-#    from: "2021-02-18 01:00"                    |    to: "2021-02-18T01:00:00.000000Z"
-#    from: "2021-02-18 03:00+01:00"              |    to: "2021-02-18T02:00:00.000000Z"
-#    from: "2021-02-18-01:00"                    |    to: "2021-02-18T01:00:00.000000Z"
-#    from: "2021-02-18+01:00"                    |    to: "2021-02-17T23:00:00.000000Z"
-#    from: "2021-02-18T23:55"                    |    to: "2021-02-18T23:55:00.000000Z"
-#    from: "2021-02-18T23:55:10"                 |    to: "2021-02-18T23:55:10.000000Z"
-#    from: "2021-02-18T23:55:10.0"               |    to: "2021-02-18T23:55:10.000000Z"
-#    from: "2021-02-18T23:55:10.0+05:00"         |    to: "2021-02-18T18:55:10.000000Z"
-#    from: "2021-02-18T23:55:10.0-05:00"         |    to: "2021-02-19T04:55:10.000000Z"
-#    from: "2021-02-18T23:55:10.550-05:00"       |    to: "2021-02-19T04:55:10.550000Z"
-#    from: "2021-02-18 23:55:10.550+05:00"       |    to: "2021-02-18T18:55:10.550000Z"
-#    from: "2021-02-18 23:55:10.550-01:00"       |    to: "2021-02-19T00:55:10.550000Z"
-#    from: "2021-02-28 10:10:59.123987+00:00"    |    to: "2021-02-28T10:10:59.123987Z"
-#    from: "2021-02-28 10:10:59.123987Z"         |    to: "2021-02-28T10:10:59.123987Z"
-#    from: "2021-02-28 10:10:59.123987 UTC"      |    to: "2021-02-28T10:10:59.123987Z"
+utcnow.get("2021-02-18")                        # "2021-02-18T00:00:00.000000Z"
+utcnow.get("2021-02-18 01:00")                  # "2021-02-18T01:00:00.000000Z"
+utcnow.get("2021-02-18 03:00+01:00")            # "2021-02-18T02:00:00.000000Z"
+utcnow.get("2021-02-18-01:00")                  # "2021-02-18T01:00:00.000000Z"
+utcnow.get("2021-02-18+01:00")                  # "2021-02-17T23:00:00.000000Z"
+utcnow.get("2021-02-18T23:55")                  # "2021-02-18T23:55:00.000000Z"
+utcnow.get("2021-02-18T23:55:10")               # "2021-02-18T23:55:10.000000Z"
+utcnow.get("2021-02-18T23:55:10.0")             # "2021-02-18T23:55:10.000000Z"
+utcnow.get("2021-02-18T23:55:10.0+05:00")       # "2021-02-18T18:55:10.000000Z"
+utcnow.get("2021-02-18T23:55:10.0-05:00")       # "2021-02-19T04:55:10.000000Z"
+utcnow.get("2021-02-18T23:55:10.550-05:00")     # "2021-02-19T04:55:10.550000Z"
+utcnow.get("2021-02-18 23:55:10.550+05:00")     # "2021-02-18T18:55:10.550000Z"
+utcnow.get("2021-02-18 23:55:10.550-01:00")     # "2021-02-19T00:55:10.550000Z"
+utcnow.get("2021-02-28 10:10:59.123987+00:00")  # "2021-02-28T10:10:59.123987Z"
+utcnow.get("2021-02-28 10:10:59.123987Z")       # "2021-02-28T10:10:59.123987Z"
+utcnow.get("2021-02-28 10:10:59.123987 UTC")    # "2021-02-28T10:10:59.123987Z"
 ```
 
 
@@ -171,16 +181,16 @@ $ pip install utcnow
 # Transform timestamps of many different formats to the same fixed length standard
 
 from utcnow import utcnow
-result = utcnow.as_string("1984-08-01 13:38")
-# '1984-08-01T13:38:00.000000Z'
+result = utcnow.get("1984-08-01 13:38")
+# "1984-08-01T13:38:00.000000Z"
 ```
 
 ```python
 # RFC 3339 timestamps as input – dates and datetimes – UTC will be assumed if tz is left out
 
 from utcnow import utcnow
-result = utcnow.as_string("2077-10-27")
-# '2077-10-27T00:00:00.000000Z'
+result = utcnow.get("2077-10-27")
+# "2077-10-27T00:00:00.000000Z"
 ```
 
 ```python
@@ -189,11 +199,11 @@ result = utcnow.as_string("2077-10-27")
 import datetime
 from utcnow import utcnow
 dt = datetime.datetime(1984, 8, 1, 13, 38, 0, 4711)
-result = utcnow.as_string(dt)
-# '1984-08-01T13:38:00.004711Z'
+result = utcnow.get(dt)
+# "1984-08-01T13:38:00.004711Z"
 
 # for non-tz-aware datetimes, the same result would be returned by both:
-# 1. utcnow.as_string(dt)
+# 1. utcnow.get(dt)
 # 2. dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 ```
 
@@ -204,11 +214,11 @@ import datetime
 from utcnow import utcnow
 tz_EDT = datetime.timezone(offset=datetime.timedelta(hours=-4))
 dt = datetime.datetime(1997, 8, 4, 2, 14, tzinfo=tz_EDT)
-result = utcnow.as_string(dt)
-# '1997-08-04T06:14:00.000000Z'
+result = utcnow.get(dt)
+# "1997-08-04T06:14:00.000000Z"
 
 # for timezone-aware datetimes, the same result would be returned by both:
-# 1. utcnow.as_string(dt)
+# 1. utcnow.get(dt)
 # 2. dt.astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 ```
 
@@ -229,13 +239,13 @@ value = arrow.get("2021-04-30T07:58:30.047110+02:00")
 # <Arrow [2021-04-30T07:58:30.047110+02:00]>
 
 str(value)
-# '2021-04-30T07:58:30.047110+02:00'
+# "2021-04-30T07:58:30.047110+02:00"
 
-result = utcnow.as_string(value)
-# '2021-04-30T05:58:30.047110Z'
+result = utcnow.get(value)
+# "2021-04-30T05:58:30.047110Z"
 
 # the same output as via utcnow can be returned in the following ways, including direct via arrow:
-# 1. utcnow.as_string(value)
+# 1. utcnow.get(value)
 # 2. value.to("UTC").strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 ```
 
@@ -244,14 +254,14 @@ result = utcnow.as_string(value)
 
 import utcnow
 utcnow.utcnow()
-# '2021-02-18T08:24:48.382262Z'
+# "2021-02-18T08:24:48.382262Z"
 
 # same thing can be accomplished using datetime and all of these calls returns the same str value:
 # 1. utcnow.utcnow()
 # 2. str(utcnow)
 # 3. str(utcnow.utcnow)
-# 4. utcnow.as_string()
-# 5. utcnow.utcnow.as_string()
+# 4. utcnow.get()
+# 5. utcnow.utcnow.get()
 # 6. datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 # 7. datetime.datetime.utcnow().isoformat() + "Z"
 ```
@@ -273,7 +283,7 @@ utcnow.as_datetime()
 
 import utcnow
 result = str(utcnow)
-# '2021-02-18T08:24:48.382262Z'
+# "2021-02-18T08:24:48.382262Z"
 ```
 
 ```python
@@ -289,6 +299,6 @@ result = json.dumps({"timestamp": str(utcnow), "status": 200})
 # Or just adding the current time in an f-string
 
 import utcnow
-result = f"Current server time is: {utcnow}"
-# 'Current server time is: 2021-02-18T08:24:48.382262Z'
+result = f"Current server time is: '{utcnow}'"
+# "Current server time is: '2021-02-18T08:24:48.382262Z'"
 ```

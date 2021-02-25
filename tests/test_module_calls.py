@@ -24,8 +24,14 @@ def test_module() -> None:
     assert utcnow.utcnow("1984-08-01 12:00:00") != "1984-08-01T00:00:00.000000Z"
     assert utcnow.as_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.as_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.as_timestamp("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.to_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.to_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.to_timestamp("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.get_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.get_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.get_timestamp("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.get("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"
@@ -48,6 +54,18 @@ def test_module() -> None:
         2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
     )
     assert utcnow.as_date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.to_datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.to_date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.get_datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(
+        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.get_date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
         2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
     )
     assert utcnow.datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(
