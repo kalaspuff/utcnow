@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import functools
+import re
 import sys
 from datetime import datetime as datetime_
 from datetime import timezone as timezone_
+from decimal import Decimal
+from numbers import Real
 from typing import Any, Dict, Tuple, Type, Union, cast
 
 from .__version_data__ import __version__, __version_info__
@@ -31,17 +35,44 @@ _ACCEPTED_INPUT_FORMAT_VALUES = (
     "%Y-%m-%d",
 )
 
+NUMERIC_REGEX = re.compile(r"^[-]?([0-9]+|[.][0-9]+|[0-9]+[.]|[0-9]+[.][0-9]+)$")
 
-def _transform_value(value: Union[str_, datetime_, object] = _SENTINEL) -> str_:
+
+@functools.lru_cache(maxsize=128, typed=False)
+def _is_numeric(value: str_) -> bool:
+    if NUMERIC_REGEX.match(value):
+        return True
+
+    return False
+
+
+def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> str_:
     if value is _SENTINEL:
         return datetime_.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
 
-    if not isinstance(value, str_):
-        str_value = str_(value)
-    else:
-        str_value = value
+    str_value: str_
+    try:
+        if isinstance(value, str_):
+            str_value = value.strip()
+        elif isinstance(value, (int, float)):
+            str_value = datetime_.utcfromtimestamp(value).isoformat() + "Z"
+        elif isinstance(value, (Decimal, Real)):
+            str_value = datetime_.utcfromtimestamp(float(value)).isoformat() + "Z"
+        else:
+            str_value = str_(value).strip()
 
-    str_value = str_value.strip()
+        if (
+            str_value
+            and len(str_value) <= 21
+            and "T" not in str_value
+            and ":" not in str_value
+            and "/" not in str_value
+            and str_value.count("-") <= 1
+            and _is_numeric(str_value)
+        ):
+            str_value = datetime_.utcfromtimestamp(float(str_value)).isoformat() + "Z"
+    except Exception:
+        raise ValueError(f"Input value '{value}' (type: {value.__class__}) does not match allowed input format")
 
     ends_with_utc = False
     if str_value.endswith(" UTC"):
@@ -93,7 +124,7 @@ class utcnow_(_baseclass):
 
         return result
 
-    def as_string(self, value: Union[str_, datetime_, object] = _SENTINEL) -> str_:
+    def as_string(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> str_:
         return _transform_value(value)
 
     as_str = as_string
@@ -108,7 +139,7 @@ class utcnow_(_baseclass):
     string = as_string
     str = as_string
 
-    def as_datetime(self, value: Union[str_, datetime_, object] = _SENTINEL) -> datetime_:
+    def as_datetime(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> datetime_:
         return datetime_.strptime(_transform_value(value), "%Y-%m-%dT%H:%M:%S.%f%z")
 
     as_date = as_datetime
@@ -133,6 +164,7 @@ class _module(utcnow_):
     __email__: str_ = __email__
 
     utcnow = utcnow_()
+    now = utcnow_()
 
     def __new__(cls, *args: Any) -> _module:
         result = cast(_module, object.__new__(cls, *args))
@@ -142,6 +174,7 @@ class _module(utcnow_):
 
 _module_value = _module()
 utcnow = _module_value.utcnow
+now = _module_value.now
 
 as_string = _module_value.as_string
 as_str = as_string
@@ -171,6 +204,7 @@ __all__ = [
     "__author__",
     "__email__",
     "utcnow",
+    "now",
     "as_string",
     "as_str",
     "as_timestamp",
