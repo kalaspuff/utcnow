@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import functools
+import math
 import re
 import sys
 from datetime import datetime as datetime_
 from datetime import timezone as timezone_
+from datetime import timedelta as timedelta_
+from datetime import tzinfo as tzinfo_
 from decimal import Decimal
 from numbers import Real
-from typing import Any, Dict, Tuple, Type, Union, cast
+from typing import Any, Dict, Optional, Tuple, Type, Union, cast
 
 from .__version_data__ import __version__, __version_info__
 
@@ -36,6 +39,10 @@ _ACCEPTED_INPUT_FORMAT_VALUES = (
 )
 
 NUMERIC_REGEX = re.compile(r"^[-]?([0-9]+|[.][0-9]+|[0-9]+[.]|[0-9]+[.][0-9]+)$")
+ZERO_TIMEDELTA = timedelta_(0)
+
+
+utc = UTC = timezone_.utc
 
 
 @functools.lru_cache(maxsize=128, typed=False)
@@ -52,8 +59,14 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
     try:
         if isinstance(value, str_):
             str_value = value.strip()
-        elif isinstance(value, (int, float)):
-            str_value = datetime_.utcfromtimestamp(value).isoformat() + "Z"
+        elif isinstance(value, int):
+            return datetime_.utcfromtimestamp(value).replace(microsecond=0).isoformat() + "Z"
+        elif isinstance(value, float) and math.floor(value) == value:
+            return datetime_.utcfromtimestamp(int(value)).replace(microsecond=0).isoformat() + "Z"
+        elif isinstance(value, float):
+            return datetime_.utcfromtimestamp(value).isoformat() + "Z"
+        elif isinstance(value, (Decimal, Real)) and math.floor(value) == value:
+            return datetime_.utcfromtimestamp(int(value)).replace(microsecond=0).isoformat() + "Z"
         elif isinstance(value, (Decimal, Real)):
             str_value = datetime_.utcfromtimestamp(float(value)).isoformat() + "Z"
         else:
@@ -98,7 +111,7 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
         # Timezone declaration missing, skipping tz application and blindly assuming UTC
         return dt_value.strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
 
-    return dt_value.astimezone(timezone_.utc).strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
+    return dt_value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
 
 
 @functools.lru_cache(maxsize=128)
@@ -119,7 +132,7 @@ class _baseclass(metaclass=_metaclass):
 
     def __call__(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> str_:
         if value is _SENTINEL:
-            return datetime_.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
+            return datetime_.utcnow().isoformat() + "Z"
         return _transform_value(value)
 
 
@@ -131,7 +144,7 @@ class utcnow_(_baseclass):
 
     def as_string(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> str_:
         if value is _SENTINEL:
-            return datetime_.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
+            return datetime_.utcnow().isoformat() + "Z"
         return _transform_value(value)
 
     as_str = as_string
@@ -148,16 +161,21 @@ class utcnow_(_baseclass):
 
     def as_datetime(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> datetime_:
         if value is _SENTINEL:
-            return datetime_.utcnow().replace(tzinfo=timezone_.utc)
+            # return datetime_.utcnow().replace(tzinfo=UTC)
+            return datetime_.now(UTC)
         return _timestamp_to_datetime(_transform_value(value))
 
     as_date = as_datetime
+    as_dt = as_datetime
     to_datetime = as_datetime
     to_date = as_datetime
+    to_dt = as_datetime
     get_datetime = as_datetime
     get_date = as_datetime
+    get_dt = as_datetime
     datetime = as_datetime
     date = as_datetime
+    dt = as_datetime
 
     def __str__(self) -> str_:
         return self.as_string()
@@ -200,12 +218,16 @@ str = as_string
 
 as_datetime = _module_value.as_datetime
 as_date = as_datetime
+as_dt = as_datetime
 to_datetime = as_datetime
 to_date = as_datetime
+to_dt = as_datetime
 get_datetime = as_datetime
 get_date = as_datetime
+get_dt = as_datetime
 datetime = as_datetime
 date = as_datetime
+dt = as_datetime
 
 __all__ = [
     "__version__",
