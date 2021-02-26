@@ -126,17 +126,17 @@ Some additional examples of timestamps and to what they whould be converted. Thr
 ```python
 import utcnow
 
-# This represents 20 minutes and 50.52 seconds after the 23rd hour of April 12th, 1985 in UTC.
+# This represents 20 minutes and 50.52 seconds after the 23rd hour of April 12th, 1985 UTC.
 utcnow.get("1985-04-12T23:20:50.52Z")           # "1985-04-12T23:20:50.520000Z"
 
-# This represents 39 minutes and 57 seconds after the 16th hour of December 19th, 1996 with an
-# offset of -08:00 from UTC (Pacific Standard Time).  Note that this is equivalent to
+# This represents 39 minutes and 57 seconds after the 16th hour of December 19th, 1996 with
+# an offset of -08:00 from UTC (Pacific Standard Time).  Note that this is equivalent to
 # 1996-12-20T00:39:57Z in UTC.
 utcnow.get("1996-12-19T16:39:57-08:00")         # "1996-12-20T00:39:57.000000Z"
 
-# This represents the same instant of time as noon, January 1, 1937, Netherlands time. Standard
-# time in the Netherlands was exactly 19 minutes and 32.13 seconds ahead of UTC by law from
-# 1909-05-01 through 1937-06-30.
+# This represents the same instant of time as noon, January 1, 1937, Netherlands time.
+# Standard time in the Netherlands was exactly 19 minutes and 32.13 seconds ahead of UTC by
+# law from 1909-05-01 through 1937-06-30.
 utcnow.get("1937-01-01T12:00:27.87+00:20")      # "1937-01-01T11:40:27.870000Z"
 
 # Examples of other formats of accepted inputs:
@@ -177,7 +177,7 @@ result = utcnow.get("1984-08-01 13:38")
 ```
 
 ```python
-# RFC 3339 timestamps as input – dates and datetimes – UTC will be assumed if tz is left out
+# RFC 3339 timestamp as input – dates and datetimes – UTC assumed if tz is left out
 
 from utcnow import utcnow
 result = utcnow.get("2077-10-27")
@@ -199,7 +199,7 @@ result = utcnow.get(dt)
 ```
 
 ```python
-# It's also possible to transform datetime values with timezone offsets into timestamp strings
+# It's also possible to convert datetime values with tz offsets to timestamp strings
 
 import datetime
 from utcnow import utcnow
@@ -214,7 +214,7 @@ result = utcnow.get(dt)
 ```
 
 ```python
-# Or vice versa, transforming a timestamp string into a datetime object (with tzinfo set to UTC)
+# Vice versa, transforming a timestamp string to a datetime object (with tzinfo set to UTC)
 
 from utcnow import utcnow
 result = utcnow.as_datetime("1984-08-01T13:38:00.123450Z")
@@ -222,7 +222,7 @@ result = utcnow.as_datetime("1984-08-01T13:38:00.123450Z")
 ```
 
 ```python
-# Example of using a value from "arrow" – a popular date-time Python lib with a large featureset
+# Example using a value from "arrow" – a popular date-time Python lib with large featureset
 
 import arrow
 from utcnow import utcnow
@@ -235,7 +235,7 @@ str(value)
 result = utcnow.get(value)
 # "2021-04-30T05:58:30.047110Z"
 
-# the same output as via utcnow can be returned in the following ways, including direct via arrow:
+# the same output as via utcnow can be returned in following ways, also directly arrow:
 # 1. utcnow.get(value)
 # 2. value.to("UTC").strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 ```
@@ -247,7 +247,7 @@ import utcnow
 utcnow.utcnow()
 # "2021-02-18T08:24:48.382262Z"
 
-# same thing can be accomplished using datetime and all of these calls returns the same str value:
+# Similar can be accomplished with datetime – these lines returns the same string value:
 # 1. utcnow.utcnow()
 # 2. str(utcnow)
 # 3. str(utcnow.utcnow)
