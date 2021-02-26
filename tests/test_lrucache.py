@@ -1,13 +1,18 @@
 import datetime
 import time
+from typing import Callable, Tuple
 
 
-def hits_miss_currsize(func):
-    hits, misses, _, currsize = func.cache_info()
+def hits_miss_currsize(func: Callable) -> Tuple[int, int, int]:
+    hits: int = 0
+    misses: int = 0
+    currsize: int = 0
+
+    hits, misses, _, currsize = func.cache_info()  # type: ignore
     return (hits, misses, currsize)
 
 
-def test_functional_cache_hits():
+def test_functional_cache_hits() -> None:
     import utcnow
     from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
@@ -188,7 +193,7 @@ def test_functional_cache_hits():
     assert hits_miss_currsize(_timestamp_to_datetime) == (39, 5, 5)
 
 
-def test_cache_hits_similar():
+def test_cache_hits_similar() -> None:
     import utcnow
     from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
@@ -328,7 +333,7 @@ def test_cache_hits_similar():
     assert hits_miss_currsize(_timestamp_to_datetime) == (23, 1, 1)
 
 
-def test_cache_hits_with_sentinel():
+def test_cache_hits_with_sentinel() -> None:
     import utcnow
     from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
@@ -361,7 +366,7 @@ def test_cache_hits_with_sentinel():
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
 
-def test_cache_hits_with_sentinel_loop():
+def test_cache_hits_with_sentinel_loop() -> None:
     import utcnow
     from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
@@ -405,7 +410,7 @@ def test_cache_hits_with_sentinel_loop():
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
     for _ in range(call_count):
-        values.add(str(utcnow()))
+        values.add(str(utcnow()))  # type: ignore
 
     assert len(values) == call_count * 5
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -470,7 +475,7 @@ def test_cache_hits_with_sentinel_loop():
     assert hits_miss_currsize(_transform_value) == (0, 0, 0)
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
-    d = {"timestamp": utcnow}
+    d = {"timestamp": utcnow}  # type: ignore
     for _ in range(call_count):
         values.add(str(d))
 
@@ -479,7 +484,7 @@ def test_cache_hits_with_sentinel_loop():
     assert hits_miss_currsize(_transform_value) == (0, 0, 0)
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
-    d = {"timestamp": utcnow.utcnow}
+    d = {"timestamp": utcnow.utcnow}  # type: ignore
     for _ in range(call_count):
         values.add(str(d))
 
@@ -489,7 +494,7 @@ def test_cache_hits_with_sentinel_loop():
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
 
-def test_cache_hits_with_uniques():
+def test_cache_hits_with_uniques() -> None:
     import utcnow
     from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
@@ -652,7 +657,7 @@ def test_cache_hits_with_uniques():
     assert hits_miss_currsize(_timestamp_to_datetime) == (12, 7, 7)
 
 
-def test_cache_hits_with_uniques_loop():
+def test_cache_hits_with_uniques_loop() -> None:
     import utcnow
     from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
@@ -691,9 +696,9 @@ def test_cache_hits_with_uniques_loop():
     assert hits_miss_currsize(_transform_value) == (call_count - 1, call_count * 2 + 1, 128)
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
-    t = str(time.time())
+    t_str = str(time.time())
     for _ in range(call_count):
-        values.add(utcnow.get(t))
+        values.add(utcnow.get(t_str))
 
     assert len(values) == call_count * 2 + 2
 
@@ -701,9 +706,9 @@ def test_cache_hits_with_uniques_loop():
     assert hits_miss_currsize(_transform_value) == ((call_count - 1) * 2, call_count * 2 + 2, 128)
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
-    t = datetime.datetime.utcnow()
+    t_dt = datetime.datetime.utcnow()
     for _ in range(call_count):
-        values.add(utcnow.get(t))
+        values.add(utcnow.get(t_dt))
 
     assert len(values) == call_count * 2 + 3
 

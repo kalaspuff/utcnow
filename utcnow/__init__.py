@@ -102,7 +102,7 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
 
 
 @functools.lru_cache(maxsize=128)
-def _timestamp_to_datetime(value: str) -> datetime_:
+def _timestamp_to_datetime(value: str_) -> datetime_:
     return datetime_.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z")
 
 
