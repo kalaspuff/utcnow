@@ -46,10 +46,8 @@ def _is_numeric(value: str_) -> bool:
     return False
 
 
-def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> str_:
-    if value is _SENTINEL:
-        return datetime_.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
-
+@functools.lru_cache(maxsize=128, typed=True)
+def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, Real]) -> str_:
     str_value: str_
     try:
         if isinstance(value, str_):
@@ -103,6 +101,11 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
     return dt_value.astimezone(timezone_.utc).strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
 
 
+@functools.lru_cache(maxsize=128)
+def _timestamp_to_datetime(value: str) -> datetime_:
+    return datetime_.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z")
+
+
 class _metaclass(type):
     def __new__(cls: Type[_metaclass], name: str_, bases: Tuple[type, ...], attributedict: Dict) -> _metaclass:
         result = cast(Type["_baseclass"], super().__new__(cls, name, bases, dict(attributedict)))
@@ -114,7 +117,9 @@ class _baseclass(metaclass=_metaclass):
     def __init__(self) -> None:
         pass
 
-    def __call__(self, value: Union[str_, datetime_, object] = _SENTINEL) -> str_:
+    def __call__(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> str_:
+        if value is _SENTINEL:
+            return datetime_.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
         return _transform_value(value)
 
 
@@ -125,6 +130,8 @@ class utcnow_(_baseclass):
         return result
 
     def as_string(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> str_:
+        if value is _SENTINEL:
+            return datetime_.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
         return _transform_value(value)
 
     as_str = as_string
@@ -140,7 +147,9 @@ class utcnow_(_baseclass):
     str = as_string
 
     def as_datetime(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> datetime_:
-        return datetime_.strptime(_transform_value(value), "%Y-%m-%dT%H:%M:%S.%f%z")
+        if value is _SENTINEL:
+            return datetime_.utcnow().replace(tzinfo=timezone_.utc)
+        return _timestamp_to_datetime(_transform_value(value))
 
     as_date = as_datetime
     to_datetime = as_datetime
