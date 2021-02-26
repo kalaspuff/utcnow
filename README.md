@@ -93,6 +93,7 @@ This library aims at going for simplicity by being explicit about the choices al
 Here follows a few examples of the problems with having to work with mismatching timestamps, even though the four example statements all use RFC 3339 compliant values. For example an API is kind enough for users to submit timestamps as long as they're good enough and for where the backend application has to convert inputs to values good for the cause.
 
 *Matching two dates of different formats using strings won't go well at all. All of the following four string comparisons would've given an opposite result if compared as actual timestamps instead of as strings, where comparison is just alphabetic.*
+
 ```python
 "2022-08-01 23:51:30.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # False 😵
 "2022-08-01 14:00:10"                  >  "2022-08-01T13:51:30.000000Z"          # False 😵
@@ -100,7 +101,9 @@ Here follows a few examples of the problems with having to work with mismatching
 "2022-08-01T13:51Z"                    >  "2022-08-01T13:51:30.000000Z"          # True  😵
 ```
 
-*Using `utcnow` on the same set of timestamps, which returns a string value for comparison.
+
+*Using `utcnow` on the same set of timestamps, which returns a string value for comparison.*
+
 ```python
 from utcnow import utcnow
 
@@ -110,7 +113,9 @@ utcnow("2022-08-01T14:00:10+01:00")    >  utcnow("2022-08-01T13:51:30.000000Z") 
 utcnow("2022-08-01T13:51Z")            >  utcnow("2022-08-01T13:51:30.000000Z")  # False 😻
 ```
 
-*This shown the returned values from the `utcnow` calls, and for what the comparisons is actually evaluated on.
+
+*This shown the returned values from the `utcnow` calls, and for what the comparisons is actually evaluated on.*
+
 ```python
 "2022-08-01T23:51:30.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # True  🎉
 "2022-08-01T14:00:10.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # True  ✅
