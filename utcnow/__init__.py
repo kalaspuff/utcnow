@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 import functools
-import math
 import re
 import sys
 from datetime import datetime as datetime_
 from datetime import timezone as timezone_
-from datetime import timedelta as timedelta_
-from datetime import tzinfo as tzinfo_
 from decimal import Decimal
 from numbers import Real
-from typing import Any, Dict, Optional, Tuple, Type, Union, cast
+from typing import Any, Dict, Tuple, Type, Union, cast
 
 from .__version_data__ import __version__, __version_info__
 
@@ -39,7 +36,6 @@ _ACCEPTED_INPUT_FORMAT_VALUES = (
 )
 
 NUMERIC_REGEX = re.compile(r"^[-]?([0-9]+|[.][0-9]+|[0-9]+[.]|[0-9]+[.][0-9]+)$")
-ZERO_TIMEDELTA = timedelta_(0)
 
 
 utc = UTC = timezone_.utc
@@ -59,16 +55,10 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
     try:
         if isinstance(value, str_):
             str_value = value.strip()
-        elif isinstance(value, int):
-            return datetime_.utcfromtimestamp(value).replace(microsecond=0).isoformat() + "Z"
-        elif isinstance(value, float) and math.floor(value) == value:
-            return datetime_.utcfromtimestamp(int(value)).replace(microsecond=0).isoformat() + "Z"
-        elif isinstance(value, float):
-            return datetime_.utcfromtimestamp(value).isoformat() + "Z"
-        elif isinstance(value, (Decimal, Real)) and math.floor(value) == value:
-            return datetime_.utcfromtimestamp(int(value)).replace(microsecond=0).isoformat() + "Z"
+        elif isinstance(value, (int, float)):
+            return datetime_.utcfromtimestamp(value).isoformat(timespec="microseconds") + "Z"
         elif isinstance(value, (Decimal, Real)):
-            str_value = datetime_.utcfromtimestamp(float(value)).isoformat() + "Z"
+            str_value = datetime_.utcfromtimestamp(float(value)).isoformat(timespec="microseconds") + "Z"
         else:
             str_value = str_(value).strip()
 
@@ -81,7 +71,7 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
             and str_value.count("-") <= 1
             and _is_numeric(str_value)
         ):
-            str_value = datetime_.utcfromtimestamp(float(str_value)).isoformat() + "Z"
+            str_value = datetime_.utcfromtimestamp(float(str_value)).isoformat(timespec="microseconds") + "Z"
     except Exception:
         raise ValueError(f"Input value '{value}' (type: {value.__class__}) does not match allowed input format")
 
@@ -109,9 +99,9 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
 
     if not dt_value.tzinfo:
         # Timezone declaration missing, skipping tz application and blindly assuming UTC
-        return dt_value.strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
+        return dt_value.isoformat(timespec="microseconds") + "Z"
 
-    return dt_value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
+    return dt_value.astimezone(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
 @functools.lru_cache(maxsize=128)
@@ -132,7 +122,7 @@ class _baseclass(metaclass=_metaclass):
 
     def __call__(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> str_:
         if value is _SENTINEL:
-            return datetime_.utcnow().isoformat() + "Z"
+            return datetime_.utcnow().isoformat(timespec="microseconds") + "Z"
         return _transform_value(value)
 
 
@@ -144,7 +134,7 @@ class utcnow_(_baseclass):
 
     def as_string(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> str_:
         if value is _SENTINEL:
-            return datetime_.utcnow().isoformat() + "Z"
+            return datetime_.utcnow().isoformat(timespec="microseconds") + "Z"
         return _transform_value(value)
 
     as_str = as_string
