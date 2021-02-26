@@ -21,21 +21,22 @@ _SENTINEL = object()
 _ACCEPTED_INPUT_FORMAT_VALUES = (
     "%Y-%m-%dT%H:%M:%S.%f%z",
     "%Y-%m-%d %H:%M:%S.%f%z",
+    "%Y-%m-%dT%H:%M:%S.%f",
+    "%Y-%m-%d %H:%M:%S.%f",
     "%Y-%m-%dT%H:%M:%S%z",
     "%Y-%m-%d %H:%M:%S%z",
+    "%Y-%m-%dT%H:%M:%S",
+    "%Y-%m-%d %H:%M:%S",
     "%Y-%m-%dT%H:%M%z",
     "%Y-%m-%d %H:%M%z",
     "%Y-%m-%d%z",
-    "%Y-%m-%dT%H:%M:%S.%f",
-    "%Y-%m-%d %H:%M:%S.%f",
-    "%Y-%m-%dT%H:%M:%S",
-    "%Y-%m-%d %H:%M:%S",
     "%Y-%m-%dT%H:%M",
     "%Y-%m-%d %H:%M",
     "%Y-%m-%d",
 )
 
 NUMERIC_REGEX = re.compile(r"^[-]?([0-9]+|[.][0-9]+|[0-9]+[.]|[0-9]+[.][0-9]+)$")
+PREFERRED_FORMAT_REGEX = re.compile(r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt ]([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9].[0-9]{6}([Zz]|[+-]00:00|)$")
 
 
 utc = UTC = timezone_.utc
@@ -75,12 +76,19 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
     except Exception:
         raise ValueError(f"Input value '{value}' (type: {value.__class__}) does not match allowed input format")
 
+    if PREFERRED_FORMAT_REGEX.match(str_value):
+        if int(str_value[8:10]) >= 30 or (int(str_value[5:7]) == 2 and int(str_value[8:10]) >= 28):
+            try:
+                dt_value = datetime_.strptime(str_value[0:10], "%Y-%m-%d")
+            except ValueError:
+                raise ValueError(f"Input value '{value}' (type: {value.__class__}) does not match allowed input format")
+        return (str_value[:10] + "T" + str_value[11:]).upper().rstrip("Z").rstrip("+00:00").rstrip("-00:00") + "Z"
+
     ends_with_utc = False
     if str_value.endswith(" UTC"):
         str_value = str_value[0:-4]
         ends_with_utc = True
 
-    dt_value = None
     for format_ in _ACCEPTED_INPUT_FORMAT_VALUES:
         try:
             dt_value = datetime_.strptime(str_value, format_)
@@ -93,8 +101,7 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
             )
 
         break
-
-    if not dt_value:
+    else:
         raise ValueError(f"Input value '{value}' (type: {value.__class__}) does not match allowed input format")
 
     if not dt_value.tzinfo:
