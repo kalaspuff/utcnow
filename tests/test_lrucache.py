@@ -1,5 +1,5 @@
-import time
 import datetime
+import time
 
 
 def hits_miss_currsize(func):
@@ -9,7 +9,7 @@ def hits_miss_currsize(func):
 
 def test_functional_cache_hits():
     import utcnow
-    from utcnow import _is_numeric, _transform_value, _timestamp_to_datetime
+    from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
     assert hits_miss_currsize(_transform_value) == (0, 0, 0)
@@ -62,7 +62,7 @@ def test_functional_cache_hits():
     utcnow.get(3.0)
     assert hits_miss_currsize(_is_numeric) == (4, 7, 7)
 
-    utcnow.get(3.)
+    utcnow.get(3.0)
     assert hits_miss_currsize(_is_numeric) == (4, 7, 7)
 
     utcnow.get(3.000)
@@ -190,38 +190,43 @@ def test_functional_cache_hits():
 
 def test_cache_hits_similar():
     import utcnow
-    from utcnow import _is_numeric, _transform_value, _timestamp_to_datetime
+    from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
     assert hits_miss_currsize(_transform_value) == (0, 0, 0)
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
-    values = list(map(utcnow.get, [
-        1,
-        1,
-        1.,
-        1.0,
-        1.0,
-        1.00,
-        1.000,
-        "1",
-        "1.",
-        "1.0",
-        "1.00",
-        "1.000",
-        "1.000",
-        "1970-01-01T00:00:01.000000Z",
-        "1970-01-01T00:00:01.000000+00:00",
-        "1970-01-01T00:00:01.000000",
-        "1970-01-01T00:00:01.000000",
-        "1970-01-01T00:00:01Z",
-        "1970-01-01T00:00:01+00:00",
-        "1970-01-01T00:00:01",
-        "1970-01-01T00:00:01.0Z",
-        "1970-01-01T00:00:01.0+00:00",
-        "1970-01-01T00:00:01.000+00:00",
-        "1970-01-01T00:00:01.000",
-    ]))
+    values = list(
+        map(
+            utcnow.get,
+            [
+                1,
+                1,
+                1.0,
+                1.0,
+                1.0,
+                1.00,
+                1.000,
+                "1",
+                "1.",
+                "1.0",
+                "1.00",
+                "1.000",
+                "1.000",
+                "1970-01-01T00:00:01.000000Z",
+                "1970-01-01T00:00:01.000000+00:00",
+                "1970-01-01T00:00:01.000000",
+                "1970-01-01T00:00:01.000000",
+                "1970-01-01T00:00:01Z",
+                "1970-01-01T00:00:01+00:00",
+                "1970-01-01T00:00:01",
+                "1970-01-01T00:00:01.0Z",
+                "1970-01-01T00:00:01.0+00:00",
+                "1970-01-01T00:00:01.000+00:00",
+                "1970-01-01T00:00:01.000",
+            ],
+        )
+    )
 
     assert len(list(filter(lambda value: value == "1970-01-01T00:00:01.000000Z", values))) == 24
 
@@ -229,32 +234,37 @@ def test_cache_hits_similar():
     assert hits_miss_currsize(_transform_value) == (7, 17, 17)
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
-    values2 = list(map(utcnow.get, [
-        1,
-        1,
-        1.,
-        1.0,
-        1.0,
-        1.00,
-        1.000,
-        "1",
-        "1.",
-        "1.0",
-        "1.00",
-        "1.000",
-        "1.000",
-        "1970-01-01T00:00:01.000000Z",
-        "1970-01-01T00:00:01.000000+00:00",
-        "1970-01-01T00:00:01.000000",
-        "1970-01-01T00:00:01.000000",
-        "1970-01-01T00:00:01Z",
-        "1970-01-01T00:00:01+00:00",
-        "1970-01-01T00:00:01",
-        "1970-01-01T00:00:01.0Z",
-        "1970-01-01T00:00:01.0+00:00",
-        "1970-01-01T00:00:01.000+00:00",
-        "1970-01-01T00:00:01.000",
-    ]))
+    values2 = list(
+        map(
+            utcnow.get,
+            [
+                1,
+                1,
+                1.0,
+                1.0,
+                1.0,
+                1.00,
+                1.000,
+                "1",
+                "1.",
+                "1.0",
+                "1.00",
+                "1.000",
+                "1.000",
+                "1970-01-01T00:00:01.000000Z",
+                "1970-01-01T00:00:01.000000+00:00",
+                "1970-01-01T00:00:01.000000",
+                "1970-01-01T00:00:01.000000",
+                "1970-01-01T00:00:01Z",
+                "1970-01-01T00:00:01+00:00",
+                "1970-01-01T00:00:01",
+                "1970-01-01T00:00:01.0Z",
+                "1970-01-01T00:00:01.0+00:00",
+                "1970-01-01T00:00:01.000+00:00",
+                "1970-01-01T00:00:01.000",
+            ],
+        )
+    )
 
     assert len(list(filter(lambda value: value == "1970-01-01T00:00:01.000000Z", values2))) == 24
 
@@ -262,34 +272,48 @@ def test_cache_hits_similar():
     assert hits_miss_currsize(_transform_value) == (7 + 24, 17, 17)
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
-    values3 = list(map(utcnow.as_datetime, [
-        1,
-        1,
-        1.,
-        1.0,
-        1.0,
-        1.00,
-        1.000,
-        "1",
-        "1.",
-        "1.0",
-        "1.00",
-        "1.000",
-        "1.000",
-        "1970-01-01T00:00:01.000000Z",
-        "1970-01-01T00:00:01.000000+00:00",
-        "1970-01-01T00:00:01.000000",
-        "1970-01-01T00:00:01.000000",
-        "1970-01-01T00:00:01Z",
-        "1970-01-01T00:00:01+00:00",
-        "1970-01-01T00:00:01",
-        "1970-01-01T00:00:01.0Z",
-        "1970-01-01T00:00:01.0+00:00",
-        "1970-01-01T00:00:01.000+00:00",
-        "1970-01-01T00:00:01.000",
-    ]))
+    values3 = list(
+        map(
+            utcnow.as_datetime,
+            [
+                1,
+                1,
+                1.0,
+                1.0,
+                1.0,
+                1.00,
+                1.000,
+                "1",
+                "1.",
+                "1.0",
+                "1.00",
+                "1.000",
+                "1.000",
+                "1970-01-01T00:00:01.000000Z",
+                "1970-01-01T00:00:01.000000+00:00",
+                "1970-01-01T00:00:01.000000",
+                "1970-01-01T00:00:01.000000",
+                "1970-01-01T00:00:01Z",
+                "1970-01-01T00:00:01+00:00",
+                "1970-01-01T00:00:01",
+                "1970-01-01T00:00:01.0Z",
+                "1970-01-01T00:00:01.0+00:00",
+                "1970-01-01T00:00:01.000+00:00",
+                "1970-01-01T00:00:01.000",
+            ],
+        )
+    )
 
-    assert len(list(filter(lambda value: value == datetime.datetime(1970, 1, 1, 0, 0, 1, tzinfo=datetime.timezone.utc), values3))) == 24
+    assert (
+        len(
+            list(
+                filter(
+                    lambda value: value == datetime.datetime(1970, 1, 1, 0, 0, 1, tzinfo=datetime.timezone.utc), values3
+                )
+            )
+        )
+        == 24
+    )
 
     assert hits_miss_currsize(_is_numeric) == (0, 5, 5)
     assert hits_miss_currsize(_transform_value) == (7 + 24 + 24, 17, 17)
@@ -306,7 +330,7 @@ def test_cache_hits_similar():
 
 def test_cache_hits_with_sentinel():
     import utcnow
-    from utcnow import _is_numeric, _transform_value, _timestamp_to_datetime
+    from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
     assert hits_miss_currsize(_transform_value) == (0, 0, 0)
@@ -339,7 +363,7 @@ def test_cache_hits_with_sentinel():
 
 def test_cache_hits_with_sentinel_loop():
     import utcnow
-    from utcnow import _is_numeric, _transform_value, _timestamp_to_datetime
+    from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
     assert hits_miss_currsize(_transform_value) == (0, 0, 0)
@@ -465,10 +489,9 @@ def test_cache_hits_with_sentinel_loop():
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
 
-
 def test_cache_hits_with_uniques():
     import utcnow
-    from utcnow import _is_numeric, _transform_value, _timestamp_to_datetime
+    from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
     assert hits_miss_currsize(_transform_value) == (0, 0, 0)
@@ -631,7 +654,7 @@ def test_cache_hits_with_uniques():
 
 def test_cache_hits_with_uniques_loop():
     import utcnow
-    from utcnow import _is_numeric, _transform_value, _timestamp_to_datetime
+    from utcnow import _is_numeric, _timestamp_to_datetime, _transform_value
 
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
     assert hits_miss_currsize(_transform_value) == (0, 0, 0)
