@@ -36,7 +36,9 @@ _ACCEPTED_INPUT_FORMAT_VALUES = (
 )
 
 NUMERIC_REGEX = re.compile(r"^[-]?([0-9]+|[.][0-9]+|[0-9]+[.]|[0-9]+[.][0-9]+)$")
-PREFERRED_FORMAT_REGEX = re.compile(r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt ]([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9].[0-9]{6}([Zz]|[+-]00:00|)$")
+PREFERRED_FORMAT_REGEX = re.compile(
+    r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt ]([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9].[0-9]{6}([Zz]|[+-]00:00|)$"
+)
 
 
 utc = UTC = timezone_.utc
@@ -82,7 +84,7 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
                 dt_value = datetime_.strptime(str_value[0:10], "%Y-%m-%d")
             except ValueError:
                 raise ValueError(f"Input value '{value}' (type: {value.__class__}) does not match allowed input format")
-        return (str_value[:10] + "T" + str_value[11:]).upper().rstrip("Z").rstrip("+00:00").rstrip("-00:00") + "Z"
+        return (str_value[:10] + "T" + str_value[11:]).upper().rstrip("Z").rsplit("+00:00")[0].rsplit("-00:00")[0] + "Z"
 
     ends_with_utc = False
     if str_value.endswith(" UTC"):
