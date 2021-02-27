@@ -227,6 +227,25 @@ result = utcnow.as_datetime("1984-08-01T13:38:00.123450Z")
 ```
 
 ```python
+# You can even convert your value to a unix timestamp, if that ever would do you any good
+
+from utcnow import utcnow
+result = utcnow.as_unixtime("1984-08-01T13:38:00.123450Z")
+# 460215480.12345
+```
+
+```python
+# And the other way around again, converting from a unix timestamp to our date-time strings
+
+from utcnow import utcnow
+result = utcnow.get(0)
+# "1970-01-01T00:00:00.000000Z"
+
+result = utcnow.get(1614403926.108192)
+# "2021-02-27T05:32:06.108192Z"
+```
+
+```python
 # Example using a value from "arrow" – a popular date-time Python lib with large featureset
 
 import arrow
