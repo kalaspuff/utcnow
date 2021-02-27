@@ -74,7 +74,7 @@ If any of this sounds like the use-cases within your domains, try `utcnow` out �
 
 If your work require a complex mix and match back and forth using different timezones even within internal applications (which may be true for legacy systems or on purely domestic use-cases), then go for `arrow`. Also iterating: Modern internet applications shouldn't use any other timezone than UTC in app to app / computer to computer interfaces.
 
-Note that this library is built with backend developers in mind and while there's a good need for human readability and timestamp conversion into local timezones within a service's user interface, frontend applications, etc. Interfaces where conversion into date and time formats meant for human eyes will obviously also reap the benefits from well defined backends that delivers timestamp values in one standardized format.
+Note that this library is built with backend developers in mind and while these date-time formatted timestamps are more readable than unix timestamps, they still usually shouldn't be used within user interfaces, however since these format of timestamps are so common basically any library will be able to convert back and forth into whatever your human users would expect, to improve readability – useful for frontend applications, app user interfaces, etc. Also, using a standard like this, the frontend devs won't banish you for changing formatting of timestamps within API responses across different services.
 
 
 ## Supported input values for timestamp conversion
@@ -227,6 +227,25 @@ result = utcnow.as_datetime("1984-08-01T13:38:00.123450Z")
 ```
 
 ```python
+# You can even convert your value to a unix timestamp, if that ever would do you any good
+
+from utcnow import utcnow
+result = utcnow.as_unixtime("1984-08-01T13:38:00.123450Z")
+# 460215480.12345
+```
+
+```python
+# And the other way around again, converting from a unix timestamp to our date-time strings
+
+from utcnow import utcnow
+result = utcnow.get(0)
+# "1970-01-01T00:00:00.000000Z"
+
+result = utcnow.get(1614403926.108192)
+# "2021-02-27T05:32:06.108192Z"
+```
+
+```python
 # Example using a value from "arrow" – a popular date-time Python lib with large featureset
 
 import arrow
@@ -246,7 +265,7 @@ result = utcnow.get(value)
 ```
 
 ```python
-# Getting the current server time in UTC as a timestamp string
+# Getting the current server time in UTC as a date-time timestamp string
 
 import utcnow
 utcnow.utcnow()
@@ -275,7 +294,7 @@ utcnow.as_datetime()
 ```
 
 ```python
-# As described – current server timestamp as a RFC 3339 timestamp in UTC
+# As described – current server timestamp as a RFC 3339 date-time timestamp in UTC
 
 import utcnow
 result = str(utcnow)
@@ -283,7 +302,7 @@ result = str(utcnow)
 ```
 
 ```python
-# Easy way of adding the current timestamp to a JSON response
+# Easy way of adding the current date-time timestamp to a JSON response
 
 import json
 import utcnow
@@ -302,9 +321,20 @@ result = f"Current server time is: '{utcnow}'"
 
 ## Finally
 
-This is not a fullblown date library at all – it's simple and basically it just output timestamps into the fixes length string format `YYYY-MM-DDTHH:mm:ss.uuuuuuZ` (or as `%Y-%m-%dT%H:%M:%SZ` as if used with `datetime.datetime.strftime`). Always uses UTC in output and always appends the UTC timezone as a `Z` to the string (instead of using `+00:00` or ` UTC`).
+This is not a fullblown date library at all – it's lightweight, convenient utility package and should mostly just be used to output the date-time timestamp we want and at times convert values from other parts into our fixed length string format `YYYY-MM-DDTHH:mm:ss.ffffffZ` (or as `%Y-%m-%dT%H:%M:%SZ` as if used with `datetime.datetime.strftime` on a naive `datetime` value or a `datetime` value in UTC). Always uses UTC in output and always appends the UTC timezone as a `Z` to the string (instead of using `+00:00`, which a tz-aware `datetime` would do when used with `datetime.isoformat()`).
 
-There's no other external dependencies required. A convenient utility package for when you need to store timestamps in a datastore as a string, adding it to a JSON response or using a shared and common standard in your log outputs.
+Use `utcnow` when you need to store date-time timestamps (and also preferably _internet_ date-time timestamps) in any datastore as a string, using them in API responses (JSON responses usually) or when your services are adding timestamps in their log outputs.
 
 Wether you choose to use this library or anything else, or just specify _this is how we do it_ in a documement, it'll be worth it. It's never too late to start aligning your formatting standards and interfaces.
 
+
+## TLDR?
+
+Use `utcnow` if you have a hard time being consistent with timestamp values in API:s and logging.
+
+If you don't want to use `utcnow`, then here's a few key takeaways to remember.
+
+* Always include ~timezones~ timezone as UTC when storing a timestamp (to database, within logging, everywhere).
+* Always include ~timezones~ timezone as UTC when sending API responses.
+* Set strict guidelines of how timestamps must be formatted within databases, in log output and API responses. Follow them.
+* If your API accepts users to submit timestamps using arbitrary timezones or without tz info, immediately convert the timestamps to UTC.

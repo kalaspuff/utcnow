@@ -83,6 +83,7 @@ def test_unixtime_values(value: Union[int, float, str, Decimal], expected_output
     try:
         assert isinstance(utcnow.as_string(value), str)
         assert isinstance(utcnow.as_datetime(value), datetime.datetime)
+        assert isinstance(utcnow.as_unixtime(value), (float, int))
         if expect_error:
             assert False
     except Exception:

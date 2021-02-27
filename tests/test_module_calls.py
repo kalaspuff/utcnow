@@ -24,16 +24,17 @@ def test_module() -> None:
     assert utcnow.utcnow("1984-08-01 12:00:00") != "1984-08-01T00:00:00.000000Z"
     assert utcnow.as_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.as_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
-    assert utcnow.as_timestamp("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.as_rfc3339("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.to_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.to_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
-    assert utcnow.to_timestamp("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.to_rfc3339("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.get_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.get_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
-    assert utcnow.get_timestamp("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.get_rfc3339("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.get("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow.rfc3339("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.utcnow.as_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.utcnow.as_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
@@ -86,6 +87,27 @@ def test_module() -> None:
     assert utcnow.utcnow.date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
         2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
     )
+
+    # Unixtime
+    assert isinstance(utcnow.as_string(), str)
+    assert isinstance(utcnow.as_datetime(), datetime.datetime)
+    assert isinstance(utcnow.as_unixtime(), (int, float))
+    assert isinstance(utcnow.as_unixtime(0), (int, float))
+    assert utcnow.as_unixtime(0) == 0
+    assert utcnow.as_unixtime(1) == 1
+    assert utcnow.as_unixtime(-1) == -1
+
+    for i in range(-1000, 1000):
+        assert utcnow.as_unixtime(i * 4711) == i * 4711
+        assert utcnow.as_unixtime(i * 4711) == i * 4711
+        assert utcnow.as_unixtime(i * 4711 + 0.1) == i * 4711 + 0.1
+
+    assert utcnow.as_unixtime("2021-02-27T06:22:00") == 1614406920.0
+    assert utcnow.as_unixtime("2021-02-27T06:22:00.1") == 1614406920.1
+    assert utcnow.as_unixtime("2021-02-27T06:22:00.001000") == 1614406920.001
+    assert utcnow.as_unixtime("2021-02-27T06:22:00.000000") == 1614406920.0
+    assert utcnow.as_unixtime("2021-02-27T06:22:00.000000") == 1614406920.0
+    assert utcnow.as_unixtime("2021-02-27T06:22:00.000009") == 1614406920.000009
 
     # Timezone test
     assert utcnow.as_datetime("2021-04-30T09:00:00.000000+01:00") == datetime.datetime(

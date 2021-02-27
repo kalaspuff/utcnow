@@ -50,6 +50,7 @@ def test_to_string_values(value: str, expected_output: str, expect_error: bool) 
     try:
         assert isinstance(utcnow.as_string(value), str)
         assert isinstance(utcnow.as_datetime(value), datetime.datetime)
+        assert isinstance(utcnow.as_unixtime(value), (float, int))
         if expect_error:
             assert False
     except Exception:
