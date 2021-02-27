@@ -337,3 +337,4 @@ If you don't want to use `utcnow`, then here's a few key takeaways to remember.
 * Always include ~timezones~ timezone as UTC when storing a timestamp (to database, within logging, everywhere).
 * Always include ~timezones~ timezone as UTC when sending API responses.
 * Set strict guidelines of how timestamps must be formatted within databases, in log output and API responses. Follow them.
+* If your API accepts users to submit timestamps using arbitrary timezones or without tz info, immediately convert the timestamps to UTC.
