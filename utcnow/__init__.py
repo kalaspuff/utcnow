@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 import re
 import sys
+import time as time_
 from datetime import datetime as datetime_
 from datetime import timezone as timezone_
 from decimal import Decimal
@@ -115,7 +116,13 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
 
 @functools.lru_cache(maxsize=128)
 def _timestamp_to_datetime(value: str_) -> datetime_:
+    value = _transform_value(value)
     return datetime_.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z")
+
+
+@functools.lru_cache(maxsize=128)
+def _timestamp_to_unixtime(value: str_) -> float:
+    return _timestamp_to_datetime(value).timestamp()
 
 
 class _metaclass(type):
@@ -148,21 +155,27 @@ class utcnow_(_baseclass):
 
     def as_datetime(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> datetime_:
         if value is _SENTINEL:
-            # return datetime_.utcnow().replace(tzinfo=UTC)
+            # 'datetime.datetime.now(UTC)' is faster than 'datetime.datetime.utcnow().replace(tzinfo=UTC)'
             return datetime_.now(UTC)
-        return _timestamp_to_datetime(_transform_value(value))
+        return _timestamp_to_datetime(value)
+
+    def as_unixtime(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> float:
+        if value is _SENTINEL:
+            return time_.time()
+        return _timestamp_to_unixtime(value)
 
     as_str = as_string
-    as_timestamp = as_string
+    as_rfc3339 = as_string
     to_string = as_string
     to_str = as_string
-    to_timestamp = as_string
+    to_rfc3339 = as_string
     get_string = as_string
     get_str = as_string
-    get_timestamp = as_string
+    get_rfc3339 = as_string
     get = as_string
     string = as_string
     str = as_string
+    rfc3339 = as_string
 
     as_date = as_datetime
     as_dt = as_datetime
@@ -175,6 +188,33 @@ class utcnow_(_baseclass):
     datetime = as_datetime
     date = as_datetime
     dt = as_datetime
+
+    as_unix = as_unixtime
+    as_time = as_unixtime
+    as_timestamp = as_unixtime
+    as_ut = as_unixtime
+    as_ts = as_unixtime
+    as_float = as_unixtime
+    to_unixtime = as_unixtime
+    to_unix = as_unixtime
+    to_time = as_unixtime
+    to_timestamp = as_unixtime
+    to_ut = as_unixtime
+    to_ts = as_unixtime
+    to_float = as_unixtime
+    get_unixtime = as_unixtime
+    get_unix = as_unixtime
+    get_time = as_unixtime
+    get_timestamp = as_unixtime
+    get_ut = as_unixtime
+    get_ts = as_unixtime
+    get_float = as_unixtime
+    unixtime = as_unixtime
+    unix = as_unixtime
+    time = as_unixtime
+    timestamp = as_unixtime
+    ut = as_unixtime
+    ts = as_unixtime
 
     def __str__(self) -> str_:
         return self.as_string()
@@ -204,16 +244,17 @@ now = _module_value.now
 
 as_string = _module_value.as_string
 as_str = as_string
-as_timestamp = as_string
+as_rfc3339 = as_string
 to_string = as_string
 to_str = as_string
-to_timestamp = as_string
+to_rfc3339 = as_string
 get_string = as_string
 get_str = as_string
-get_timestamp = as_string
+get_rfc3339 = as_string
 get = as_string
 string = as_string
 str = as_string
+rfc3339 = as_string
 
 as_datetime = _module_value.as_datetime
 as_date = as_datetime
@@ -228,6 +269,34 @@ datetime = as_datetime
 date = as_datetime
 dt = as_datetime
 
+as_unixtime = _module_value.as_unixtime
+as_unix = as_unixtime
+as_time = as_unixtime
+as_timestamp = as_unixtime
+as_ut = as_unixtime
+as_ts = as_unixtime
+as_float = as_unixtime
+to_unixtime = as_unixtime
+to_unix = as_unixtime
+to_time = as_unixtime
+to_timestamp = as_unixtime
+to_ut = as_unixtime
+to_ts = as_unixtime
+to_float = as_unixtime
+get_unixtime = as_unixtime
+get_unix = as_unixtime
+get_time = as_unixtime
+get_timestamp = as_unixtime
+get_ut = as_unixtime
+get_ts = as_unixtime
+get_float = as_unixtime
+unixtime = as_unixtime
+unix = as_unixtime
+time = as_unixtime
+timestamp = as_unixtime
+ut = as_unixtime
+ts = as_unixtime
+
 __all__ = [
     "__version__",
     "__version_info__",
@@ -237,23 +306,56 @@ __all__ = [
     "now",
     "as_string",
     "as_str",
-    "as_timestamp",
+    "as_rfc3339",
     "to_string",
     "to_str",
-    "to_timestamp",
+    "to_rfc3339",
     "get_string",
     "get_str",
-    "get_timestamp",
+    "get_rfc3339",
+    "get",
     "string",
     "str",
+    "rfc3339",
     "as_datetime",
     "as_date",
+    "as_dt",
     "to_datetime",
     "to_date",
+    "to_dt",
     "get_datetime",
     "get_date",
+    "get_dt",
     "datetime",
     "date",
+    "dt",
+    "as_unixtime",
+    "as_unix",
+    "as_time",
+    "as_timestamp",
+    "as_ut",
+    "as_ts",
+    "as_float",
+    "to_unixtime",
+    "to_unix",
+    "to_time",
+    "to_timestamp",
+    "to_ut",
+    "to_ts",
+    "to_float",
+    "get_unixtime",
+    "get_unix",
+    "get_time",
+    "get_timestamp",
+    "get_ut",
+    "get_ts",
+    "get_float",
+    "unixtime",
+    "unix",
+    "time",
+    "timestamp",
+    "ut",
+    "ts",
 ]
 
 _actual_module = sys.modules[__name__]  # noqa
