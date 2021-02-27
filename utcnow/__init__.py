@@ -146,6 +146,12 @@ class utcnow_(_baseclass):
             return datetime_.utcnow().isoformat(timespec="microseconds") + "Z"
         return _transform_value(value)
 
+    def as_datetime(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> datetime_:
+        if value is _SENTINEL:
+            # return datetime_.utcnow().replace(tzinfo=UTC)
+            return datetime_.now(UTC)
+        return _timestamp_to_datetime(_transform_value(value))
+
     as_str = as_string
     as_timestamp = as_string
     to_string = as_string
@@ -157,12 +163,6 @@ class utcnow_(_baseclass):
     get = as_string
     string = as_string
     str = as_string
-
-    def as_datetime(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> datetime_:
-        if value is _SENTINEL:
-            # return datetime_.utcnow().replace(tzinfo=UTC)
-            return datetime_.now(UTC)
-        return _timestamp_to_datetime(_transform_value(value))
 
     as_date = as_datetime
     as_dt = as_datetime
