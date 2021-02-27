@@ -170,7 +170,7 @@ class utcnow_(_baseclass):
         self,
         begin: Union[str_, datetime_, object, int, float, Decimal, Real],
         end: Union[str_, datetime_, object, int, float, Decimal, Real],
-        unit: str = "seconds",
+        unit: str_ = "seconds",
     ) -> float:
         delta = _timestamp_to_datetime(end) - _timestamp_to_datetime(begin)
         unit = unit.lower()
