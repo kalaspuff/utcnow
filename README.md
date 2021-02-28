@@ -318,6 +318,47 @@ result = f"Current server time is: '{utcnow}'"
 # "Current server time is: '2021-02-18T08:24:48.382262Z'"
 ```
 
+### How much time between timestamp A and timestamp B?
+
+The library also comes with a small utility function for calculating the number of seconds (usually) between two timestamps.It's called `utcnow.timediff` and works like this.
+
+```python
+import utcnow
+
+# Afternoon meeting first work day of the year – also way too long
+begin = "2021-01-04T13:00:00.000000Z"
+end = "2021-01-04T17:30:00.000000Z"
+
+seconds = utcnow.timediff(begin, end)
+# 16200.0
+
+# Additionally a unit can be specified as the third argument which automatically
+# just divides the number of seconds with the value relative to the unit. If not
+# specified, the default unit "seconds" will be applied.
+
+minutes = utcnow.timediff(begin, end, "minutes")
+# 270.0
+
+hours = utcnow.timediff(begin, end, "hours")
+# 4.5
+
+days = utcnow.timediff(begin, end, "days")
+# 0.1875
+```
+
+```python
+import utcnow
+
+# Another stupid example. How many seconds were there between unixtime epoch
+# and unixtime 1234567890.
+answer = utcnow.timediff(0, 1234567890)
+# 1234567890.0
+
+# This can also be calculated by using the power of subtraction.
+also_the_answer = 1234567890 - 0
+# 1234567890
+```
+
 
 ## Finally
 

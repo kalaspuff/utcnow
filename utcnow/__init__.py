@@ -77,14 +77,16 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
         ):
             str_value = datetime_.utcfromtimestamp(float(str_value)).isoformat(timespec="microseconds") + "Z"
     except Exception:
-        raise ValueError(f"Input value '{value}' (type: {value.__class__}) does not match allowed input format")
+        raise ValueError(f"The input value '{value}' (type: {value.__class__}) does not match allowed input formats")
 
     if PREFERRED_FORMAT_REGEX.match(str_value):
         if int(str_value[8:10]) >= 30 or (int(str_value[5:7]) == 2 and int(str_value[8:10]) >= 28):
             try:
                 dt_value = datetime_.strptime(str_value[0:10], "%Y-%m-%d")
             except ValueError:
-                raise ValueError(f"Input value '{value}' (type: {value.__class__}) does not match allowed input format")
+                raise ValueError(
+                    f"The input value '{value}' (type: {value.__class__}) does not match allowed input formats"
+                )
         return (str_value[:10] + "T" + str_value[11:]).upper().rstrip("Z").rsplit("+00:00")[0].rsplit("-00:00")[0] + "Z"
 
     ends_with_utc = False
@@ -100,12 +102,12 @@ def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, 
 
         if ends_with_utc and dt_value.tzinfo:
             raise ValueError(
-                f"Input value '{value}' (type: {value.__class__}) uses double timezone declaration: 'UTC' and '{dt_value.tzinfo}'"
+                f"The input value '{value}' (type: {value.__class__}) uses double timezone declaration: 'UTC' and '{dt_value.tzinfo}'"
             )
 
         break
     else:
-        raise ValueError(f"Input value '{value}' (type: {value.__class__}) does not match allowed input format")
+        raise ValueError(f"The input value '{value}' (type: {value.__class__}) does not match allowed input formats")
 
     if not dt_value.tzinfo:
         # Timezone declaration missing, skipping tz application and blindly assuming UTC
@@ -164,6 +166,28 @@ class utcnow_(_baseclass):
             return time_.time()
         return _timestamp_to_unixtime(value)
 
+    def timediff(
+        self,
+        begin: Union[str_, datetime_, object, int, float, Decimal, Real],
+        end: Union[str_, datetime_, object, int, float, Decimal, Real],
+        unit: str_ = "seconds",
+    ) -> float:
+        delta = _timestamp_to_datetime(end) - _timestamp_to_datetime(begin)
+        unit = unit.lower()
+
+        if unit in ("seconds", "second", "sec", "s"):
+            return delta.total_seconds()
+        if unit in ("minutes", "minute", "min", "m"):
+            return delta.total_seconds() / 60
+        if unit in ("hours", "hour", "h"):
+            return delta.total_seconds() / 3600
+        if unit in ("days", "day", "d"):
+            return delta.total_seconds() / 86400
+        if unit in ("weeks", "week", "w"):
+            return delta.total_seconds() / (86400 * 7)
+
+        raise ValueError(f"Unknown unit '{unit}' for utcnow.timediff")
+
     as_str = as_string
     as_rfc3339 = as_string
     to_string = as_string
@@ -215,6 +239,11 @@ class utcnow_(_baseclass):
     timestamp = as_unixtime
     ut = as_unixtime
     ts = as_unixtime
+
+    time_diff = timediff
+    diff = timediff
+    timedelta = timediff
+    delta = timediff
 
     def __str__(self) -> str_:
         return self.as_string()
@@ -297,6 +326,13 @@ timestamp = as_unixtime
 ut = as_unixtime
 ts = as_unixtime
 
+timediff = _module_value.timediff
+time_diff = timediff
+diff = timediff
+timedelta = timediff
+delta = timediff
+
+
 __all__ = [
     "__version__",
     "__version_info__",
@@ -356,6 +392,11 @@ __all__ = [
     "timestamp",
     "ut",
     "ts",
+    "timediff",
+    "time_diff",
+    "diff",
+    "timedelta",
+    "delta",
 ]
 
 _actual_module = sys.modules[__name__]  # noqa
