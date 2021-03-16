@@ -144,7 +144,22 @@ class _baseclass(metaclass=_metaclass):
         return _transform_value(value)
 
 
+class now_(_baseclass):
+    def __new__(cls, *args: Any) -> now_:
+        result = cast(now_, object.__new__(cls, *args))
+
+        return result
+
+    def __str__(self) -> str_:
+        return datetime_.utcnow().isoformat(timespec="microseconds") + "Z"
+
+    def __repr__(self) -> str_:
+        return datetime_.utcnow().isoformat(timespec="microseconds") + "Z"
+
+
 class utcnow_(_baseclass):
+    now = now_()
+
     def __new__(cls, *args: Any) -> utcnow_:
         result = cast(utcnow_, object.__new__(cls, *args))
 
@@ -200,6 +215,15 @@ class utcnow_(_baseclass):
     string = as_string
     str = as_string
     rfc3339 = as_string
+    timestamp_rfc3339 = as_string
+    ts_rfc3339 = as_string
+    rfc3339_timestamp = as_string
+    rfc3339_ts = as_string
+    utcnow_rfc3339 = as_string
+    rfc3339_utcnow = as_string
+    now_rfc3339 = as_string
+    rfc3339_now = as_string
+    get_now = as_string
 
     as_date = as_datetime
     as_dt = as_datetime
@@ -259,17 +283,18 @@ class _module(utcnow_):
     __email__: str_ = __email__
 
     utcnow = utcnow_()
-    now = utcnow_()
 
     def __new__(cls, *args: Any) -> _module:
         result = cast(_module, object.__new__(cls, *args))
+
+        setattr(result, "now", result.utcnow)
 
         return result
 
 
 _module_value = _module()
 utcnow = _module_value.utcnow
-now = _module_value.now
+now = utcnow
 
 as_string = _module_value.as_string
 as_str = as_string
@@ -284,6 +309,15 @@ get = as_string
 string = as_string
 str = as_string
 rfc3339 = as_string
+timestamp_rfc3339 = as_string
+ts_rfc3339 = as_string
+rfc3339_timestamp = as_string
+rfc3339_ts = as_string
+utcnow_rfc3339 = as_string
+rfc3339_utcnow = as_string
+now_rfc3339 = as_string
+rfc3339_now = as_string
+get_now = as_string
 
 as_datetime = _module_value.as_datetime
 as_date = as_datetime
@@ -353,6 +387,15 @@ __all__ = [
     "string",
     "str",
     "rfc3339",
+    "timestamp_rfc3339",
+    "ts_rfc3339",
+    "rfc3339_timestamp",
+    "rfc3339_ts",
+    "utcnow_rfc3339",
+    "rfc3339_utcnow",
+    "now_rfc3339",
+    "rfc3339_now",
+    "get_now",
     "as_datetime",
     "as_date",
     "as_dt",
