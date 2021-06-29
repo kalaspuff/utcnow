@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "utcnow"
-version = "0.2.2"
+version = "0.3.0"
 description = "Timestamps as opinionated RFC 3339 (Date and Time on the Internet) formatted strings"
 authors = ["Carl Oscar Aaro <hello@carloscar.com>"]
 homepage = "https://github.com/kalaspuff/utcnow"
@@ -38,7 +38,7 @@ codecov = { version = ">=2.1.10", markers = "sys_platform != \"win32\"" }
 
 [tool.black]
 line-length = 120
-target_version = ["py37", "py38"]
+target_version = ["py37", "py38", "py39"]
 include = '\.pyi?$'
 exclude = '\.eggs/|\.egg-info/|\.git/|\.github/|\.mypy_cache/|\.venv/|\.pytest_cache/|\.vscode/|__pycache__/|build/|dist/|setup\.py'
 
