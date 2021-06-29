@@ -11,12 +11,12 @@ def test_module() -> None:
     assert len(repr(utcnow)) == 27
 
     # Modules aren't callable, but this one is – it's frowned upon and bad practice.
-    assert utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"  # type: ignore
-    assert utcnow("1984-08-01 00:00:00") == "1984-08-01T00:00:00.000000Z"  # type: ignore
-    assert utcnow("1984-08-01 12:00:00") != "1984-08-01T00:00:00.000000Z"  # type: ignore
-    assert datetime.datetime.strptime(utcnow(), "%Y-%m-%dT%H:%M:%S.%f%z")  # type: ignore
+    assert utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow("1984-08-01 00:00:00") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow("1984-08-01 12:00:00") != "1984-08-01T00:00:00.000000Z"
+    assert datetime.datetime.strptime(utcnow(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(str(utcnow), "%Y-%m-%dT%H:%M:%S.%f%z")
-    assert utcnow(datetime.datetime(2021, 4, 30, 8, 0)) == "2021-04-30T08:00:00.000000Z"  # type: ignore
+    assert utcnow(datetime.datetime(2021, 4, 30, 8, 0)) == "2021-04-30T08:00:00.000000Z"
 
     # Testing module functions
     assert utcnow.utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"
