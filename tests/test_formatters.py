@@ -54,15 +54,17 @@ def test_utcnow_resolution_uniqueness() -> None:
 
 
 def test_utcnow_resolution_uniqueness_1000() -> None:
+    # todo - many of these tests should be fixed so that they don't rely on computers becoming too fast.
+
     import utcnow
 
-    assert len(set([str(utcnow) for x in range(1000)])) == 1000
+    assert len(set([str(utcnow) for x in range(5000)])) >= 1000
 
     u1 = utcnow
-    assert len(set([str(u1) for x in range(1000)])) == 1000
+    assert len(set([str(u1) for x in range(5000)])) >= 1000
 
     u2 = utcnow.utcnow
-    assert len(set([str(u2) for x in range(1000)])) == 1000
+    assert len(set([str(u2) for x in range(5000)])) >= 1000
 
     u3 = utcnow()  # type: ignore
     assert len(set([str(u3) for x in range(1000)])) == 1
@@ -85,8 +87,8 @@ def test_utcnow_resolution_uniqueness_1000() -> None:
     assert len(set([u7 for x in range(1000)])) == 1
 
     u8 = utcnow
-    assert len(set([u8.as_string() for x in range(1000)])) == 1000
-    assert len(set([utcnow.as_string() for x in range(1000)])) == 1000
+    assert len(set([u8.as_string() for x in range(5000)])) >= 1000
+    assert len(set([utcnow.as_string() for x in range(5000)])) >= 1000
 
 
 def test_uniqueness_as_reference() -> None:

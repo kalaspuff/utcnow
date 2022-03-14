@@ -146,7 +146,7 @@ class _baseclass(metaclass=_metaclass):
 
 class now_(_baseclass):
     def __new__(cls, *args: Any) -> now_:
-        result = cast(now_, object.__new__(cls, *args))
+        result = object.__new__(cls, *args)
 
         return result
 
@@ -161,7 +161,7 @@ class utcnow_(_baseclass):
     now = now_()
 
     def __new__(cls, *args: Any) -> utcnow_:
-        result = cast(utcnow_, object.__new__(cls, *args))
+        result = object.__new__(cls, *args)
 
         return result
 
@@ -285,7 +285,7 @@ class _module(utcnow_):
     utcnow = utcnow_()
 
     def __new__(cls, *args: Any) -> _module:
-        result = cast(_module, object.__new__(cls, *args))
+        result = object.__new__(cls, *args)
 
         setattr(result, "now", result.utcnow)
 

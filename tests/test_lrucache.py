@@ -379,6 +379,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
 
     for _ in range(call_count):
         values.add(utcnow.get())
+        time.sleep(0.00001)
 
     assert len(values) == call_count
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -387,6 +388,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
 
     for _ in range(call_count):
         values.add(utcnow())  # type: ignore
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 2
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -395,6 +397,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
 
     for _ in range(call_count):
         values.add(f"{utcnow}")
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 3
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -403,6 +406,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
 
     for _ in range(call_count):
         values.add(f"{utcnow.utcnow}")
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 4
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -411,6 +415,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
 
     for _ in range(call_count):
         values.add(str(utcnow()))  # type: ignore
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 5
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -419,6 +424,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
 
     for _ in range(call_count):
         values.add(str(utcnow))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 6
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -427,6 +433,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
 
     for _ in range(call_count):
         values.add(str(utcnow.utcnow))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 7
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -435,6 +442,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
 
     for _ in range(call_count):
         values.add(str(utcnow.utcnow()))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 8
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -443,6 +451,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
 
     for _ in range(call_count):
         values.add(str(utcnow.as_string()))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 9
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -451,6 +460,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
 
     for _ in range(call_count):
         values.add(str(utcnow.as_datetime()))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 10
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -460,6 +470,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
     d = {"timestamp": str(utcnow)}
     for _ in range(call_count):
         values.add(str(d))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 10 + 1
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -469,6 +480,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
     d = {"timestamp": str(utcnow)}
     for _ in range(call_count):
         values.add(str(d))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 10 + 2
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -478,6 +490,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
     d = {"timestamp": utcnow}  # type: ignore
     for _ in range(call_count):
         values.add(str(d))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 11 + 2
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -487,6 +500,7 @@ def test_cache_hits_with_sentinel_loop() -> None:
     d = {"timestamp": utcnow.utcnow}  # type: ignore
     for _ in range(call_count):
         values.add(str(d))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 12 + 2
     assert hits_miss_currsize(_is_numeric) == (0, 0, 0)
@@ -670,6 +684,7 @@ def test_cache_hits_with_uniques_loop() -> None:
 
     for _ in range(call_count):
         values.add(utcnow.get(time.time()))
+        time.sleep(0.00001)
 
     assert len(values) == call_count
 
@@ -679,6 +694,7 @@ def test_cache_hits_with_uniques_loop() -> None:
 
     for _ in range(call_count):
         values.add(utcnow.get(str(time.time())))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 2
 
@@ -689,6 +705,7 @@ def test_cache_hits_with_uniques_loop() -> None:
     t = time.time()
     for _ in range(call_count):
         values.add(utcnow.get(t))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 2 + 1
 
@@ -699,6 +716,7 @@ def test_cache_hits_with_uniques_loop() -> None:
     t_str = str(time.time())
     for _ in range(call_count):
         values.add(utcnow.get(t_str))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 2 + 2
 
@@ -709,6 +727,7 @@ def test_cache_hits_with_uniques_loop() -> None:
     t_dt = datetime.datetime.utcnow()
     for _ in range(call_count):
         values.add(utcnow.get(t_dt))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 2 + 3
 
@@ -718,6 +737,7 @@ def test_cache_hits_with_uniques_loop() -> None:
 
     for _ in range(call_count):
         values.add(utcnow.get(datetime.datetime.utcnow()))
+        time.sleep(0.00001)
 
     assert len(values) == call_count * 3 + 3
 
