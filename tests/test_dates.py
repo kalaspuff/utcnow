@@ -1,4 +1,5 @@
 import datetime
+import utcnow
 
 import pytest
 
@@ -126,3 +127,11 @@ def test_dates(value: str, expect_error: bool) -> None:
             assert False
 
         assert True
+
+
+def test_as_date_string():
+    date_today_0 = datetime.datetime.utcnow().date().isoformat()
+    assert utcnow.get_today() == date_today_0 or utcnow.get_today() == datetime.datetime.utcnow().date().isoformat()
+
+    assert utcnow.as_date_string("2022-04-04") == "2022-04-04"
+    assert utcnow.as_date_string("2021-01-02T00:00:00.04000Z") == "2021-01-02"

@@ -140,7 +140,7 @@ def test_module() -> None:
     )
 
     # Testing function imports
-    from utcnow import as_str, as_string
+    from utcnow import as_str, as_string, as_date_string
     from utcnow import str as str_
     from utcnow import string
 
@@ -148,6 +148,7 @@ def test_module() -> None:
     assert as_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert str_("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert as_date_string("1984-08-01") == "1984-08-01"
     assert datetime.datetime.strptime(as_string(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(as_str(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(string(), "%Y-%m-%dT%H:%M:%S.%f%z")
@@ -161,6 +162,8 @@ def test_module() -> None:
     assert utcnow_.as_str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow_.string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow_.str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
+    assert utcnow_.as_date_string("1984-08-01") == "1984-08-01"
+    assert utcnow_.get_today()
     assert datetime.datetime.strptime(utcnow_(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(utcnow_.as_string(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(utcnow_.as_str(), "%Y-%m-%dT%H:%M:%S.%f%z")

@@ -203,6 +203,13 @@ class utcnow_(_baseclass):
 
         raise ValueError(f"Unknown unit '{unit}' for utcnow.timediff")
 
+    def as_date_string(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL) -> str_:
+        if value is _SENTINEL:
+            str_value = datetime_.utcnow().isoformat(timespec="microseconds") + "Z"
+        else:
+            str_value = _transform_value(value)
+        return str_value[0:10]
+
     as_str = as_string
     as_rfc3339 = as_string
     to_string = as_string
@@ -268,6 +275,28 @@ class utcnow_(_baseclass):
     diff = timediff
     timedelta = timediff
     delta = timediff
+
+    as_datestring = as_date_string
+    as_date_str = as_date_string
+    as_datestr = as_date_string
+    to_date_string = as_date_string
+    to_datestring = as_date_string
+    to_date_str = as_date_string
+    to_datestr = as_date_string
+    get_date_string = as_date_string
+    get_datestring = as_date_string
+    get_datestr = as_date_string
+    get_date_string = as_date_string
+    get_today = as_date_string
+    get_today_date = as_date_string
+    get_date_today = as_date_string
+    date_today = as_date_string
+    today_date = as_date_string
+    today = as_date_string
+    date_string = as_date_string
+    datestring = as_date_string
+    date_str = as_date_string
+    datestr = as_date_string
 
     def __str__(self) -> str_:
         return self.as_string()
@@ -366,6 +395,29 @@ diff = timediff
 timedelta = timediff
 delta = timediff
 
+as_date_string = _module_value.as_date_string
+as_datestring = as_date_string
+as_date_str = as_date_string
+as_datestr = as_date_string
+to_date_string = as_date_string
+to_datestring = as_date_string
+to_date_str = as_date_string
+to_datestr = as_date_string
+get_date_string = as_date_string
+get_datestring = as_date_string
+get_date_str = as_date_string
+get_datestr = as_date_string
+get_today = as_date_string
+get_today_date = as_date_string
+get_date_today = as_date_string
+date_today = as_date_string
+today_date = as_date_string
+today = as_date_string
+date_string = as_date_string
+datestring = as_date_string
+date_str = as_date_string
+datestr = as_date_string
+
 
 __all__ = [
     "__version__",
@@ -440,6 +492,28 @@ __all__ = [
     "diff",
     "timedelta",
     "delta",
+    "as_date_string",
+    "as_datestring",
+    "as_date_str",
+    "as_datestr",
+    "to_date_string",
+    "to_datestring",
+    "to_date_str",
+    "to_datestr",
+    "get_date_string",
+    "get_datestring",
+    "get_date_str",
+    "get_datestr",
+    "get_today",
+    "get_today_date",
+    "get_date_today",
+    "date_today",
+    "today_date",
+    "today",
+    "date_string",
+    "datestring",
+    "date_str",
+    "datestr",
 ]
 
 _actual_module = sys.modules[__name__]  # noqa
