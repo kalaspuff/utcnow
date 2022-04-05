@@ -318,6 +318,36 @@ result = f"Current server time is: '{utcnow}'"
 # "Current server time is: '2021-02-18T08:24:48.382262Z'"
 ```
 
+### Get the date part as a string from a timestamp
+
+Not as common, but every now and then you might need to get the date part from a timestamp (or for example today's date), to use in some string concatenation, S3 object keys and what not.
+
+There's the long away around it, by generating a timestamp with `utcnow.get()` and then just keeping the first 10 characters of the timestamp – that's the date – `YYYY-MM-DD`. You could even use `datetime` and go `datetime.datetime.utcnow().date().isoformat()`, but it's not super clean.
+
+`utcnow` comes with a wrapper function `utcnow.as_date_string(value)` to fetch just the date part based on the input value's UTC timestamp. Note that the date string that is returned does not include timezone information.
+
+```python
+import utcnow
+
+timestamp = "2022-04-05T13:44:52.748994Z"
+utcnow.as_date_string(timestamp)
+# "2022-04-05"
+```
+
+Bonus 🎉🎉 – calling the `utcnow.as_date_string()` function without arguments will return today's date, _based on the current time in UTC_. For some sugar to your code, the same function is also available under the name `utcnow.get_today()`.
+
+To get the current date in another timezone use the keyword argument `tz` to the function call. The value for `tz` should be either a `datetime.tzinfo` object or an utcoffset represented as a string (for example "+01:00", "-06:00", etc.).
+
+```python
+import utcnow
+
+utcnow.get_today()
+# "2022-04-05" (it's the 5th of April when typing this)
+
+utcnow.get_today(tz="+12:00")
+# "2022-04-06" (time in UTC is currently 15:12 - adding 12 hours to that would yield 03:12 tomorrow)
+```
+
 ### How much time between timestamp A and timestamp B?
 
 The library also comes with a small utility function for calculating the number of seconds (usually) between two timestamps.It's called `utcnow.timediff` and works like this.
