@@ -140,7 +140,7 @@ def test_module() -> None:
     )
 
     # Testing function imports
-    from utcnow import as_str, as_string, as_date_string
+    from utcnow import as_date_string, as_str, as_string
     from utcnow import str as str_
     from utcnow import string
 

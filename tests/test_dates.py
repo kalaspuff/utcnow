@@ -1,7 +1,8 @@
 import datetime
-import utcnow
 
 import pytest
+
+import utcnow
 
 
 @pytest.mark.parametrize(
@@ -139,11 +140,21 @@ def test_as_date_string():
     assert utcnow.get_today(tz="+24:00") != utcnow.get_today()
     assert utcnow.get_today(tz="-24:00") != utcnow.get_today()
 
-    assert utcnow.get_today(tz="UTC") == date_today_0 or utcnow.get_today(tz="UTC") == datetime.datetime.utcnow().date().isoformat()
-    assert utcnow.get_today(tz=datetime.timezone.utc) == date_today_0 or utcnow.get_today(tz=datetime.timezone.utc) == datetime.datetime.utcnow().date().isoformat()
+    assert (
+        utcnow.get_today(tz="UTC") == date_today_0
+        or utcnow.get_today(tz="UTC") == datetime.datetime.utcnow().date().isoformat()
+    )
+    assert (
+        utcnow.get_today(tz=datetime.timezone.utc) == date_today_0
+        or utcnow.get_today(tz=datetime.timezone.utc) == datetime.datetime.utcnow().date().isoformat()
+    )
 
     assert utcnow.get_today(tz=datetime.timezone(datetime.timedelta(hours=24, microseconds=-1))) != utcnow.get_today()
-    assert utcnow.get_today(tz=datetime.timezone(datetime.timedelta(hours=24, microseconds=-1))) == utcnow.get_today(tz="+24:00") or utcnow.get_today(tz=datetime.timezone(datetime.timedelta(hours=24, microseconds=-1))) == utcnow.get_today(tz="+24:00")
+    assert utcnow.get_today(tz=datetime.timezone(datetime.timedelta(hours=24, microseconds=-1))) == utcnow.get_today(
+        tz="+24:00"
+    ) or utcnow.get_today(tz=datetime.timezone(datetime.timedelta(hours=24, microseconds=-1))) == utcnow.get_today(
+        tz="+24:00"
+    )
 
     with pytest.raises(ValueError):
         utcnow.get_today(tz="UnknownTimezone")

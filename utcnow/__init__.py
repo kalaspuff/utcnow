@@ -5,8 +5,8 @@ import re
 import sys
 import time as time_
 from datetime import datetime as datetime_
-from datetime import timezone as timezone_
 from datetime import timedelta as timedelta_
+from datetime import timezone as timezone_
 from datetime import tzinfo as tzinfo_
 from decimal import Decimal
 from numbers import Real
@@ -205,13 +205,32 @@ class utcnow_(_baseclass):
 
         raise ValueError(f"Unknown unit '{unit}' for utcnow.timediff")
 
-    def as_date_string(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL, tz: Optional[Union[str_, tzinfo_]] = None) -> str_:
+    def as_date_string(
+        self,
+        value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+        tz: Optional[Union[str_, tzinfo_]] = None,
+    ) -> str_:
         date_tz: tzinfo_
         if not tz:
             date_tz = UTC
         elif isinstance(tz, tzinfo_):
             date_tz = tz
-        elif isinstance(tz, str_) and tz.upper() in ("UTC", "GMT", "UTC+0", "UTC-0", "GMT+0", "GMT-0", "Z", "ZULU", "00:00", "+00:00", "-00:00", "0000", "+0000", "-0000"):
+        elif isinstance(tz, str_) and tz.upper() in (
+            "UTC",
+            "GMT",
+            "UTC+0",
+            "UTC-0",
+            "GMT+0",
+            "GMT-0",
+            "Z",
+            "ZULU",
+            "00:00",
+            "+00:00",
+            "-00:00",
+            "0000",
+            "+0000",
+            "-0000",
+        ):
             date_tz = UTC
         elif isinstance(tz, str_) and re.match(r"^[+-][0-9]{2}:?[0-9]{2}$", tz):
             m = re.match(r"^[+-]([0-9]{2}):?([0-9]{2})$", tz)
@@ -223,9 +242,13 @@ class utcnow_(_baseclass):
 
             date_tz = timezone_(modifier * td)
         elif isinstance(tz, str_):
-            raise ValueError(f"Unknown timezone value '{tz}' (string) - use value of type 'datetime.tzinfo' or an utcoffset string value")
+            raise ValueError(
+                f"Unknown timezone value '{tz}' (string) - use value of type 'datetime.tzinfo' or an utcoffset string value"
+            )
         else:
-            raise ValueError(f"Unknown timezone value '{tz}' (type: {tz.__class__}) - should preferably be of type 'datetime.tzinfo'")
+            raise ValueError(
+                f"Unknown timezone value '{tz}' (type: {tz.__class__}) - should preferably be of type 'datetime.tzinfo'"
+            )
 
         if value is _SENTINEL:
             return datetime_.now(date_tz).date().isoformat()
