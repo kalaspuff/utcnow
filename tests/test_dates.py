@@ -130,7 +130,7 @@ def test_dates(value: str, expect_error: bool) -> None:
         assert True
 
 
-def test_as_date_string():
+def test_as_date_string() -> None:
     date_today_0 = datetime.datetime.utcnow().date().isoformat()
     assert utcnow.get_today() == date_today_0 or utcnow.get_today() == datetime.datetime.utcnow().date().isoformat()
 
@@ -160,7 +160,7 @@ def test_as_date_string():
         utcnow.get_today(tz="UnknownTimezone")
 
     with pytest.raises(ValueError):
-        utcnow.get_today(tz=datetime.timezone)
+        utcnow.get_today(tz=datetime.timezone)  # type:ignore
 
     with pytest.raises(ValueError):
         utcnow.get_today(tz="+32:00")
