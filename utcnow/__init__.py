@@ -5,10 +5,12 @@ import re
 import sys
 import time as time_
 from datetime import datetime as datetime_
+from datetime import timedelta as timedelta_
 from datetime import timezone as timezone_
+from datetime import tzinfo as tzinfo_
 from decimal import Decimal
 from numbers import Real
-from typing import Any, Dict, Tuple, Type, Union, cast
+from typing import Any, Dict, Optional, Tuple, Type, Union, cast
 
 from .__version_data__ import __version__, __version_info__
 
@@ -127,6 +129,42 @@ def _timestamp_to_unixtime(value: str_) -> float:
     return _timestamp_to_datetime(value).timestamp()
 
 
+@functools.lru_cache(maxsize=128)
+def _timezone_from_string(value: str_) -> Optional[tzinfo_]:
+    if value.upper() in (
+        "UTC",
+        "GMT",
+        "UTC+0",
+        "UTC-0",
+        "GMT+0",
+        "GMT-0",
+        "Z",
+        "ZULU",
+        "00:00",
+        "+00:00",
+        "-00:00",
+        "0000",
+        "+0000",
+        "-0000",
+    ):
+        return UTC
+
+    if value and value[0] in ("+", "-"):
+        m = re.match(r"^[+-]([0-9]{2}):?([0-9]{2})$", value)
+        if not m:
+            return None
+
+        modifier = 1 if value[0] == "+" else -1
+
+        td = timedelta_(hours=int(m.group(1)), minutes=int(m.group(2)))
+        if td.days == 1 and td == timedelta_(days=1):
+            td = timedelta_(days=1, microseconds=-1)
+
+        return timezone_(modifier * td)
+
+    return None
+
+
 class _metaclass(type):
     def __new__(cls: Type[_metaclass], name: str_, bases: Tuple[type, ...], attributedict: Dict) -> _metaclass:
         result = cast(Type["_baseclass"], super().__new__(cls, name, bases, dict(attributedict)))
@@ -203,6 +241,30 @@ class utcnow_(_baseclass):
 
         raise ValueError(f"Unknown unit '{unit}' for utcnow.timediff")
 
+    def as_date_string(
+        self,
+        value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+        tz: Optional[Union[str_, tzinfo_]] = None,
+    ) -> str_:
+        date_tz: Optional[tzinfo_] = None
+
+        if not tz:
+            date_tz = UTC
+        elif isinstance(tz, tzinfo_):
+            date_tz = tz
+        elif isinstance(tz, str_):
+            date_tz = _timezone_from_string(tz)
+
+        if not date_tz:
+            raise ValueError(
+                f"Unknown timezone value '{tz}' (type: {tz.__class__.__name__}) - use value of type 'datetime.tzinfo' or an utcoffset string value"
+            )
+
+        if value is _SENTINEL:
+            return datetime_.now(date_tz).date().isoformat()
+
+        return _timestamp_to_datetime(value).astimezone(date_tz).date().isoformat()
+
     as_str = as_string
     as_rfc3339 = as_string
     to_string = as_string
@@ -268,6 +330,30 @@ class utcnow_(_baseclass):
     diff = timediff
     timedelta = timediff
     delta = timediff
+
+    as_datestring = as_date_string
+    as_date_str = as_date_string
+    as_datestr = as_date_string
+    to_date_string = as_date_string
+    to_datestring = as_date_string
+    to_date_str = as_date_string
+    to_datestr = as_date_string
+    get_date_string = as_date_string
+    get_datestring = as_date_string
+    get_datestr = as_date_string
+    get_date_string = as_date_string
+    get_today = as_date_string
+    get_today_date = as_date_string
+    get_todays_date = as_date_string
+    get_date_today = as_date_string
+    date_today = as_date_string
+    today_date = as_date_string
+    todays_date = as_date_string
+    today = as_date_string
+    date_string = as_date_string
+    datestring = as_date_string
+    date_str = as_date_string
+    datestr = as_date_string
 
     def __str__(self) -> str_:
         return self.as_string()
@@ -366,6 +452,31 @@ diff = timediff
 timedelta = timediff
 delta = timediff
 
+as_date_string = _module_value.as_date_string
+as_datestring = as_date_string
+as_date_str = as_date_string
+as_datestr = as_date_string
+to_date_string = as_date_string
+to_datestring = as_date_string
+to_date_str = as_date_string
+to_datestr = as_date_string
+get_date_string = as_date_string
+get_datestring = as_date_string
+get_date_str = as_date_string
+get_datestr = as_date_string
+get_today = as_date_string
+get_today_date = as_date_string
+get_todays_date = as_date_string
+get_date_today = as_date_string
+date_today = as_date_string
+today_date = as_date_string
+todays_date = as_date_string
+today = as_date_string
+date_string = as_date_string
+datestring = as_date_string
+date_str = as_date_string
+datestr = as_date_string
+
 
 __all__ = [
     "__version__",
@@ -440,6 +551,30 @@ __all__ = [
     "diff",
     "timedelta",
     "delta",
+    "as_date_string",
+    "as_datestring",
+    "as_date_str",
+    "as_datestr",
+    "to_date_string",
+    "to_datestring",
+    "to_date_str",
+    "to_datestr",
+    "get_date_string",
+    "get_datestring",
+    "get_date_str",
+    "get_datestr",
+    "get_today",
+    "get_today_date",
+    "get_todays_date",
+    "get_date_today",
+    "date_today",
+    "today_date",
+    "todays_date",
+    "today",
+    "date_string",
+    "datestring",
+    "date_str",
+    "datestr",
 ]
 
 _actual_module = sys.modules[__name__]  # noqa
