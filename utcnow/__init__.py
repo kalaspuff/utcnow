@@ -234,7 +234,7 @@ class utcnow_(_baseclass):
             date_tz = UTC
         elif isinstance(tz, str_) and re.match(r"^[+-][0-9]{2}:?[0-9]{2}$", tz):
             m = re.match(r"^[+-]([0-9]{2}):?([0-9]{2})$", tz)
-            if not m:
+            if not m:  # pragma: no cover
                 raise ValueError(
                     f"Unknown timezone value '{tz}' (string) - use value of type 'datetime.tzinfo' or an utcoffset string value"
                 )
