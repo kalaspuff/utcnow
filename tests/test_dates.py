@@ -167,3 +167,6 @@ def test_as_date_string() -> None:
 
     with pytest.raises(ValueError):
         utcnow.get_today(tz="-32:00")
+
+    with pytest.raises(ValueError):
+        utcnow.get_today(tz="+TEST")

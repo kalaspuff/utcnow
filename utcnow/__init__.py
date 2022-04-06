@@ -129,6 +129,42 @@ def _timestamp_to_unixtime(value: str_) -> float:
     return _timestamp_to_datetime(value).timestamp()
 
 
+@functools.lru_cache(maxsize=128)
+def _timezone_from_string(value: str_) -> Optional[tzinfo_]:
+    if value.upper() in (
+        "UTC",
+        "GMT",
+        "UTC+0",
+        "UTC-0",
+        "GMT+0",
+        "GMT-0",
+        "Z",
+        "ZULU",
+        "00:00",
+        "+00:00",
+        "-00:00",
+        "0000",
+        "+0000",
+        "-0000",
+    ):
+        return UTC
+
+    if value and value[0] in ("+", "-"):
+        m = re.match(r"^[+-]([0-9]{2}):?([0-9]{2})$", value)
+        if not m:
+            return None
+
+        modifier = 1 if value[0] == "+" else -1
+
+        td = timedelta_(hours=int(m.group(1)), minutes=int(m.group(2)))
+        if td.days == 1 and td == timedelta_(days=1):
+            td = timedelta_(days=1, microseconds=-1)
+
+        return timezone_(modifier * td)
+
+    return None
+
+
 class _metaclass(type):
     def __new__(cls: Type[_metaclass], name: str_, bases: Tuple[type, ...], attributedict: Dict) -> _metaclass:
         result = cast(Type["_baseclass"], super().__new__(cls, name, bases, dict(attributedict)))
@@ -210,49 +246,18 @@ class utcnow_(_baseclass):
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         tz: Optional[Union[str_, tzinfo_]] = None,
     ) -> str_:
-        date_tz: tzinfo_
+        date_tz: Optional[tzinfo_] = None
+
         if not tz:
             date_tz = UTC
         elif isinstance(tz, tzinfo_):
             date_tz = tz
-        elif isinstance(tz, str_) and tz.upper() in (
-            "UTC",
-            "GMT",
-            "UTC+0",
-            "UTC-0",
-            "GMT+0",
-            "GMT-0",
-            "Z",
-            "ZULU",
-            "00:00",
-            "+00:00",
-            "-00:00",
-            "0000",
-            "+0000",
-            "-0000",
-        ):
-            date_tz = UTC
-        elif isinstance(tz, str_) and re.match(r"^[+-][0-9]{2}:?[0-9]{2}$", tz):
-            m = re.match(r"^[+-]([0-9]{2}):?([0-9]{2})$", tz)
-            if not m:  # pragma: no cover
-                raise ValueError(
-                    f"Unknown timezone value '{tz}' (string) - use value of type 'datetime.tzinfo' or an utcoffset string value"
-                )
-
-            modifier = 1 if tz.startswith("+") else -1
-
-            td = timedelta_(hours=int(m.group(1)), minutes=int(m.group(2)))
-            if td.days == 1 and td == timedelta_(days=1):
-                td = timedelta_(days=1, microseconds=-1)
-
-            date_tz = timezone_(modifier * td)
         elif isinstance(tz, str_):
+            date_tz = _timezone_from_string(tz)
+
+        if not date_tz:
             raise ValueError(
-                f"Unknown timezone value '{tz}' (string) - use value of type 'datetime.tzinfo' or an utcoffset string value"
-            )
-        else:
-            raise ValueError(
-                f"Unknown timezone value '{tz}' (type: {tz.__class__}) - should preferably be of type 'datetime.tzinfo'"
+                f"Unknown timezone value '{tz}' (type: {tz.__class__.__name__}) - use value of type 'datetime.tzinfo' or an utcoffset string value"
             )
 
         if value is _SENTINEL:
