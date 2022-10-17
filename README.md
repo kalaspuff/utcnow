@@ -105,6 +105,9 @@ pip install utcnow-cli
 code ~$ utcnow
 2022-10-17T14:25:04.481821Z
 
+code ~$ utcnow +365d
+2023-10-17T14:25:04.481821Z
+
 code ~$ utcnow "2022-02-28 10:10:59.100+02:00" "1984-08-01 15:00"
 2022-02-28T08:10:59.100000Z
 1984-08-01T15:00:00.000000Z
@@ -317,6 +320,14 @@ utcnow.utcnow()
 # 5. utcnow.utcnow.get()
 # 6. datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 # 7. datetime.datetime.utcnow().isoformat() + "Z"
+```
+
+```python
+# Getting the current server time in UTC but with a modifier
+
+import utcnow
+utcnow.utcnow("now", "+10d")
+# "2021-02-28T08:24:48.382262Z"
 ```
 
 ```python
