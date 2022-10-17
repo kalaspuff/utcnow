@@ -22,7 +22,9 @@ def get_error_options(argv: List[str]) -> str:
     )
 
 
-def cli_entrypoint(argv: List[str]) -> int:
+def cli_entrypoint(argv: Optional[List[str]] = None) -> int:
+    if argv is None:  # pragma: no cover
+        argv = sys.argv[1:]
     if argv and ("-v" in argv or "--version" in argv or "version" in argv):
         # utcnow --version
         from utcnow import __version__  # isort:skip
