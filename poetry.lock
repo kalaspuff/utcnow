@@ -395,6 +395,17 @@ secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "ipaddress", "p
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
+name = "utcnow-cli"
+version = "1.0.0"
+description = "Timestamps as opinionated RFC 3339 (Date and Time on the Internet) formatted strings"
+category = "main"
+optional = true
+python-versions = ">=3.7,<4.0"
+
+[package.dependencies]
+utcnow = ">=0.3.3"
+
+[[package]]
 name = "zipp"
 version = "3.9.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -406,10 +417,13 @@ python-versions = ">=3.7"
 docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)"]
 testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
 
+[extras]
+cli = ["utcnow-cli"]
+
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "206f8d406c31b56797edb8fa41961719836de99912bf9efc0db2e8274d7fd7bf"
+content-hash = "40b55ab28896364fe8e3579499370b3d6cab6bd06a2710cd2d7548f10092e66b"
 
 [metadata.files]
 attrs = [
@@ -655,6 +669,10 @@ typing-extensions = [
 urllib3 = [
     {file = "urllib3-1.26.12-py2.py3-none-any.whl", hash = "sha256:b930dd878d5a8afb066a637fbb35144fe7901e3b209d1cd4f524bd0e9deee997"},
     {file = "urllib3-1.26.12.tar.gz", hash = "sha256:3fa96cf423e6987997fc326ae8df396db2a8b7c667747d47ddd8ecba91f4a74e"},
+]
+utcnow-cli = [
+    {file = "utcnow_cli-1.0.0-py3-none-any.whl", hash = "sha256:24467d8288eec2afca52c76826671ef728d2747fc7783d9014a13ac9e52a2b68"},
+    {file = "utcnow_cli-1.0.0.tar.gz", hash = "sha256:422366fc645bd7205019d520f28f4fea2603cc512f899b98a9ba1432757a64ee"},
 ]
 zipp = [
     {file = "zipp-3.9.0-py3-none-any.whl", hash = "sha256:972cfa31bc2fedd3fa838a51e9bc7e64b7fb725a8c00e7431554311f180e9980"},
