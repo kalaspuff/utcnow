@@ -62,6 +62,34 @@ def _is_numeric(value: str_) -> bool:
 
 
 @functools.lru_cache(maxsize=128, typed=True)
+def _init_modifier(value: Union[str_, datetime_, object, int, float, Decimal, Real], modifier: Optional[Union[str_, int, float]] = 0) -> Tuple[Union[str_, datetime_, object, int, float, Decimal, Real], Union[int, float]]:
+    if value is not _SENTINEL and value and str_(value)[0] in ("+", "-") and not modifier and isinstance(value, str_) and value[-1] in MODIFIER_MUL:
+        modifier = value
+        value = _SENTINEL
+
+    if modifier is None:
+        modifier = 0
+
+    if isinstance(modifier, str_):
+        modifier_mul: int = 1
+        modifier_mul_str = modifier[-1]
+
+        if len(modifier) > 1 and modifier_mul_str in MODIFIER_MUL and (modifier[-2].isdigit() or modifier[-2] == "."):
+            modifier = modifier[:-1]
+            modifier_mul = MODIFIER_MUL[modifier_mul_str]
+
+        if "." in modifier:
+            modifier = float(modifier) * modifier_mul
+        else:
+            modifier = int(modifier) * modifier_mul
+
+    if value == "now":
+        value = _SENTINEL
+
+    return value, modifier
+
+
+@functools.lru_cache(maxsize=128, typed=True)
 def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, Real], modifier: Optional[Union[str_, int, float]] = 0) -> str_:
     str_value: str_
     try:
@@ -183,23 +211,9 @@ class _baseclass(metaclass=_metaclass):
         pass
 
     def __call__(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL, modifier: Optional[Union[str_, int, float]] = 0) -> str_:
-        if value is not _SENTINEL and value and str_(value)[0] in ("+", "-") and not modifier and isinstance(value, (str_, int, float)):
-            modifier = value
-            value = _SENTINEL
-        if modifier is None:
-            modifier = 0
-        if isinstance(modifier, str_):
-            modifier_mul: int = 1
-            modifier_mul_str = modifier[-1]
-            if len(modifier) > 1 and modifier_mul_str in MODIFIER_MUL and (modifier[-2].isdigit() or modifier[-2] == "."):
-                modifier = modifier[:-1]
-                modifier_mul = MODIFIER_MUL[modifier_mul_str]
-            if "." in modifier:
-                modifier = float(modifier) * modifier_mul
-            else:
-                modifier = int(modifier) * modifier_mul
+        value, modifier = _init_modifier(value, modifier)
 
-        if value is _SENTINEL or value == "now":
+        if value is _SENTINEL:
             return (datetime_.utcnow() if not modifier else datetime_.utcnow() + timedelta_(seconds=modifier)).isoformat(timespec="microseconds") + "Z"
         return _transform_value(value) if not modifier else _transform_value(_timestamp_to_unixtime(value) + modifier)
 
@@ -226,66 +240,24 @@ class utcnow_(_baseclass):
         return result
 
     def as_string(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL, modifier: Optional[Union[str_, int, float]] = 0) -> str_:
-        if value is not _SENTINEL and value and str_(value)[0] in ("+", "-") and not modifier and isinstance(value, (str_, int, float)):
-            modifier = value
-            value = _SENTINEL
-        if modifier is None:
-            modifier = 0
-        if isinstance(modifier, str_):
-            modifier_mul: int = 1
-            modifier_mul_str = modifier[-1]
-            if len(modifier) > 1 and modifier_mul_str in MODIFIER_MUL and (modifier[-2].isdigit() or modifier[-2] == "."):
-                modifier = modifier[:-1]
-                modifier_mul = MODIFIER_MUL[modifier_mul_str]
-            if "." in modifier:
-                modifier = float(modifier) * modifier_mul
-            else:
-                modifier = int(modifier) * modifier_mul
+        value, modifier = _init_modifier(value, modifier)
 
-        if value is _SENTINEL or value == "now":
+        if value is _SENTINEL:
             return (datetime_.utcnow() if not modifier else datetime_.utcnow() + timedelta_(seconds=modifier)).isoformat(timespec="microseconds") + "Z"
         return _transform_value(value) if not modifier else _transform_value(_timestamp_to_unixtime(value) + modifier)
 
     def as_datetime(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL, modifier: Optional[Union[str_, int, float]] = 0) -> datetime_:
-        if value is not _SENTINEL and value and str_(value)[0] in ("+", "-") and not modifier and isinstance(value, (str_, int, float)):
-            modifier = value
-            value = _SENTINEL
-        if modifier is None:
-            modifier = 0
-        if isinstance(modifier, str_):
-            modifier_mul: int = 1
-            modifier_mul_str = modifier[-1]
-            if len(modifier) > 1 and modifier_mul_str in MODIFIER_MUL and (modifier[-2].isdigit() or modifier[-2] == "."):
-                modifier = modifier[:-1]
-                modifier_mul = MODIFIER_MUL[modifier_mul_str]
-            if "." in modifier:
-                modifier = float(modifier) * modifier_mul
-            else:
-                modifier = int(modifier) * modifier_mul
+        value, modifier = _init_modifier(value, modifier)
 
-        if value is _SENTINEL or value == "now":
+        if value is _SENTINEL:
             # 'datetime.datetime.now(UTC)' is faster than 'datetime.datetime.utcnow().replace(tzinfo=UTC)'
             return datetime_.now(UTC) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier)
         return _timestamp_to_datetime(value) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier)
 
     def as_unixtime(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL, modifier: Optional[Union[str_, int, float]] = 0) -> float:
-        if value is not _SENTINEL and value and str_(value)[0] in ("+", "-") and not modifier and isinstance(value, (str_, int, float)):
-            modifier = value
-            value = _SENTINEL
-        if modifier is None:
-            modifier = 0
-        if isinstance(modifier, str_):
-            modifier_mul: int = 1
-            modifier_mul_str = modifier[-1]
-            if len(modifier) > 1 and modifier_mul_str in MODIFIER_MUL and (modifier[-2].isdigit() or modifier[-2] == "."):
-                modifier = modifier[:-1]
-                modifier_mul = MODIFIER_MUL[modifier_mul_str]
-            if "." in modifier:
-                modifier = float(modifier) * modifier_mul
-            else:
-                modifier = int(modifier) * modifier_mul
+        value, modifier = _init_modifier(value, modifier)
 
-        if value is _SENTINEL or value == "now":
+        if value is _SENTINEL:
             return time_.time() + modifier
         return _timestamp_to_unixtime(value) + modifier
 
