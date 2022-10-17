@@ -28,9 +28,9 @@ packages = [
 ]
 
 include = [
-    "utcnow/cli/**/*.py",
-    "utcnow/cli/**/*.pyi",
-    "utcnow/cli/**/py.typed",
+    "utcnow/cli/*.py",
+    "utcnow/cli/*.pyi",
+    "utcnow/cli/py.typed",
 ]
 
 [tool.poetry.dependencies]
@@ -38,7 +38,7 @@ python = "^3.7"
 utcnow = ">=0.3.3"
 
 [tool.poetry.scripts]
-utcnow = "utcnow.cli:entrypoint"
+utcnow = "utcnow.interface:cli_entrypoint"
 
 [build-system]
 requires = ["poetry_core>=1.0.0"]
