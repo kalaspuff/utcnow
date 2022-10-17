@@ -11,7 +11,11 @@ from utcnow import utcnow
 
 utcnow.get()
 # "2077-03-01T09:33:07.139361Z" | The most common use case – get current server time.
-#                               | Always uses UTC in the returned value.
+#                               | Always uses UTC timezone in the returned value.
+```
+
+```python
+from utcnow import utcnow
 
 utcnow.get("2020-02-26 09:10:10+00:00")
 # "2020-02-26T09:10:10.000000Z" | Reformats any valid date-time input to a defined standard.
@@ -84,6 +88,40 @@ This library aims at going for simplicity by being explicit about the choices al
 * The most common format for handling dates and datetimes in Python, the builtin `datetime.datetime` object values (both timezone aware values, as well as values that aren't timezone aware, as for which we'll assume UTC).
 * Also supporting object values from other commonly used libraries, such as `arrow`.
 * As a bonus – Unix time, mainly for convinience (`time.time()`) (we have many names for the things we love: epoch time, posix time, seconds since epoch, 2038-bug on 32-bit unsigned ints to time-travel back to the first radio-transmission across the atlantic, there will be movies about this ).
+
+
+## Can also be used on the command-line
+
+`utcnow` can now be used as a cli by installing `utcnow-cli` or using the `cli` extras of `utcnow`.
+
+```bash
+# install utcnow with extras: cli
+pip install utcnow[cli]
+# equivalent to installing utcnow-cli
+pip install utcnow-cli
+```
+
+```
+code ~$ utcnow
+2022-10-17T14:25:04.481821Z
+
+code ~$ utcnow "2022-02-28 10:10:59.100+02:00" "1984-08-01 15:00"
+2022-02-28T08:10:59.100000Z
+1984-08-01T15:00:00.000000Z
+```
+
+##### FULL CLI USAGE
+
+```
+  usage:
+    utcnow [values ...]              | default     output in rfc3339 format
+    utcnow --unixtime [values ...]   | short: -u   output as unixtime
+    utcnow --diff <from> <to>        | short: -d   diff in seconds: from -> to
+
+  help:
+    utcnow --help                    | short: -h   display this message
+    utcnow --version                 | short: -v   show installed version
+```
 
 
 ## A neat side-effect of defaulted string output – comparison as strings
