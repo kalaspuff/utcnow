@@ -2,7 +2,7 @@ from typing import Any
 
 from utcnow import __version__ as utcnow_version
 from utcnow.cli.__version__ import __version__ as cli_version
-from utcnow.interface import cli_entrypoint, error_message, get_error_options
+from utcnow.interface import cli_entrypoint
 
 
 def test_version_cli_package() -> None:
@@ -66,7 +66,6 @@ def test_cli_unixtime_invalid_argument(capsys: Any) -> None:
     assert err != ""
     assert exit_code == 1
     assert out == ""
-
 
 
 def test_cli_diff(capsys: Any) -> None:
