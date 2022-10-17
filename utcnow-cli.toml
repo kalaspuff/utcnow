@@ -35,7 +35,7 @@ include = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-utcnow = "*"
+utcnow = ">=0.3.3"
 
 [tool.poetry.scripts]
 utcnow = "utcnow.cli:entrypoint"
