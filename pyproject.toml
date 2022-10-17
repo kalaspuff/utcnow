@@ -37,6 +37,10 @@ black = { version = "*", markers = "sys_platform != \"win32\"", allow-prerelease
 mypy = { version = ">=0.800", markers = "sys_platform != \"win32\"" }
 codecov = { version = ">=2.1.10", markers = "sys_platform != \"win32\"" }
 
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.black]
 line-length = 120
 target_version = ["py37", "py38", "py39", "py310"]
