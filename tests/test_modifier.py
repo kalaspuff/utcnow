@@ -11,7 +11,11 @@ def test_unxitime_modifier() -> None:
     assert utcnow.unixtime(0, "+10s") == 10.0
     assert utcnow.unixtime(0, "+24h") == 86400.0
     assert utcnow.unixtime("now", None) < utcnow.unixtime("+1s")
-    assert utcnow.unixtime("2022-10-17T15:15:22.556084Z", None) == utcnow.unixtime("2022-10-17T15:15:22.556084Z", 0) == utcnow.unixtime("2022-10-17T15:15:22.556084Z")
+    assert (
+        utcnow.unixtime("2022-10-17T15:15:22.556084Z", None)
+        == utcnow.unixtime("2022-10-17T15:15:22.556084Z", 0)
+        == utcnow.unixtime("2022-10-17T15:15:22.556084Z")
+    )
 
 
 def test_unixtime_modifier() -> None:

@@ -62,8 +62,17 @@ def _is_numeric(value: str_) -> bool:
 
 
 @functools.lru_cache(maxsize=128, typed=True)
-def _init_modifier(value: Union[str_, datetime_, object, int, float, Decimal, Real], modifier: Optional[Union[str_, int, float]] = 0) -> Tuple[Union[str_, datetime_, object, int, float, Decimal, Real], Union[int, float]]:
-    if value is not _SENTINEL and value and str_(value)[0] in ("+", "-") and not modifier and isinstance(value, str_) and value[-1] in MODIFIER_MUL:
+def _init_modifier(
+    value: Union[str_, datetime_, object, int, float, Decimal, Real], modifier: Optional[Union[str_, int, float]] = 0
+) -> Tuple[Union[str_, datetime_, object, int, float, Decimal, Real], Union[int, float]]:
+    if (
+        value is not _SENTINEL
+        and value
+        and str_(value)[0] in ("+", "-")
+        and not modifier
+        and isinstance(value, str_)
+        and value[-1] in MODIFIER_MUL
+    ):
         modifier = value
         value = _SENTINEL
 
@@ -90,7 +99,9 @@ def _init_modifier(value: Union[str_, datetime_, object, int, float, Decimal, Re
 
 
 @functools.lru_cache(maxsize=128, typed=True)
-def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, Real], modifier: Optional[Union[str_, int, float]] = 0) -> str_:
+def _transform_value(
+    value: Union[str_, datetime_, object, int, float, Decimal, Real], modifier: Optional[Union[str_, int, float]] = 0
+) -> str_:
     str_value: str_
     try:
         if isinstance(value, str_):
@@ -210,11 +221,17 @@ class _baseclass(metaclass=_metaclass):
     def __init__(self) -> None:
         pass
 
-    def __call__(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL, modifier: Optional[Union[str_, int, float]] = 0) -> str_:
+    def __call__(
+        self,
+        value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+        modifier: Optional[Union[str_, int, float]] = 0,
+    ) -> str_:
         value, modifier = _init_modifier(value, modifier)
 
         if value is _SENTINEL:
-            return (datetime_.utcnow() if not modifier else datetime_.utcnow() + timedelta_(seconds=modifier)).isoformat(timespec="microseconds") + "Z"
+            return (
+                datetime_.utcnow() if not modifier else datetime_.utcnow() + timedelta_(seconds=modifier)
+            ).isoformat(timespec="microseconds") + "Z"
         return _transform_value(value) if not modifier else _transform_value(_timestamp_to_unixtime(value) + modifier)
 
 
@@ -239,14 +256,24 @@ class utcnow_(_baseclass):
 
         return result
 
-    def as_string(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL, modifier: Optional[Union[str_, int, float]] = 0) -> str_:
+    def as_string(
+        self,
+        value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+        modifier: Optional[Union[str_, int, float]] = 0,
+    ) -> str_:
         value, modifier = _init_modifier(value, modifier)
 
         if value is _SENTINEL:
-            return (datetime_.utcnow() if not modifier else datetime_.utcnow() + timedelta_(seconds=modifier)).isoformat(timespec="microseconds") + "Z"
+            return (
+                datetime_.utcnow() if not modifier else datetime_.utcnow() + timedelta_(seconds=modifier)
+            ).isoformat(timespec="microseconds") + "Z"
         return _transform_value(value) if not modifier else _transform_value(_timestamp_to_unixtime(value) + modifier)
 
-    def as_datetime(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL, modifier: Optional[Union[str_, int, float]] = 0) -> datetime_:
+    def as_datetime(
+        self,
+        value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+        modifier: Optional[Union[str_, int, float]] = 0,
+    ) -> datetime_:
         value, modifier = _init_modifier(value, modifier)
 
         if value is _SENTINEL:
@@ -254,7 +281,11 @@ class utcnow_(_baseclass):
             return datetime_.now(UTC) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier)
         return _timestamp_to_datetime(value) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier)
 
-    def as_unixtime(self, value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL, modifier: Optional[Union[str_, int, float]] = 0) -> float:
+    def as_unixtime(
+        self,
+        value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+        modifier: Optional[Union[str_, int, float]] = 0,
+    ) -> float:
         value, modifier = _init_modifier(value, modifier)
 
         if value is _SENTINEL:
