@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "utcnow-cli"
+version = "1.0.0"
+description = "Timestamps as opinionated RFC 3339 (Date and Time on the Internet) formatted strings"
+authors = ["Carl Oscar Aaro <hello@carloscar.com>"]
+homepage = "https://github.com/kalaspuff/utcnow"
+repository = "https://github.com/kalaspuff/utcnow"
+keywords = ["utcnow", "utc timestamp", "modern timestamp", "rfc 3339", "rfc3339", "timestamp", "timestamps", "date and time on the internet", "datetime", "zulu time"]
+readme = "README.md"
+license = "MIT"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Intended Audience :: Developers",
+    "Typing :: Typed",
+    "License :: OSI Approved :: MIT License"
+]
+
+packages = [
+    { include = "utcnow/cli" },
+]
+
+include = [
+    "utcnow/cli/*.py",
+    "utcnow/cli/*.pyi",
+    "utcnow/cli/py.typed",
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+utcnow = ">=0.3.3"
+
+[tool.poetry.scripts]
+utcnow = "utcnow.interface:cli_entrypoint"
+
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

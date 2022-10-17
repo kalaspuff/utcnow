@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "utcnow"
-version = "0.3.2"
+version = "0.3.3"
 description = "Timestamps as opinionated RFC 3339 (Date and Time on the Internet) formatted strings"
 authors = ["Carl Oscar Aaro <hello@carloscar.com>"]
 homepage = "https://github.com/kalaspuff/utcnow"
@@ -23,8 +23,28 @@ classifiers = [
     "License :: OSI Approved :: MIT License"
 ]
 
+packages = [
+    { include = "utcnow" },
+]
+
+include = [
+    "utcnow/*.py",
+    "utcnow/*.pyi",
+    "utcnow/py.typed",
+]
+
+exclude = [
+    "utcnow/cli/*.py",
+    "utcnow/cli/*.pyi",
+    "utcnow/cli/py.typed",
+]
+
 [tool.poetry.dependencies]
 python = "^3.7"
+utcnow-cli = { version = ">=1.0.0", optional = true }
+
+[tool.poetry.extras]
+cli = ["utcnow-cli"]
 
 [tool.poetry.dev-dependencies]
 flake8 = { version = ">=3.8.4", markers = "sys_platform != \"win32\"" }
@@ -37,9 +57,13 @@ black = { version = "*", markers = "sys_platform != \"win32\"", allow-prerelease
 mypy = { version = ">=0.800", markers = "sys_platform != \"win32\"" }
 codecov = { version = ">=2.1.10", markers = "sys_platform != \"win32\"" }
 
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.black]
 line-length = 120
-target_version = ["py37", "py38", "py39"]
+target_version = ["py37", "py38", "py39", "py310"]
 include = '\.pyi?$'
 exclude = '\.eggs/|\.egg-info/|\.git/|\.github/|\.mypy_cache/|\.venv/|\.pytest_cache/|\.vscode/|__pycache__/|build/|dist/|setup\.py'
 
