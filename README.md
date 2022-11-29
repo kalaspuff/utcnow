@@ -1,8 +1,10 @@
 # `utcnow`
+
+[![Python package](https://github.com/kalaspuff/utcnow/workflows/Python%20package/badge.svg)](https://github.com/kalaspuff/utcnow/actions/workflows/pythonpackage.yml)
 [![pypi](https://badge.fury.io/py/utcnow.svg)](https://pypi.python.org/pypi/utcnow/)
 [![Made with Python](https://img.shields.io/pypi/pyversions/utcnow)](https://www.python.org/)
-[![Type hinted - mypy validated](https://img.shields.io/badge/typehinted-yes-teal)](https://github.com/kalaspuff/utcnow)
 [![MIT License](https://img.shields.io/github/license/kalaspuff/utcnow.svg)](https://github.com/kalaspuff/utcnow/blob/master/LICENSE)
+[![Code coverage](https://codecov.io/gh/kalaspuff/utcnow/branch/master/graph/badge.svg)](https://codecov.io/gh/kalaspuff/utcnow/tree/master/utcnow)
 
 *Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion functionality from other timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objets and other common date utilities. Follow modern practices when developing API interfaces.*
 
