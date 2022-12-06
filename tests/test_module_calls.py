@@ -113,6 +113,9 @@ def test_module() -> None:
     assert utcnow.as_datetime("2021-04-30T09:00:00.000000+01:00") == datetime.datetime(
         2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
     )
+    assert utcnow.as_datetime("2021-04-30T09:00:00.000000 +01:00") == datetime.datetime(
+        2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
+    )
     assert utcnow.as_datetime("2021-04-30T08:00:00.000000+00:00") == datetime.datetime(
         2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
     )
@@ -120,6 +123,9 @@ def test_module() -> None:
         2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
     )
     assert utcnow.as_datetime("2021-04-30T07:00:00.000000-01:00") == datetime.datetime(
+        2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
+    )
+    assert utcnow.as_datetime("2021-04-30T07:00:00.000000 -01:00") == datetime.datetime(
         2021, 4, 30, 8, 0, tzinfo=datetime.timezone.utc
     )
     assert utcnow.as_datetime("2021-04-30T08:00:00.000000 UTC") == datetime.datetime(
