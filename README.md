@@ -8,12 +8,31 @@
 
 *Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion functionality from other timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objets and other common date utilities. Follow modern practices when developing API interfaces.*
 
+### A library for formatting timestamps as RFC3339
+
+* One preferred output format strictly following RFC3339.
+* Making it easier to follow common best practices for developers.
+* Tranforming timestamps from (or when needed, to) common interfaces such as unix timestamps, `datetime` objects, `google.protobuf.Timestamp` messages or plain text.
+* Type hinted, battle tested and supporting several versions of Python.
+
+```pycon
+>>> utcnow.rfc3339_timestamp()  # current time
+'2022-12-06T12:25:49.738032Z'
+
+>>> utcnow.rfc3339_timestamp("1984-08-01 22:31")
+'1984-08-01T22:31:00.000000Z'
+```
+
+#### Additional examples of simple use-cases
+
 ```python
 from utcnow import utcnow
 
-utcnow.get()
+utcnow.get()  # utcnow.get does the same thing as utcnow.rfc3339_timestamp
 # "2077-03-01T09:33:07.139361Z" | The most common use case – get current server time.
 #                               | Always uses UTC timezone in the returned value.
+#                               | utcnow.get() is the same as utcnow.rfc3339_timestamp().
+
 ```
 
 ```python
@@ -213,6 +232,11 @@ Like you would install any other Python package, use `pip`, `poetry`, `pipenv` o
 $ pip install utcnow
 ```
 
+To install with Protocol Buffers support, specify the `protobuf` extras.
+
+```
+$ pip install utcnow[protobuf]
+```
 
 ## Usage and examples
 
@@ -367,6 +391,43 @@ result = json.dumps({"timestamp": str(utcnow), "status": 200})
 import utcnow
 result = f"Current server time is: '{utcnow}'"
 # "Current server time is: '2021-02-18T08:24:48.382262Z'"
+```
+
+### Converting from Protocol Buffers message
+
+It's also possible to transform a value encoded as a `google.protobuf.Timestamp` protobuf message in the same way you would from any other value.
+
+```python
+# Using a google.protobuf.Timestamp message as input to utcnow
+import utcnow
+from google.protobuf.timestamp_pb2 import Timestamp
+msg = Timestamp(seconds=1670329924, nanos=170660000)
+result = utcnow.get(msg)
+# "2022-12-06T12:32:04.170660Z"
+```
+
+```python
+# Using the binary data from a google.protobuf.Timestamp message
+import utcnow
+protobuf_msg_binary = b"\x08\xc4\xec\xbc\x9c\x06\x10\xa0\xa1\xb0Q"
+result = utcnow.get(protobuf_msg_binary)
+# "2022-12-06T12:32:04.170660Z"
+```
+
+You can also generate a new google.protobuf.Timestamp message using `utcnow.as_protobuf()`
+
+```python
+import utcnow
+msg = utcnow.as_protobuf("1984-08-01 22:30:47.234003Z")
+# <class 'google.protobuf.timestamp_pb2.Timestamp'>
+# · seconds: 460247447
+# · nanos: 234003000
+```
+
+Note that the `protobuf` package has to be installed to make use of the above functionality. For convenience, it's also possible to install `utcnow` with `protobuf` support using the `protobuf` extras.
+
+```
+$ pip install utcnow[protobuf]
 ```
 
 ### Get the date part as a string from a timestamp
