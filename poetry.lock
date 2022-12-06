@@ -157,6 +157,21 @@ isort = ">=4.3.5,<6"
 test = ["pytest"]
 
 [[package]]
+name = "flake8-pyproject"
+version = "1.2.2"
+description = "Flake8 plug-in loading the configuration from pyproject.toml"
+category = "dev"
+optional = false
+python-versions = ">= 3.6"
+
+[package.dependencies]
+Flake8 = ">=5"
+TOMLi = {version = "*", markers = "python_version < \"3.11\""}
+
+[package.extras]
+dev = ["pyTest", "pyTest-cov"]
+
+[[package]]
 name = "freezegun"
 version = "1.2.2"
 description = "Let your Python tests travel through time"
@@ -477,7 +492,7 @@ protobuf = ["protobuf"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "e50a77d32b93a92148136eef6d18bd50741dae5c43176d8dd28a4d1b48f6776a"
+content-hash = "a2cb088fe030b80ebd60a298d08ff7d1d909cf27db4cc695169018529a948590"
 
 [metadata.files]
 attrs = [
@@ -595,6 +610,9 @@ flake8-black = [
 flake8-isort = [
     {file = "flake8-isort-5.0.3.tar.gz", hash = "sha256:0951398c343c67f4933407adbbfb495d4df7c038650c5d05753a006efcfeb390"},
     {file = "flake8_isort-5.0.3-py3-none-any.whl", hash = "sha256:8c4ab431d87780d0c8336e9614e50ef11201bc848ef64ca017532dec39d4bf49"},
+]
+flake8-pyproject = [
+    {file = "flake8_pyproject-1.2.2-py3-none-any.whl", hash = "sha256:52d412219e7db6227faa654675b1435947b11d49b453f3eced760f19bdd6f06a"},
 ]
 freezegun = [
     {file = "freezegun-1.2.2-py3-none-any.whl", hash = "sha256:ea1b963b993cb9ea195adbd893a48d573fda951b0da64f60883d7e988b606c9f"},

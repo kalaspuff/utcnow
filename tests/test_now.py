@@ -112,13 +112,13 @@ def test_utcnow_now_functionality() -> None:
     import utcnow
     from utcnow import now, utcnow_
 
-    assert type(utcnow.now) is not str
+    assert type(utcnow.now) is not str  # type: ignore
     assert not isinstance(utcnow.now, str)
-    assert type(utcnow.utcnow.now) is not str
+    assert type(utcnow.utcnow.now) is not str  # type: ignore
     assert not isinstance(utcnow.utcnow.now, str)
-    assert type(utcnow_.now) is not str
+    assert type(utcnow_.now) is not str  # type: ignore
     assert not isinstance(utcnow_.now, str)
-    assert type(now) is not str
+    assert type(now) is not str  # type: ignore
     assert not isinstance(now, str)
 
     assert type(utcnow.now()) is str
