@@ -60,6 +60,7 @@ black = { version = "*", markers = "sys_platform != \"win32\"", allow-prerelease
 mypy = { version = ">=0.800", markers = "sys_platform != \"win32\"" }
 codecov = { version = ">=2.1.10", markers = "sys_platform != \"win32\"" }
 protobuf = { version = ">=3.20.0,<5.0.0", markers = "sys_platform != \"win32\"" }
+freezegun ={ version = ">=1.2.2", markers = "sys_platform != \"win32\"" }
 types-protobuf = { version = ">=0.1.13", markers = "sys_platform != \"win32\"" }
 
 [build-system]

@@ -59,9 +59,12 @@ def test_protobuf_values(value: Timestamp, expected_output: str, expect_error: b
     assert utcnow.utcnow(utcnow.as_datetime(value)) == utcnow.utcnow(utcnow.as_datetime(expected_output))
     assert utcnow.utcnow(utcnow.as_datetime(value).replace(tzinfo=None)) == expected_output
     assert utcnow.as_string(utcnow.utcnow(utcnow.as_datetime(value))) == expected_output
-    assert utcnow.as_protobuf(value) == value
+
+    value2 = utcnow.as_protobuf(value)
+    assert round(value2.seconds + value2.nanos * 1e-9, 9) == round(value.seconds + value.nanos * 1e-9, 9)
 
     message = Timestamp()
     message.FromJsonString(utcnow.as_string(value))
     assert round(message.seconds + message.nanos * 1e-9, 9) == round(value.seconds + value.nanos * 1e-9, 9)
     assert utcnow.as_string(message) == expected_output
+    assert message == utcnow.as_protobuf(value)

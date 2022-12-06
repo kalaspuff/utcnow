@@ -188,6 +188,9 @@ def _timestamp_to_unixtime(value: str_) -> float:
 def _unixtime_to_protobuf(unixtime_value: Union[int, float]) -> TimestampProtobufMessage:
     seconds = int(unixtime_value)
     nanos = round(int((unixtime_value - seconds) * 1e6)) * 1000
+    if nanos < 0:
+        seconds -= 1
+        nanos += 1_000_000_000
     return TimestampProtobufMessage(
         seconds=seconds,
         nanos=nanos,
@@ -323,6 +326,9 @@ class utcnow_(_baseclass):
             unixtime_value = time_.time() + modifier
             seconds = int(unixtime_value)
             nanos = round(int((unixtime_value - seconds) * 1e6)) * 1000
+            if nanos < 0:
+                seconds -= 1
+                nanos += 1_000_000_000
             return TimestampProtobufMessage(
                 seconds=seconds,
                 nanos=nanos,
