@@ -13,6 +13,7 @@ from numbers import Real
 from typing import Any, Dict, Optional, Tuple, Type, Union, cast
 
 from .__version_data__ import __version__, __version_info__
+from .protobuf import TimestampProtobufMessage
 
 str_ = str
 
@@ -61,10 +62,25 @@ def _is_numeric(value: str_) -> bool:
     return False
 
 
-@functools.lru_cache(maxsize=128, typed=True)
 def _init_modifier(
-    value: Union[str_, datetime_, object, int, float, Decimal, Real], modifier: Optional[Union[str_, int, float]] = 0
+    value: Union[str_, datetime_, object, int, float, Decimal, Real, bytes, TimestampProtobufMessage],
+    modifier: Optional[Union[str_, int, float]] = 0,
 ) -> Tuple[Union[str_, datetime_, object, int, float, Decimal, Real], Union[int, float]]:
+    if isinstance(value, TimestampProtobufMessage):
+        value = value.seconds + round(value.nanos * 1e-9, 9)
+    return _init_modifier_lru(value, modifier)
+
+
+@functools.lru_cache(maxsize=128, typed=True)
+def _init_modifier_lru(
+    value: Union[str_, datetime_, object, int, bytes, float, Decimal, Real],
+    modifier: Optional[Union[str_, int, float]] = 0,
+) -> Tuple[Union[str_, datetime_, object, int, float, Decimal, Real], Union[int, float]]:
+    if isinstance(value, bytes):
+        value_ = TimestampProtobufMessage()
+        value_.MergeFromString(value)
+        value = value_.seconds + round(value_.nanos * 1e-9, 9)
+
     if (
         value is not _SENTINEL
         and value
@@ -172,6 +188,19 @@ def _timestamp_to_datetime(value: str_) -> datetime_:
 @functools.lru_cache(maxsize=128)
 def _timestamp_to_unixtime(value: str_) -> float:
     return _timestamp_to_datetime(value).timestamp()
+
+
+@functools.lru_cache(maxsize=128)
+def _unixtime_to_protobuf(unixtime_value: Union[int, float]) -> TimestampProtobufMessage:
+    seconds = int(unixtime_value)
+    nanos = round(int((unixtime_value - seconds) * 1e6)) * 1000
+    if nanos < 0:
+        seconds -= 1
+        nanos += 1_000_000_000
+    return TimestampProtobufMessage(
+        seconds=seconds,
+        nanos=nanos,
+    )
 
 
 @functools.lru_cache(maxsize=128)
@@ -292,6 +321,27 @@ class utcnow_(_baseclass):
             return time_.time() + modifier
         return _timestamp_to_unixtime(value) + modifier
 
+    def as_protobuf(
+        self,
+        value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+        modifier: Optional[Union[str_, int, float]] = 0,
+    ) -> TimestampProtobufMessage:
+        value, modifier = _init_modifier(value, modifier)
+
+        if value is _SENTINEL:
+            unixtime_value = time_.time() + modifier
+            seconds = int(unixtime_value)
+            nanos = round(int((unixtime_value - seconds) * 1e6)) * 1000
+            if nanos < 0:
+                seconds -= 1
+                nanos += 1_000_000_000
+            return TimestampProtobufMessage(
+                seconds=seconds,
+                nanos=nanos,
+            )
+
+        return _unixtime_to_protobuf(_timestamp_to_unixtime(value) + modifier)
+
     def timediff(
         self,
         begin: Union[str_, datetime_, object, int, float, Decimal, Real],
@@ -398,6 +448,26 @@ class utcnow_(_baseclass):
     timestamp = as_unixtime
     ut = as_unixtime
     ts = as_unixtime
+
+    as_proto = as_protobuf
+    as_protobuf_timestamp = as_protobuf
+    as_proto_timestamp = as_protobuf
+    as_pb = as_protobuf
+    to_protobuf = as_protobuf
+    to_proto = as_protobuf
+    to_protobuf_timestamp = as_protobuf
+    to_proto_timestamp = as_protobuf
+    to_pb = as_protobuf
+    get_protobuf = as_protobuf
+    get_proto = as_protobuf
+    get_protobuf_timestamp = as_protobuf
+    get_proto_timestamp = as_protobuf
+    get_pb = as_protobuf
+    protobuf = as_protobuf
+    proto = as_protobuf
+    protobuf_timestamp = as_protobuf
+    proto_timestamp = as_protobuf
+    pb = as_protobuf
 
     time_diff = timediff
     diff = timediff
@@ -518,6 +588,27 @@ time = as_unixtime
 timestamp = as_unixtime
 ut = as_unixtime
 ts = as_unixtime
+
+as_protobuf = _module_value.as_protobuf
+as_proto = as_protobuf
+as_protobuf_timestamp = as_protobuf
+as_proto_timestamp = as_protobuf
+as_pb = as_protobuf
+to_protobuf = as_protobuf
+to_proto = as_protobuf
+to_protobuf_timestamp = as_protobuf
+to_proto_timestamp = as_protobuf
+to_pb = as_protobuf
+get_protobuf = as_protobuf
+get_proto = as_protobuf
+get_protobuf_timestamp = as_protobuf
+get_proto_timestamp = as_protobuf
+get_pb = as_protobuf
+protobuf = as_protobuf
+proto = as_protobuf
+protobuf_timestamp = as_protobuf
+proto_timestamp = as_protobuf
+pb = as_protobuf
 
 timediff = _module_value.timediff
 time_diff = timediff

@@ -1,6 +1,7 @@
 import datetime
 
 import pytest
+from google.protobuf.timestamp_pb2 import Timestamp
 
 import utcnow
 
@@ -39,6 +40,7 @@ def test_dates(value: str, expect_error: bool) -> None:
         assert isinstance(utcnow.as_string(value), str)
         assert isinstance(utcnow.as_datetime(value), datetime.datetime)
         assert isinstance(utcnow.as_unixtime(value), (float, int))
+        assert isinstance(utcnow.as_protobuf(value), Timestamp)
         if expect_error:
             assert False
     except Exception:

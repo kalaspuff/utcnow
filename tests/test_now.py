@@ -25,6 +25,19 @@ def test_now_datetime() -> None:
     assert a <= b <= c <= d <= e <= f
 
 
+def test_now_protobuf() -> None:
+    import utcnow
+
+    a = utcnow.as_unixtime(utcnow.as_protobuf())
+    b = utcnow.as_unixtime(utcnow.as_protobuf())
+    c = utcnow.as_unixtime(utcnow.as_protobuf())
+    d = utcnow.as_unixtime(utcnow.as_protobuf())
+    e = utcnow.as_unixtime(utcnow.as_protobuf())
+    f = utcnow.as_unixtime(utcnow.as_protobuf())
+
+    assert a <= b <= c <= d <= e <= f
+
+
 def test_now_list_string() -> None:
     import utcnow
 

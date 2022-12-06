@@ -5,7 +5,7 @@ description = "Timestamps as opinionated RFC 3339 (Date and Time on the Internet
 authors = ["Carl Oscar Aaro <hello@carloscar.com>"]
 homepage = "https://github.com/kalaspuff/utcnow"
 repository = "https://github.com/kalaspuff/utcnow"
-keywords = ["utcnow", "utc timestamp", "modern timestamp", "rfc 3339", "rfc3339", "timestamp", "timestamps", "date and time on the internet", "datetime", "zulu time"]
+keywords = ["utcnow", "utc timestamp", "modern timestamp", "rfc 3339", "rfc3339", "timestamp", "rfc3339 timestamp", "timestamps", "date and time on the internet", "datetime", "zulu time", "protobuf", "protobuf timestamp"]
 readme = "README.md"
 license = "MIT"
 classifiers = [
@@ -42,10 +42,12 @@ exclude = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
+protobuf = { version = ">=3.20.0,<5.0.0", optional = true }
 utcnow-cli = { version = ">=1.0.0", optional = true }
 
 [tool.poetry.extras]
 cli = ["utcnow-cli"]
+protobuf = ["protobuf"]
 
 [tool.poetry.dev-dependencies]
 flake8 = { version = ">=3.8.4", markers = "sys_platform != \"win32\"" }
@@ -57,6 +59,9 @@ pytest-cov = { version = ">=2.10.0", markers = "sys_platform != \"win32\"" }
 black = { version = "*", markers = "sys_platform != \"win32\"", allow-prereleases = true }
 mypy = { version = ">=0.800", markers = "sys_platform != \"win32\"" }
 codecov = { version = ">=2.1.10", markers = "sys_platform != \"win32\"" }
+protobuf = { version = ">=3.20.0,<5.0.0", markers = "sys_platform != \"win32\"" }
+freezegun ={ version = ">=1.2.2", markers = "sys_platform != \"win32\"" }
+types-protobuf = { version = ">=0.1.13", markers = "sys_platform != \"win32\"" }
 
 [build-system]
 requires = ["poetry_core>=1.0.0"]
