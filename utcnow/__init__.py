@@ -63,18 +63,24 @@ def _is_numeric(value: str_) -> bool:
 
 
 def _init_modifier(
-    value: Union[str_, datetime_, object, int, float, Decimal, Real, TimestampProtobufMessage],
+    value: Union[str_, datetime_, object, int, float, Decimal, Real, bytes, TimestampProtobufMessage],
     modifier: Optional[Union[str_, int, float]] = 0,
 ) -> Tuple[Union[str_, datetime_, object, int, float, Decimal, Real], Union[int, float]]:
     if isinstance(value, TimestampProtobufMessage):
-        return _init_modifier_lru(value.seconds + round(value.nanos * 1e-9, 9), modifier)
+        value = value.seconds + round(value.nanos * 1e-9, 9)
     return _init_modifier_lru(value, modifier)
 
 
 @functools.lru_cache(maxsize=128, typed=True)
 def _init_modifier_lru(
-    value: Union[str_, datetime_, object, int, float, Decimal, Real], modifier: Optional[Union[str_, int, float]] = 0
+    value: Union[str_, datetime_, object, int, bytes, float, Decimal, Real],
+    modifier: Optional[Union[str_, int, float]] = 0,
 ) -> Tuple[Union[str_, datetime_, object, int, float, Decimal, Real], Union[int, float]]:
+    if isinstance(value, bytes):
+        value_ = TimestampProtobufMessage()
+        value_.MergeFromString(value)
+        value = value_.seconds + round(value_.nanos * 1e-9, 9)
+
     if (
         value is not _SENTINEL
         and value
