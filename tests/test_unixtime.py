@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import Union
 
 import pytest
+from google.protobuf.timestamp_pb2 import Timestamp
 
 
 @pytest.mark.parametrize(
@@ -84,6 +85,7 @@ def test_unixtime_values(value: Union[int, float, str, Decimal], expected_output
         assert isinstance(utcnow.as_string(value), str)
         assert isinstance(utcnow.as_datetime(value), datetime.datetime)
         assert isinstance(utcnow.as_unixtime(value), (float, int))
+        assert isinstance(utcnow.as_protobuf(value), Timestamp)
         if expect_error:
             assert False
     except Exception:

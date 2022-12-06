@@ -1,6 +1,7 @@
 import datetime
 
 import pytest
+from google.protobuf.timestamp_pb2 import Timestamp
 
 
 @pytest.mark.parametrize(
@@ -51,6 +52,7 @@ def test_to_string_values(value: str, expected_output: str, expect_error: bool) 
         assert isinstance(utcnow.as_string(value), str)
         assert isinstance(utcnow.as_datetime(value), datetime.datetime)
         assert isinstance(utcnow.as_unixtime(value), (float, int))
+        assert isinstance(utcnow.as_protobuf(value), Timestamp)
         if expect_error:
             assert False
     except Exception:
