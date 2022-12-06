@@ -414,7 +414,7 @@ result = utcnow.get(protobuf_msg_binary)
 # "2022-12-06T12:32:04.170660Z"
 ```
 
-You can also generate a new google.protobuf.Timestamp message using `utcnow.as_protobuf()`
+You can also generate a new `google.protobuf.Timestamp` message using `utcnow.as_protobuf()`
 
 ```python
 import utcnow
