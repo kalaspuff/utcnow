@@ -31,6 +31,8 @@ packages = [
 include = [
     "utcnow/*.py",
     "utcnow/*.pyi",
+    "utcnow/protobuf/*.py",
+    "utcnow/protobuf/*.pyi",
     "utcnow/py.typed",
 ]
 
