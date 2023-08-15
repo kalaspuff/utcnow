@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "utcnow"
-version = "0.3.6"
+version = "0.3.7"
 description = "Timestamps as opinionated RFC 3339 (Date and Time on the Internet) formatted strings"
 authors = ["Carl Oscar Aaro <hello@carloscar.com>"]
 homepage = "https://github.com/kalaspuff/utcnow"
@@ -19,6 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Intended Audience :: Developers",
     "Typing :: Typed",
     "License :: OSI Approved :: MIT License"
@@ -54,7 +55,7 @@ protobuf = ["protobuf"]
 [tool.poetry.dev-dependencies]
 flake8 = { version = ">=3.8.4", markers = "sys_platform != \"win32\"" }
 flake8-black = { version = ">=0.2.0", markers = "sys_platform != \"win32\"" }
-flake8-isort = { version = ">=4.0.0", markers = "sys_platform != \"win32\"" }
+flake8-isort = { version = ">=4.0.0", markers = "python_version < \"3.12\" and sys_platform != \"win32\"" }
 flake8-pyproject = { version = ">=1.1.0", markers = "sys_platform != \"win32\"" }
 isort = { version = ">=5.6.0", markers = "sys_platform != \"win32\"" }
 pytest = { version = ">=6.1.0", markers = "sys_platform != \"win32\"" }
@@ -103,7 +104,7 @@ warn_return_any = true
 warn_unreachable = true
 
 [tool.flake8]
-ignore = ["E203", "E501", "W503"]
+ignore = ["E203", "E501", "W503", "E231", "E221"]
 exclude = ["utcnow.egg-info", ".git", ".mypy_cache", ".pytest_cache", ".venv", ".vscode", "__pycache__", "build", "dist", "tmp"]
 
 [tool.coverage.run]
