@@ -55,7 +55,7 @@ protobuf = ["protobuf"]
 [tool.poetry.dev-dependencies]
 flake8 = { version = ">=3.8.4", markers = "sys_platform != \"win32\"" }
 flake8-black = { version = ">=0.2.0", markers = "sys_platform != \"win32\"" }
-flake8-isort = { version = ">=4.0.0", markers = "python_version < \"3.12\" and sys_platform != \"win32\"" }
+flake8-isort = { version = ">=4.0.0", markers = "sys_platform != \"win32\"" }
 flake8-pyproject = { version = ">=1.1.0", markers = "sys_platform != \"win32\"" }
 isort = { version = ">=5.6.0", markers = "sys_platform != \"win32\"" }
 pytest = { version = ">=6.1.0", markers = "sys_platform != \"win32\"" }
@@ -66,6 +66,7 @@ codecov = { version = ">=2.1.10", markers = "sys_platform != \"win32\"" }
 protobuf = { version = ">=3.20.0,<5.0.0", markers = "sys_platform != \"win32\"" }
 freezegun ={ version = ">=1.2.2", markers = "sys_platform != \"win32\"" }
 types-protobuf = { version = ">=0.1.13", markers = "sys_platform != \"win32\"" }
+setuptools = { version = ">=68.1.2", markers = "sys_platform != \"win32\"" }
 
 [build-system]
 requires = ["poetry_core>=1.0.0"]
