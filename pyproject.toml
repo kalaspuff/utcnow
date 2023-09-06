@@ -44,7 +44,7 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 protobuf = { version = ">=3.20.0,<5.0.0", optional = true }
 utcnow-cli = { version = ">=1.0.0", optional = true }
 
@@ -73,7 +73,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 120
-target_version = ["py37", "py38", "py39", "py310", "py311"]
+target_version = ["py38", "py39", "py310", "py311"]
 include = '\.pyi?$'
 exclude = '\.eggs/|\.egg-info/|\.git/|\.github/|\.mypy_cache/|\.venv/|\.pytest_cache/|\.vscode/|__pycache__/|build/|dist/|setup\.py'
 
