@@ -344,8 +344,10 @@ utcnow.utcnow()
 # 3. str(utcnow.utcnow)
 # 4. utcnow.get()
 # 5. utcnow.utcnow.get()
-# 6. datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-# 7. datetime.datetime.utcnow().isoformat() + "Z"
+# 6. datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+# 7. datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+# 8. datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
+# 9. datetime.datetime.utcnow().isoformat(timespec="microseconds") + "Z"
 ```
 
 ```python
@@ -365,7 +367,8 @@ utcnow.as_datetime()
 
 # this is merely a convinience, as the same value would be returned by both:
 # 1. utcnow.as_datetime()
-# 2. datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+# 2. datetime.datetime.now(datetime.timezone.utc)
+# 3. datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
 ```
 
 ```python
@@ -434,7 +437,7 @@ $ pip install utcnow[protobuf]
 
 Not as common, but every now and then you might need to get the date part from a timestamp (or for example today's date), to use in some string concatenation, S3 object keys and what not.
 
-There's the long away around it, by generating a timestamp with `utcnow.get()` and then just keeping the first 10 characters of the timestamp – that's the date – `YYYY-MM-DD`. You could even use `datetime` and go `datetime.datetime.utcnow().date().isoformat()`, but it's not super clean.
+There's the long away around it, by generating a timestamp with `utcnow.get()` and then just keeping the first 10 characters of the timestamp – that's the date – `YYYY-MM-DD`. You could even use `datetime` and go `datetime.datetime.now(datetime.timezone.utc).date().isoformat()`, but it's not super clean.
 
 `utcnow` comes with a wrapper function `utcnow.as_date_string(value)` to fetch just the date part based on the input value's UTC timestamp. Note that the date string that is returned does not include timezone information.
 

@@ -130,9 +130,11 @@ def _transform_value(
         if isinstance(value, str_):
             str_value = value.strip()
         elif isinstance(value, (int, float)):
-            return datetime_.utcfromtimestamp(value).isoformat(timespec="microseconds") + "Z"
+            return datetime_.fromtimestamp(value, tz=UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
         elif isinstance(value, (Decimal, Real)):
-            str_value = datetime_.utcfromtimestamp(float(value)).isoformat(timespec="microseconds") + "Z"
+            str_value = (
+                datetime_.fromtimestamp(float(value), tz=UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
+            )
         else:
             str_value = str_(value).strip()
 
@@ -145,7 +147,11 @@ def _transform_value(
             and str_value.count("-") <= 1
             and _is_numeric(str_value)
         ):
-            str_value = datetime_.utcfromtimestamp(float(str_value)).isoformat(timespec="microseconds") + "Z"
+            str_value = (
+                datetime_.fromtimestamp(float(str_value), tz=UTC)
+                .isoformat(timespec="microseconds")
+                .replace("+00:00", "Z")
+            )
     except Exception:
         raise ValueError(f"The input value '{value}' (type: {value.__class__}) does not match allowed input formats")
 
@@ -266,8 +272,10 @@ class _baseclass(metaclass=_metaclass):
 
         if value is _SENTINEL:
             return (
-                datetime_.utcnow() if not modifier else datetime_.utcnow() + timedelta_(seconds=modifier)
-            ).isoformat(timespec="microseconds") + "Z"
+                (datetime_.now(UTC) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier))
+                .isoformat(timespec="microseconds")
+                .replace("+00:00", "Z")
+            )
         return _transform_value(value) if not modifier else _transform_value(_timestamp_to_unixtime(value) + modifier)
 
 
@@ -278,10 +286,10 @@ class now_(_baseclass):
         return result
 
     def __str__(self) -> str_:
-        return datetime_.utcnow().isoformat(timespec="microseconds") + "Z"
+        return datetime_.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
     def __repr__(self) -> str_:
-        return datetime_.utcnow().isoformat(timespec="microseconds") + "Z"
+        return datetime_.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
 class utcnow_(_baseclass):
@@ -301,8 +309,10 @@ class utcnow_(_baseclass):
 
         if value is _SENTINEL:
             return (
-                datetime_.utcnow() if not modifier else datetime_.utcnow() + timedelta_(seconds=modifier)
-            ).isoformat(timespec="microseconds") + "Z"
+                (datetime_.now(UTC) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier))
+                .isoformat(timespec="microseconds")
+                .replace("+00:00", "Z")
+            )
         return _transform_value(value) if not modifier else _transform_value(_timestamp_to_unixtime(value) + modifier)
 
     def as_datetime(
@@ -313,7 +323,7 @@ class utcnow_(_baseclass):
         value, modifier = _init_modifier(value, modifier)
 
         if value is _SENTINEL:
-            # 'datetime.datetime.now(UTC)' is faster than 'datetime.datetime.utcnow().replace(tzinfo=UTC)'
+            # 'datetime.datetime.now(UTC)' is faster than (deprecated) 'datetime.datetime.utcnow().replace(tzinfo=UTC)'
             return datetime_.now(UTC) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier)
         return _timestamp_to_datetime(value) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier)
 
