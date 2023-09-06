@@ -133,8 +133,11 @@ def test_dates(value: str, expect_error: bool) -> None:
 
 
 def test_as_date_string() -> None:
-    date_today_0 = datetime.datetime.utcnow().date().isoformat()
-    assert utcnow.get_today() == date_today_0 or utcnow.get_today() == datetime.datetime.utcnow().date().isoformat()
+    date_today_0 = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+    assert (
+        utcnow.get_today() == date_today_0
+        or utcnow.get_today() == datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+    )
 
     assert utcnow.as_date_string("2022-04-04") == "2022-04-04"
     assert utcnow.as_date_string("2021-01-02T00:00:00.04000Z") == "2021-01-02"
@@ -144,11 +147,11 @@ def test_as_date_string() -> None:
 
     assert (
         utcnow.get_today(tz="UTC") == date_today_0
-        or utcnow.get_today(tz="UTC") == datetime.datetime.utcnow().date().isoformat()
+        or utcnow.get_today(tz="UTC") == datetime.datetime.now(datetime.timezone.utc).date().isoformat()
     )
     assert (
         utcnow.get_today(tz=datetime.timezone.utc) == date_today_0
-        or utcnow.get_today(tz=datetime.timezone.utc) == datetime.datetime.utcnow().date().isoformat()
+        or utcnow.get_today(tz=datetime.timezone.utc) == datetime.datetime.now(datetime.timezone.utc).date().isoformat()
     )
 
     assert utcnow.get_today(tz=datetime.timezone(datetime.timedelta(hours=24, microseconds=-1))) != utcnow.get_today()

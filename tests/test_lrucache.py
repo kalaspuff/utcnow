@@ -724,7 +724,7 @@ def test_cache_hits_with_uniques_loop() -> None:
     assert hits_miss_currsize(_transform_value) == ((call_count - 1) * 2, call_count * 2 + 2, 128)
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
-    t_dt = datetime.datetime.utcnow()
+    t_dt = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
     for _ in range(call_count):
         values.add(utcnow.get(t_dt))
         time.sleep(0.00001)
@@ -735,12 +735,23 @@ def test_cache_hits_with_uniques_loop() -> None:
     assert hits_miss_currsize(_transform_value) == ((call_count - 1) * 3, call_count * 2 + 3, 128)
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
 
+    t_dt = datetime.datetime.now(datetime.timezone.utc)
     for _ in range(call_count):
-        values.add(utcnow.get(datetime.datetime.utcnow()))
+        values.add(utcnow.get(t_dt))
         time.sleep(0.00001)
 
-    assert len(values) == call_count * 3 + 3
+    assert len(values) == call_count * 2 + 4
 
     assert hits_miss_currsize(_is_numeric) == (0, call_count + 1, call_count + 1)
-    assert hits_miss_currsize(_transform_value) == ((call_count - 1) * 3, call_count * 3 + 3, 128)
+    assert hits_miss_currsize(_transform_value) == ((call_count - 1) * 4, call_count * 2 + 4, 128)
+    assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)
+
+    for _ in range(call_count):
+        values.add(utcnow.get(datetime.datetime.now(datetime.timezone.utc)))
+        time.sleep(0.00001)
+
+    assert len(values) == call_count * 3 + 4
+
+    assert hits_miss_currsize(_is_numeric) == (0, call_count + 1, call_count + 1)
+    assert hits_miss_currsize(_transform_value) == ((call_count - 1) * 4, call_count * 3 + 4, 128)
     assert hits_miss_currsize(_timestamp_to_datetime) == (0, 0, 0)

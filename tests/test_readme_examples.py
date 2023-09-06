@@ -1,4 +1,7 @@
 import datetime
+from typing import Callable
+
+import pytest
 
 
 def test_readme_example_skynet() -> None:
@@ -46,11 +49,36 @@ def test_readme_simple_transform() -> None:
     assert result == utcnow(dt.replace(tzinfo=datetime.timezone.utc).isoformat())
 
 
-def test_readme_datetime_complement() -> None:
+@pytest.mark.parametrize(
+    "dt, expected_str_func",
+    [
+        (datetime.datetime.utcnow(), lambda dt: dt.isoformat() + "Z"),
+        (datetime.datetime.utcnow(), lambda dt: dt.isoformat(timespec="microseconds") + "Z"),
+        (datetime.datetime.now(datetime.timezone.utc), lambda dt: dt.isoformat().replace("+00:00", "Z")),
+        (
+            datetime.datetime.now(datetime.timezone.utc),
+            lambda dt: dt.isoformat(timespec="microseconds").replace("+00:00", "Z"),
+        ),
+        (
+            datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
+            lambda dt: dt.isoformat() + "Z",
+        ),
+        (
+            datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
+            lambda dt: dt.isoformat(timespec="microseconds") + "Z",
+        ),
+        (
+            datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=2))),
+            lambda dt: dt.astimezone(datetime.timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z"),
+        ),
+    ],
+)
+def test_readme_datetime_complement(
+    dt: datetime.datetime, expected_str_func: Callable[[datetime.datetime], str]
+) -> None:
     import utcnow
 
-    dt = datetime.datetime.utcnow()
-    expected_str = dt.isoformat() + "Z"
+    expected_str = expected_str_func(dt)
 
     assert len(expected_str) == 27
 
@@ -60,6 +88,21 @@ def test_readme_datetime_complement() -> None:
     assert expected_str.count(":") == 2
     assert expected_str.count("T") == 1
     assert expected_str.count("Z") == 1
+
+    assert expected_str == datetime.datetime.fromtimestamp(
+        dt.replace(tzinfo=dt.tzinfo or datetime.timezone.utc).astimezone(datetime.timezone.utc).timestamp(),
+        tz=datetime.timezone.utc,
+    ).isoformat(timespec="microseconds").replace("+00:00", "Z")
+    assert (
+        expected_str
+        == datetime.datetime.fromtimestamp(
+            dt.replace(tzinfo=dt.tzinfo or datetime.timezone.utc).astimezone(datetime.timezone.utc).timestamp(),
+            tz=datetime.timezone.utc,
+        )
+        .replace(tzinfo=None)
+        .isoformat(timespec="microseconds")
+        + "Z"
+    )
 
     assert expected_str == utcnow.utcnow(dt)
     assert expected_str == utcnow.utcnow(dt)
@@ -86,6 +129,7 @@ def test_readme_datetime_complement() -> None:
     # 3. str(utcnow.utcnow)
     # 4. utcnow.as_string()
     # 5. utcnow.utcnow.as_string()
-    # 6. datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-    # 7. datetime.datetime.utcnow().isoformat() + "Z"
-    # 8. datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    # 6. datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    # 7. datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    # 8. datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
+    # 9. datetime.datetime.utcnow().isoformat(timespec="microseconds") + "Z"
