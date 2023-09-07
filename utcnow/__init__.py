@@ -1,3 +1,55 @@
+"""
+Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion functionality from other
+timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objets
+and other common date utilities.
+
+``utcnow.rfc3339_timestamp(value, modifier)``
+    Transforms the input value to a timestamp string in RFC3339 format.
+``utcnow.as_datetime(value, modifier)``
+    Transforms the input value to a datetime object.
+``utcnow.as_unixtime(value, modifier)``
+    Transforms the input value to a float value representing unixtime.
+``utcnow.as_protobuf(value, modifier)``
+    Transforms the input value to a google.protobuf.Timestamp message.
+
+value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
+modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+    Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000 seconds).
+    Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+Examples:
+
+    A few examples of transforming an arbitrary timestamp value to a RFC3339 timestamp string.
+
+    >>> import utcnow
+    >>> utcnow.rfc3339_timestamp("2023-09-07 02:18:00")
+    "2023-09-07T02:18:00.000000Z"
+    >>> utcnow.rfc3339_timestamp("2023-09-07 02:18:00", "+7d")
+    "2023-09-14T02:18:00.000000Z"
+    >>> utcnow.rfc3339_timestamp("2023-09-07 02:18:00+02:00")
+    "2023-09-07T00:18:00.000000Z"
+    >>> utcnow.rfc3339_timestamp(1693005993.285967)
+    "2023-08-25T23:26:33.285967Z"
+    >>> utcnow.rfc3339_timestamp()
+    "2023-09-07T01:04:38.091041Z"  # current time
+
+Returned timestamps follow RFC 3339 (Date and Time on the Internet: Timestamps): https://tools.ietf.org/html/rfc3339.
+
+Timestamps are converted to UTC timezone which we'll note in the timestamp with the "Z" syntax instead of the also
+accepted "+00:00". "Z" stands for UTC+0 or "Zulu time" and refers to the zone description of zero hours.
+
+Timestamps are expressed as a date-time (not a Python datetime object), including the full date (the "T" between the
+date and the time is optional in RFC 3339 (but not in ISO 8601) and usually describes the beginning of the time part.
+
+Timestamps are 27 characters long in the format: "YYYY-MM-DDTHH:mm:ss.ffffffZ". 4 digit year, 2 digit month, 2 digit
+days, "T", 2 digit hours, 2 digit minutes, 2 digit seconds, 6 fractional second digits (microseconds -> nanoseconds),
+followed by the timezone identifier for UTC: "Z".
+
+The library is specified to return timestamps with 6 fractional second digits, which means timestamps down to the
+microsecond level. Having a six-digit fraction of a second is currently the most common way that timestamps are shown
+at this date.
+"""
+
 from __future__ import annotations
 
 import functools
@@ -19,14 +71,6 @@ str_ = str
 
 __author__: str_ = "Carl Oscar Aaro"
 __email__: str_ = "hello@carloscar.com"
-
-"""
-* Timestamps follow RFC 3339 (Date and Time on the Internet: Timestamps): https://tools.ietf.org/html/rfc3339.
-* Timestamps are converted to UTC timezone which we'll note in the timestamp with the "Z" syntax instead of the also accepted "+00:00". "Z" stands for UTC+0 or "Zulu time" and refers to the zone description of zero hours.
-* Timestamps are expressed as a date-time, including the full date (the "T" between the date and the time is optional in RFC 3339 (but not in ISO 8601) and usually describes the beginning of the time part.
-* Timestamps are 27 characters long in the format: "YYYY-MM-DDTHH:mm:ss.ffffffZ". 4 digit year, 2 digit month, 2 digit days. "T", 2 digit hours, 2 digit minutes, 2 digit seconds, 6 fractional second digits (microseconds -> nanoseconds), followed by the timezone identifier for UTC: "Z".
-* The library is specified to return timestamps with 6 fractional second digits, which means timestamps down to the microsecond level. Having a six-digit fraction of a second is currently the most common way that timestamps are shown at this date.
-"""
 
 _SENTINEL = object()
 
@@ -523,7 +567,7 @@ class utcnow_(_baseclass):
         """Transforms the input value to a google.protobuf.Timestamp protobuf message.
 
         Args:
-            value: A value representing a timestamp in any of the allowed input formats.
+            value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
             modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
                 Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000 seconds).
                 Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
