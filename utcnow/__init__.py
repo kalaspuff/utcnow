@@ -20,8 +20,19 @@ str_ = str
 __author__: str_ = "Carl Oscar Aaro"
 __email__: str_ = "hello@carloscar.com"
 
+"""
+* Timestamps follow RFC 3339 (Date and Time on the Internet: Timestamps): https://tools.ietf.org/html/rfc3339.
+* Timestamps are converted to UTC timezone which we'll note in the timestamp with the "Z" syntax instead of the also accepted "+00:00". "Z" stands for UTC+0 or "Zulu time" and refers to the zone description of zero hours.
+* Timestamps are expressed as a date-time, including the full date (the "T" between the date and the time is optional in RFC 3339 (but not in ISO 8601) and usually describes the beginning of the time part.
+* Timestamps are 27 characters long in the format: "YYYY-MM-DDTHH:mm:ss.ffffffZ". 4 digit year, 2 digit month, 2 digit days. "T", 2 digit hours, 2 digit minutes, 2 digit seconds, 6 fractional second digits (microseconds -> nanoseconds), followed by the timezone identifier for UTC: "Z".
+* The library is specified to return timestamps with 6 fractional second digits, which means timestamps down to the microsecond level. Having a six-digit fraction of a second is currently the most common way that timestamps are shown at this date.
+"""
+
 _SENTINEL = object()
 
+# the following formats are accepted as date and date+time as string formatted input values.
+# the library also accepts numeric values (int / float), specified as unixtime, or datetime objects.
+# if no timezone is specified in input, utc is assumed.
 _ACCEPTED_INPUT_FORMAT_VALUES = (
     "%Y-%m-%dT%H:%M:%S.%f%z",
     "%Y-%m-%d %H:%M:%S.%f%z",
@@ -46,11 +57,17 @@ _ACCEPTED_INPUT_FORMAT_VALUES = (
     "%Y-%m-%d",
 )
 
+# examples: "123", "-123", "123.456", "-123.456", "123.", "-123.", ".456", "-.456"
 NUMERIC_REGEX = re.compile(r"^[-]?([0-9]+|[.][0-9]+|[0-9]+[.]|[0-9]+[.][0-9]+)$")
+
+# examples: "2023-09-06T23:53:59.684762Z", "2023-09-06 23:53:59.684762+00:00"
 PREFERRED_FORMAT_REGEX = re.compile(
     r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt ]([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9].[0-9]{6}([Zz]|[+-]00:00|)$"
 )
 
+# modifier multipliers: "s" (seconds), "m" (minutes), "h" (hours), "d" (days)
+# example: a modifier value of "+10d" => add 10 days.
+# example: a modifier value of "-1h" => subtract 1 hour.
 MODIFIER_MUL = {
     "s": 1,
     "m": 60,
@@ -58,11 +75,23 @@ MODIFIER_MUL = {
     "d": 86400,
 }
 
+# datetime.timezone.utc
 utc = UTC = timezone_.utc
 
 
 @functools.lru_cache(maxsize=128, typed=False)
 def _is_numeric(value: str_) -> bool:
+    """
+    Determines if a string represents a numeric value. A numeric values can optionally start with "-" (negative),
+    optionally have a leading "." (decimal point) before any digit or can optionally end with "." (decimal point),
+    meaning there is no decimal fragment present in the number.
+
+    Args:
+        value: A string to check for numeric representation.
+
+    Returns:
+        True if the string represents a numeric value, False otherwise.
+    """
     if NUMERIC_REGEX.match(value):
         return True
 
@@ -73,6 +102,18 @@ def _init_modifier(
     value: Union[str_, datetime_, object, int, float, Decimal, Real, bytes, TimestampProtobufMessage],
     modifier: Optional[Union[str_, int, float]] = 0,
 ) -> Tuple[Union[str_, datetime_, object, int, float, Decimal, Real], Union[int, float]]:
+    """
+    Normalizes the input value + modifier tuple.
+
+    Args:
+        value: A value representing a timestamp in any of the allowed input formats.
+        modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+            Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000 seconds).
+            Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+    Returns:
+        A tuple containing the normalized value and the modifier.
+    """
     if isinstance(value, TimestampProtobufMessage):
         value = value.seconds + round(value.nanos * 1e-9, 9)
     return _init_modifier_lru(value, modifier)
@@ -83,6 +124,18 @@ def _init_modifier_lru(
     value: Union[str_, datetime_, object, int, bytes, float, Decimal, Real],
     modifier: Optional[Union[str_, int, float]] = 0,
 ) -> Tuple[Union[str_, datetime_, object, int, float, Decimal, Real], Union[int, float]]:
+    """
+    Normalizes the input value + modifier tuple.
+
+    Args:
+        value: A value representing a timestamp in any of the allowed input formats.
+        modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+            Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000 seconds).
+            Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+    Returns:
+        A tuple containing the normalized value and the modifier.
+    """
     if isinstance(value, bytes):
         value_ = TimestampProtobufMessage()
         value_.MergeFromString(value)
@@ -122,9 +175,15 @@ def _init_modifier_lru(
 
 
 @functools.lru_cache(maxsize=128, typed=True)
-def _transform_value(
-    value: Union[str_, datetime_, object, int, float, Decimal, Real], modifier: Optional[Union[str_, int, float]] = 0
-) -> str_:
+def _transform_value(value: Union[str_, datetime_, object, int, float, Decimal, Real]) -> str_:
+    """Transforms the input value to a timestamp string in RFC3339 format.
+
+    Args:
+        value: A value representing a timestamp in any of the allowed input formats.
+
+    Returns:
+        The transformed value as a string in RFC3339 format.
+    """
     str_value: str_
     try:
         if isinstance(value, str_):
@@ -194,17 +253,41 @@ def _transform_value(
 
 @functools.lru_cache(maxsize=128)
 def _timestamp_to_datetime(value: str_) -> datetime_:
+    """Transforms the input value to a datetime object.
+
+    Args:
+        value: A value representing a timestamp in any of the allowed input formats.
+
+    Returns:
+        The transformed value as a datetime object.
+    """
     value = _transform_value(value)
     return datetime_.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z")
 
 
 @functools.lru_cache(maxsize=128)
 def _timestamp_to_unixtime(value: str_) -> float:
+    """Transforms the input value to a float value representing a timestamp as unixtime.
+
+    Args:
+        value: A value representing a timestamp in any of the allowed input formats.
+
+    Returns:
+        The transformed value in unixtime (float).
+    """
     return _timestamp_to_datetime(value).timestamp()
 
 
 @functools.lru_cache(maxsize=128)
 def _unixtime_to_protobuf(unixtime_value: Union[int, float]) -> TimestampProtobufMessage:
+    """Transforms the unix timestamp input value to a google.protobuf.Timestamp protobuf message.
+
+    Args:
+        unixtime_value: A timestamp in unixtime format (float).
+
+    Returns:
+        The transformed value as a google.protobuf.Timestamp message.
+    """
     seconds = int(unixtime_value)
     nanos = round(int((unixtime_value - seconds) * 1e6)) * 1000
     if nanos < 0:
@@ -218,6 +301,14 @@ def _unixtime_to_protobuf(unixtime_value: Union[int, float]) -> TimestampProtobu
 
 @functools.lru_cache(maxsize=128)
 def _timezone_from_string(value: str_) -> Optional[tzinfo_]:
+    """Converts a string to a timezone object.
+
+    Args:
+        value: A string representing a 0-offset timezone (UTC) or a timezone string as an offset (for example: +HH:mm).
+
+    Returns:
+        A timezone object if the string represents a valid timezone, otherwise None.
+    """
     if value.upper() in (
         "UTC",
         "GMT",
@@ -268,6 +359,20 @@ class _baseclass(metaclass=_metaclass):
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         modifier: Optional[Union[str_, int, float]] = 0,
     ) -> str_:
+        """Transforms the input value to a timestamp string in RFC3339 format.
+
+        Args:
+            value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
+            modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+                Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000 seconds).
+                Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+        Returns:
+            The transformed value as a string in RFC3339 format.
+
+        Raises:
+            ValueError: If the input value does not match allowed input formats.
+        """
         value, modifier = _init_modifier(value, modifier)
 
         if value is _SENTINEL:
@@ -305,6 +410,36 @@ class utcnow_(_baseclass):
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         modifier: Optional[Union[str_, int, float]] = 0,
     ) -> str_:
+        """Transforms the input value to a timestamp string in RFC3339 format.
+
+        Args:
+            value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
+            modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+                Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000 seconds).
+                Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+        Returns:
+            The transformed value as a string in RFC3339 format.
+
+        Raises:
+            ValueError: If the input value does not match allowed input formats.
+
+        Examples:
+            >>> import utcnow
+            >>> utcnow.rfc3339_timestamp("2023-09-07 02:18:00")
+            "2023-09-07T02:18:00.000000Z"
+            >>> utcnow.rfc3339_timestamp("2023-09-07 02:18:00", "+7d")
+            "2023-09-14T02:18:00.000000Z"
+            >>> utcnow.rfc3339_timestamp("2023-09-07 02:18:00+02:00")
+            "2023-09-07T00:18:00.000000Z"
+            >>> utcnow.rfc3339_timestamp(1693005993.285967)
+            "2023-08-25T23:26:33.285967Z"
+            >>> from datetime import datetime, timezone, timedelta
+            >>> tz = timezone(timedelta(hours=2, minutes=0))
+            >>> dt = datetime(2023, 4, 30, 8, 0, 0, tzinfo=tz)
+            >>> utcnow.rfc3339_timestamp(dt)
+            "2023-04-30T06:00:00.000000Z"
+        """
         value, modifier = _init_modifier(value, modifier)
 
         if value is _SENTINEL:
@@ -320,6 +455,25 @@ class utcnow_(_baseclass):
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         modifier: Optional[Union[str_, int, float]] = 0,
     ) -> datetime_:
+        """Transforms the input value to a datetime object.
+
+        Args:
+            value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
+            modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+                Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000 seconds).
+                Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+        Returns:
+            The transformed value as a datetime object.
+
+        Raises:
+            ValueError: If the input value does not match allowed input formats.
+
+        Examples:
+            >>> import utcnow
+            >>> utcnow.as_datetime("2023-08-01 12:10:59.123456+02:00")
+            datetime.datetime(2023, 8, 1, 10, 10, 59, 123456, tzinfo=datetime.timezone.utc)
+        """
         value, modifier = _init_modifier(value, modifier)
 
         if value is _SENTINEL:
@@ -332,6 +486,29 @@ class utcnow_(_baseclass):
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         modifier: Optional[Union[str_, int, float]] = 0,
     ) -> float:
+        """Transforms the input value to a float value representing a timestamp as unixtime.
+
+        Args:
+            value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
+            modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+                Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000 seconds).
+                Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+        Returns:
+            The transformed value in unixtime (float).
+
+        Raises:
+            ValueError: If the input value does not match allowed input formats.
+
+        Examples:
+            >>> import utcnow
+            >>> utcnow.as_unixtime("1970-01-01T00:00:00.000000Z")
+            0.0
+            >>> utcnow.as_unixtime("1970-01-01T00:00:00.000000Z", "+24h")
+            86400.0
+            >>> utcnow.as_unixtime("2022-01-01 00:00:00.123456+00:00")
+            1640995200.123456
+        """
         value, modifier = _init_modifier(value, modifier)
 
         if value is _SENTINEL:
@@ -343,6 +520,29 @@ class utcnow_(_baseclass):
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         modifier: Optional[Union[str_, int, float]] = 0,
     ) -> TimestampProtobufMessage:
+        """Transforms the input value to a google.protobuf.Timestamp protobuf message.
+
+        Args:
+            value: A value representing a timestamp in any of the allowed input formats.
+            modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+                Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000 seconds).
+                Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+        Returns:
+            The transformed value as a google.protobuf.Timestamp message.
+
+        Raises:
+            ValueError: If the input value does not match allowed input formats.
+
+        Examples:
+            >>> import utcnow
+            >>> utcnow.as_protobuf("2022-01-01 00:00:00.123456+00:00")
+            seconds: 1640995200
+            nanos: 123456000
+            >>> utcnow.as_protobuf(1234567890.05, modifier=-0.1)
+            seconds: 1234567889
+            nanos: 950000000
+        """
         value, modifier = _init_modifier(value, modifier)
 
         if value is _SENTINEL:
@@ -365,6 +565,32 @@ class utcnow_(_baseclass):
         end: Union[str_, datetime_, object, int, float, Decimal, Real],
         unit: str_ = "seconds",
     ) -> float:
+        """Calculate the time difference between two timestamps.
+
+        Args:
+            begin: The beginning timestamp. Can be a string, datetime object, or a numeric unixtime value.
+            end: The ending timestamp. Can be a string, datetime object, or a numeric unixtime value.
+            unit: The unit of time to return the difference in. Defaults to "seconds".
+
+        Returns:
+            The time difference between the two timestamps in the specified unit.
+
+        Raises:
+            ValueError: If an unknown unit is specified.
+
+        Examples:
+            >>> from utcnow import timediff
+            >>> timediff("2022-01-01 00:00:00", "2022-01-01 00:00:10")
+            10.0
+            >>> timediff("2022-01-01 00:00:00", "2022-01-01 00:01:00", unit="minutes")
+            1.0
+            >>> timediff("2022-01-01 00:00:00", "2022-01-02 00:00:00", unit="days")
+            1.0
+            >>> timediff("2022-01-01T00:00:00.000000Z", "2022-01-02T06:00:00.000000Z", unit="days")
+            1.25
+            >>> timediff(0, 7200, unit="hours")
+            2.0
+        """
         delta = _timestamp_to_datetime(end) - _timestamp_to_datetime(begin)
         unit = unit.lower()
 
@@ -386,6 +612,36 @@ class utcnow_(_baseclass):
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         tz: Optional[Union[str_, tzinfo_]] = None,
     ) -> str_:
+        """Transforms the input value to a string representing a date (YYYY-mm-dd) without timespec or timezone.
+
+        Args:
+            value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
+            tz: An optional timezone for which the date is represented related to the input value.
+                If not specified, UTC timezone will be applied.
+
+        Returns:
+            A string representing a date (YYYY-mm-dd) without timespec or timezone.
+
+        Raises:
+            ValueError: If the input value does not match allowed input formats.
+
+        Examples:
+            >>> import utcnow
+            >>> utcnow.as_date_string("2023-09-07 02:18:00")
+            "2023-09-07"
+            >>> utcnow.as_date_string("2020-01-01T00:00:00.000000Z")
+            "2020-01-01"
+            >>> utcnow.as_date_string("2020-01-01T00:00:00.000000+02:00")
+            "2019-12-31"
+            >>> utcnow.as_date_string("2020-01-01T00:00:00.000000+02:00", "+02:00")
+            "2020-01-01"
+            >>> utcnow.as_date_string(1234567890.123456)
+            "2009-02-13"
+            >>> utcnow.as_date_string(0)
+            "1970-01-01"
+            >>> utcnow.as_date_string()
+            "2023-09-07"  # current date
+        """
         date_tz: Optional[tzinfo_] = None
 
         if not tz:
@@ -400,7 +656,7 @@ class utcnow_(_baseclass):
                 f"Unknown timezone value '{tz}' (type: {tz.__class__.__name__}) - use value of type 'datetime.tzinfo' or an utcoffset string value"
             )
 
-        if value is _SENTINEL:
+        if value is _SENTINEL or value == "now":
             return datetime_.now(date_tz).date().isoformat()
 
         return _timestamp_to_datetime(value).astimezone(date_tz).date().isoformat()
