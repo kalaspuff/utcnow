@@ -1,4 +1,5 @@
-"""
+"""utcnow: A library for formatting timestamps as RFC3339
+
 Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion functionality from other
 timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objets
 and other common date utilities.
@@ -18,7 +19,6 @@ modifier: An optional modifier to be added to the Unix timestamp of the value. D
     Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
 
 Examples:
-
     A few examples of transforming an arbitrary timestamp value to a RFC3339 timestamp string.
 
     >>> import utcnow
@@ -48,6 +48,12 @@ followed by the timezone identifier for UTC: "Z".
 The library is specified to return timestamps with 6 fractional second digits, which means timestamps down to the
 microsecond level. Having a six-digit fraction of a second is currently the most common way that timestamps are shown
 at this date.
+
+See also:
+``utcnow.as_date_string(value, tz)``
+    Transforms the input value to a string representing a date (YYYY-mm-dd) without timespec or timezone.
+``utcnow.timediff(begin, end, unit)``
+    Calculate the time difference between two timestamps.
 """
 
 from __future__ import annotations
@@ -623,16 +629,16 @@ class utcnow_(_baseclass):
             ValueError: If an unknown unit is specified.
 
         Examples:
-            >>> from utcnow import timediff
-            >>> timediff("2022-01-01 00:00:00", "2022-01-01 00:00:10")
+            >>> import utcnow
+            >>> utcnow.timediff("2022-01-01 00:00:00", "2022-01-01 00:00:10")
             10.0
-            >>> timediff("2022-01-01 00:00:00", "2022-01-01 00:01:00", unit="minutes")
+            >>> utcnow.timediff("2022-01-01 00:00:00", "2022-01-01 00:01:00", unit="minutes")
             1.0
-            >>> timediff("2022-01-01 00:00:00", "2022-01-02 00:00:00", unit="days")
+            >>> utcnow.timediff("2022-01-01 00:00:00", "2022-01-02 00:00:00", unit="days")
             1.0
-            >>> timediff("2022-01-01T00:00:00.000000Z", "2022-01-02T06:00:00.000000Z", unit="days")
+            >>> utcnow.timediff("2022-01-01T00:00:00.000000Z", "2022-01-02T06:00:00.000000Z", unit="days")
             1.25
-            >>> timediff(0, 7200, unit="hours")
+            >>> utcnow.timediff(0, 7200, unit="hours")
             2.0
         """
         delta = _timestamp_to_datetime(end) - _timestamp_to_datetime(begin)
