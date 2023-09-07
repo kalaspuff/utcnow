@@ -1,4 +1,4 @@
-"""utcnow: A library for formatting timestamps as RFC3339
+"""Package for formatting arbitrary timestamps as strict RFC 3339.
 
 Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion functionality from other
 timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objets
@@ -68,7 +68,8 @@ from datetime import timezone as timezone_
 from datetime import tzinfo as tzinfo_
 from decimal import Decimal
 from numbers import Real
-from typing import Any, Dict, Optional, Tuple, Type, Union, cast
+from types import FunctionType, ModuleType
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 from .__version_data__ import __version__, __version_info__
 from .protobuf import TimestampProtobufMessage
@@ -127,6 +128,8 @@ MODIFIER_MUL = {
 
 # datetime.timezone.utc
 utc = UTC = timezone_.utc
+
+CT = TypeVar("CT", bound=Callable)
 
 
 @functools.lru_cache(maxsize=128, typed=False)
@@ -437,7 +440,6 @@ class _baseclass(metaclass=_metaclass):
 class now_(_baseclass):
     def __new__(cls, *args: Any) -> now_:
         result = object.__new__(cls, *args)
-
         return result
 
     def __str__(self) -> str_:
@@ -448,15 +450,30 @@ class now_(_baseclass):
 
 
 class utcnow_(_baseclass):
-    now = now_()
+    now = type("now", (now_,), {})()
 
     def __new__(cls, *args: Any) -> utcnow_:
         result = object.__new__(cls, *args)
 
+        for attr in dir(cls):
+            if any(
+                (
+                    attr.startswith("_"),
+                    not callable(getattr(result, attr)),
+                    not isinstance(getattr(result, attr), FunctionType),
+                    "." not in getattr(getattr(result, attr), "__qualname__", "."),
+                    getattr(getattr(result, attr), "__qualname__", ".").rsplit(".", 1)[-1] != attr,
+                )
+            ):
+                continue
+
+            func = getattr(result, attr)
+            func.__qualname__ = attr
+
         return result
 
+    @staticmethod
     def as_string(
-        self,
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         modifier: Optional[Union[str_, int, float]] = 0,
     ) -> str_:
@@ -500,8 +517,8 @@ class utcnow_(_baseclass):
             )
         return _transform_value(value) if not modifier else _transform_value(_timestamp_to_unixtime(value) + modifier)
 
+    @staticmethod
     def as_datetime(
-        self,
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         modifier: Optional[Union[str_, int, float]] = 0,
     ) -> datetime_:
@@ -531,8 +548,8 @@ class utcnow_(_baseclass):
             return datetime_.now(UTC) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier)
         return _timestamp_to_datetime(value) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier)
 
+    @staticmethod
     def as_unixtime(
-        self,
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         modifier: Optional[Union[str_, int, float]] = 0,
     ) -> float:
@@ -565,8 +582,8 @@ class utcnow_(_baseclass):
             return time_.time() + modifier
         return _timestamp_to_unixtime(value) + modifier
 
+    @staticmethod
     def as_protobuf(
-        self,
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         modifier: Optional[Union[str_, int, float]] = 0,
     ) -> TimestampProtobufMessage:
@@ -609,8 +626,8 @@ class utcnow_(_baseclass):
 
         return _unixtime_to_protobuf(_timestamp_to_unixtime(value) + modifier)
 
+    @staticmethod
     def timediff(
-        self,
         begin: Union[str_, datetime_, object, int, float, Decimal, Real],
         end: Union[str_, datetime_, object, int, float, Decimal, Real],
         unit: str_ = "seconds",
@@ -657,8 +674,8 @@ class utcnow_(_baseclass):
 
         raise ValueError(f"Unknown unit '{unit}' for utcnow.timediff")
 
+    @staticmethod
     def as_date_string(
-        self,
         value: Union[str_, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
         tz: Optional[Union[str_, tzinfo_]] = None,
     ) -> str_:
@@ -828,252 +845,388 @@ class utcnow_(_baseclass):
         return self.as_string()
 
 
-class _module(utcnow_):
-    __version__: str_ = __version__  # noqa
-    __version_info__: Tuple[Union[int, str_], ...] = __version_info__
-    __author__: str_ = __author__
-    __email__: str_ = __email__
+# class module_(utcnow_):
+#     __version__: str_ = __version__  # noqa
+#     __version_info__: Tuple[Union[int, str_], ...] = __version_info__
+#     __author__: str_ = __author__
+#     __email__: str_ = __email__
+#
+#     utcnow = type("utcnow", (utcnow_,), {})()
+#
+#     def __new__(cls, *args: Any) -> module_:
+#         result = object.__new__(cls, *args)
+#
+#         setattr(result, "now", result.utcnow)
+#
+#         return result
 
-    utcnow = utcnow_()
 
-    def __new__(cls, *args: Any) -> _module:
-        result = object.__new__(cls, *args)
+utcnow = now = type("utcnow", (utcnow_,), {})()
 
-        setattr(result, "now", result.utcnow)
+rfc3339_timestamp = utcnow.rfc3339_timestamp
+as_datetime = utcnow.as_datetime
+as_unixtime = utcnow.as_unixtime
+as_protobuf = utcnow.as_protobuf
+as_date_string = utcnow.as_date_string
+today = utcnow.today
+timediff = utcnow.timediff
 
-        return result
-
-
-_module_value = _module()
-utcnow = _module_value.utcnow
-now = utcnow
-
-as_string = _module_value.as_string
-as_str = as_string
-as_rfc3339 = as_string
-to_string = as_string
-to_str = as_string
-to_rfc3339 = as_string
-get_string = as_string
-get_str = as_string
-get_rfc3339 = as_string
-get = as_string
-string = as_string
-str = as_string
-rfc3339 = as_string
-timestamp_rfc3339 = as_string
-ts_rfc3339 = as_string
-rfc3339_timestamp = as_string
-rfc3339_ts = as_string
-utcnow_rfc3339 = as_string
-rfc3339_utcnow = as_string
-now_rfc3339 = as_string
-rfc3339_now = as_string
-get_now = as_string
-
-as_datetime = _module_value.as_datetime
-as_date = as_datetime
-as_dt = as_datetime
-to_datetime = as_datetime
-to_date = as_datetime
-to_dt = as_datetime
-get_datetime = as_datetime
-get_date = as_datetime
-get_dt = as_datetime
-datetime = as_datetime
-date = as_datetime
-dt = as_datetime
-
-as_unixtime = _module_value.as_unixtime
-as_unix = as_unixtime
-as_time = as_unixtime
-as_timestamp = as_unixtime
-as_ut = as_unixtime
-as_ts = as_unixtime
-as_float = as_unixtime
-to_unixtime = as_unixtime
-to_unix = as_unixtime
-to_time = as_unixtime
-to_timestamp = as_unixtime
-to_ut = as_unixtime
-to_ts = as_unixtime
-to_float = as_unixtime
-get_unixtime = as_unixtime
-get_unix = as_unixtime
-get_time = as_unixtime
-get_timestamp = as_unixtime
-get_ut = as_unixtime
-get_ts = as_unixtime
-get_float = as_unixtime
-unixtime = as_unixtime
-unix = as_unixtime
-time = as_unixtime
-timestamp = as_unixtime
-ut = as_unixtime
-ts = as_unixtime
-
-as_protobuf = _module_value.as_protobuf
-as_proto = as_protobuf
-as_protobuf_timestamp = as_protobuf
-as_proto_timestamp = as_protobuf
-as_pb = as_protobuf
-to_protobuf = as_protobuf
-to_proto = as_protobuf
-to_protobuf_timestamp = as_protobuf
-to_proto_timestamp = as_protobuf
-to_pb = as_protobuf
-get_protobuf = as_protobuf
-get_proto = as_protobuf
-get_protobuf_timestamp = as_protobuf
-get_proto_timestamp = as_protobuf
-get_pb = as_protobuf
-protobuf = as_protobuf
-proto = as_protobuf
-protobuf_timestamp = as_protobuf
-proto_timestamp = as_protobuf
-pb = as_protobuf
-
-timediff = _module_value.timediff
-time_diff = timediff
-diff = timediff
-timedelta = timediff
-delta = timediff
-
-as_date_string = _module_value.as_date_string
-as_datestring = as_date_string
-as_date_str = as_date_string
-as_datestr = as_date_string
-to_date_string = as_date_string
-to_datestring = as_date_string
-to_date_str = as_date_string
-to_datestr = as_date_string
-get_date_string = as_date_string
-get_datestring = as_date_string
-get_date_str = as_date_string
-get_datestr = as_date_string
-get_today = as_date_string
-get_today_date = as_date_string
-get_todays_date = as_date_string
-get_date_today = as_date_string
-date_today = as_date_string
-today_date = as_date_string
-todays_date = as_date_string
-today = as_date_string
-date_string = as_date_string
-datestring = as_date_string
-date_str = as_date_string
-datestr = as_date_string
-
+# utcnow_instance = type("utcnow", (module_,), {})()
+# utcnow = utcnow_instance.utcnow
+# now = utcnow
+#
+# as_string = utcnow_instance.as_string
+# as_str = as_string
+# as_rfc3339 = as_string
+# to_string = as_string
+# to_str = as_string
+# to_rfc3339 = as_string
+# get_string = as_string
+# get_str = as_string
+# get_rfc3339 = as_string
+# get = as_string
+# string = as_string
+# str = as_string
+# rfc3339 = as_string
+# timestamp_rfc3339 = as_string
+# ts_rfc3339 = as_string
+# rfc3339_timestamp = as_string
+# rfc3339_ts = as_string
+# utcnow_rfc3339 = as_string
+# rfc3339_utcnow = as_string
+# now_rfc3339 = as_string
+# rfc3339_now = as_string
+# get_now = as_string
+#
+# as_datetime = utcnow_instance.as_datetime
+# as_date = as_datetime
+# as_dt = as_datetime
+# to_datetime = as_datetime
+# to_date = as_datetime
+# to_dt = as_datetime
+# get_datetime = as_datetime
+# get_date = as_datetime
+# get_dt = as_datetime
+# datetime = as_datetime
+# date = as_datetime
+# dt = as_datetime
+#
+# as_unixtime = utcnow_instance.as_unixtime
+# as_unix = as_unixtime
+# as_time = as_unixtime
+# as_timestamp = as_unixtime
+# as_ut = as_unixtime
+# as_ts = as_unixtime
+# as_float = as_unixtime
+# to_unixtime = as_unixtime
+# to_unix = as_unixtime
+# to_time = as_unixtime
+# to_timestamp = as_unixtime
+# to_ut = as_unixtime
+# to_ts = as_unixtime
+# to_float = as_unixtime
+# get_unixtime = as_unixtime
+# get_unix = as_unixtime
+# get_time = as_unixtime
+# get_timestamp = as_unixtime
+# get_ut = as_unixtime
+# get_ts = as_unixtime
+# get_float = as_unixtime
+# unixtime = as_unixtime
+# unix = as_unixtime
+# time = as_unixtime
+# timestamp = as_unixtime
+# ut = as_unixtime
+# ts = as_unixtime
+#
+# as_protobuf = utcnow_instance.as_protobuf
+# as_proto = as_protobuf
+# as_protobuf_timestamp = as_protobuf
+# as_proto_timestamp = as_protobuf
+# as_pb = as_protobuf
+# to_protobuf = as_protobuf
+# to_proto = as_protobuf
+# to_protobuf_timestamp = as_protobuf
+# to_proto_timestamp = as_protobuf
+# to_pb = as_protobuf
+# get_protobuf = as_protobuf
+# get_proto = as_protobuf
+# get_protobuf_timestamp = as_protobuf
+# get_proto_timestamp = as_protobuf
+# get_pb = as_protobuf
+# protobuf = as_protobuf
+# proto = as_protobuf
+# protobuf_timestamp = as_protobuf
+# proto_timestamp = as_protobuf
+# pb = as_protobuf
+#
+# timediff = utcnow_instance.timediff
+# time_diff = timediff
+# diff = timediff
+# timedelta = timediff
+# delta = timediff
+#
+# as_date_string = utcnow_instance.as_date_string
+# as_datestring = as_date_string
+# as_date_str = as_date_string
+# as_datestr = as_date_string
+# to_date_string = as_date_string
+# to_datestring = as_date_string
+# to_date_str = as_date_string
+# to_datestr = as_date_string
+# get_date_string = as_date_string
+# get_datestring = as_date_string
+# get_date_str = as_date_string
+# get_datestr = as_date_string
+# get_today = as_date_string
+# get_today_date = as_date_string
+# get_todays_date = as_date_string
+# get_date_today = as_date_string
+# date_today = as_date_string
+# today_date = as_date_string
+# todays_date = as_date_string
+# today = as_date_string
+# date_string = as_date_string
+# datestring = as_date_string
+# date_str = as_date_string
+# datestr = as_date_string
 
 __all__ = [
     "__version__",
     "__version_info__",
     "__author__",
     "__email__",
+    "rfc3339_timestamp",
+    "as_datetime",
+    "as_unixtime",
+    "as_protobuf",
+    "as_date_string",
+    "today",
+    "timediff",
     "utcnow",
     "now",
-    "as_string",
-    "as_str",
-    "as_rfc3339",
-    "to_string",
-    "to_str",
-    "to_rfc3339",
-    "get_string",
-    "get_str",
-    "get_rfc3339",
-    "get",
-    "string",
-    "str",
-    "rfc3339",
-    "timestamp_rfc3339",
-    "ts_rfc3339",
-    "rfc3339_timestamp",
-    "rfc3339_ts",
-    "utcnow_rfc3339",
-    "rfc3339_utcnow",
-    "now_rfc3339",
-    "rfc3339_now",
-    "get_now",
-    "as_datetime",
-    "as_date",
-    "as_dt",
-    "to_datetime",
-    "to_date",
-    "to_dt",
-    "get_datetime",
-    "get_date",
-    "get_dt",
-    "datetime",
-    "date",
-    "dt",
-    "as_unixtime",
-    "as_unix",
-    "as_time",
-    "as_timestamp",
-    "as_ut",
-    "as_ts",
-    "as_float",
-    "to_unixtime",
-    "to_unix",
-    "to_time",
-    "to_timestamp",
-    "to_ut",
-    "to_ts",
-    "to_float",
-    "get_unixtime",
-    "get_unix",
-    "get_time",
-    "get_timestamp",
-    "get_ut",
-    "get_ts",
-    "get_float",
-    "unixtime",
-    "unix",
-    "time",
-    "timestamp",
-    "ut",
-    "ts",
-    "timediff",
-    "time_diff",
-    "diff",
-    "timedelta",
-    "delta",
-    "as_date_string",
-    "as_datestring",
-    "as_date_str",
-    "as_datestr",
-    "to_date_string",
-    "to_datestring",
-    "to_date_str",
-    "to_datestr",
-    "get_date_string",
-    "get_datestring",
-    "get_date_str",
-    "get_datestr",
-    "get_today",
-    "get_today_date",
-    "get_todays_date",
-    "get_date_today",
-    "date_today",
-    "today_date",
-    "todays_date",
-    "today",
-    "date_string",
-    "datestring",
-    "date_str",
-    "datestr",
 ]
 
-_actual_module = sys.modules[__name__]  # noqa
+# __all__ = [
+#     "__version__",
+#     "__version_info__",
+#     "__author__",
+#     "__email__",
+#     "utcnow",
+#     "now",
+#     "as_string",
+#     "as_str",
+#     "as_rfc3339",
+#     "to_string",
+#     "to_str",
+#     "to_rfc3339",
+#     "get_string",
+#     "get_str",
+#     "get_rfc3339",
+#     "get",
+#     "string",
+#     "str",
+#     "rfc3339",
+#     "timestamp_rfc3339",
+#     "ts_rfc3339",
+#     "rfc3339_timestamp",
+#     "rfc3339_ts",
+#     "utcnow_rfc3339",
+#     "rfc3339_utcnow",
+#     "now_rfc3339",
+#     "rfc3339_now",
+#     "get_now",
+#     "as_datetime",
+#     "as_date",
+#     "as_dt",
+#     "to_datetime",
+#     "to_date",
+#     "to_dt",
+#     "get_datetime",
+#     "get_date",
+#     "get_dt",
+#     "datetime",
+#     "date",
+#     "dt",
+#     "as_unixtime",
+#     "as_unix",
+#     "as_time",
+#     "as_timestamp",
+#     "as_ut",
+#     "as_ts",
+#     "as_float",
+#     "to_unixtime",
+#     "to_unix",
+#     "to_time",
+#     "to_timestamp",
+#     "to_ut",
+#     "to_ts",
+#     "to_float",
+#     "get_unixtime",
+#     "get_unix",
+#     "get_time",
+#     "get_timestamp",
+#     "get_ut",
+#     "get_ts",
+#     "get_float",
+#     "unixtime",
+#     "unix",
+#     "time",
+#     "timestamp",
+#     "ut",
+#     "ts",
+#     "timediff",
+#     "time_diff",
+#     "diff",
+#     "timedelta",
+#     "delta",
+#     "as_date_string",
+#     "as_datestring",
+#     "as_date_str",
+#     "as_datestr",
+#     "to_date_string",
+#     "to_datestring",
+#     "to_date_str",
+#     "to_datestr",
+#     "get_date_string",
+#     "get_datestring",
+#     "get_date_str",
+#     "get_datestr",
+#     "get_today",
+#     "get_today_date",
+#     "get_todays_date",
+#     "get_date_today",
+#     "date_today",
+#     "today_date",
+#     "todays_date",
+#     "today",
+#     "date_string",
+#     "datestring",
+#     "date_str",
+#     "datestr",
+# ]
 
-_module_value.__spec__ = _actual_module.__spec__  # type: ignore
-_module_value.__path__ = _actual_module.__path__  # type: ignore
-_module_value.__all__ = _actual_module.__all__  # type: ignore
-_module_value.__cached__ = _actual_module.__cached__  # type: ignore
-_module_value.__dict__ = _actual_module.__dict__
-_module_value.__doc__ = _actual_module.__doc__
-_module_value.__file__ = _actual_module.__file__  # type: ignore
-_module_value.__name__ = _actual_module.__name__  # type: ignore
-_module_value.__package__ = _actual_module.__package__  # type: ignore
+original_module = sys.modules[__name__]  # noqa
 
-sys.modules[__name__] = _module_value  # type: ignore
+
+class ModuleValue(int):
+    def __eq__(self, other: Any) -> bool:
+        if other is None or other is False:
+            return True
+        return super().__eq__(other)
+
+    def __bool__(self) -> bool:
+        return False
+
+    def __instancecheck__(self, instance: Any) -> bool:
+        if instance is None.__class__ or instance is None or isinstance(instance, None.__class__):
+            return True
+        if isinstance(instance, str_):
+            return False
+        return False
+
+    def __add__(self, value: Any) -> Any:
+        if value is None:
+            return self
+        if isinstance(value, str_):
+            return str_(self) + str_(value)
+
+    def __repr__(self) -> str_:
+        return __name__
+
+    def __str__(self) -> str_:
+        return __name__
+
+
+def staticmethod_(func: CT) -> CT:
+    return cast(CT, staticmethod(func))
+
+
+class ReplacementModuleType:
+    __name__: str_
+    __all__: List[str_] = [
+        "__version__",
+        "__version_info__",
+        "__author__",
+        "__email__",
+        "rfc3339_timestamp",
+        "as_datetime",
+        "as_unixtime",
+        "as_protobuf",
+        "as_date_string",
+        "today",
+        "timediff",
+        "utcnow",
+        "now",
+    ]
+    __cached__: Any
+    __call__ = staticmethod_(utcnow.rfc3339_timestamp)
+
+    def __init__(self, name: str_, doc: Any) -> None:
+        ModuleType.__init__(cast(ModuleType, self), name, doc)
+
+    def __repr__(self) -> str_:
+        return self.__dict__.get(self.__name__).__repr__()
+
+
+module_type = type(
+    "module",
+    (ReplacementModuleType, ModuleType),
+    {
+        "__module__": ModuleValue(0),
+        # "__all__": [],
+        **{
+            attr: staticmethod_(getattr(utcnow, attr))
+            for attr in dir(utcnow)
+            if not any(
+                (
+                    attr.startswith("_"),
+                    not callable(getattr(utcnow, attr)),
+                    not isinstance(getattr(utcnow, attr), FunctionType),
+                    "." in getattr(getattr(utcnow, attr), "__qualname__", "."),
+                )
+            )
+        },
+    },
+)
+
+module_ = module_type(original_module.__name__, original_module.__doc__)
+# module_.__all__ = [
+#     "__version__",
+#     "__version_info__",
+#     "__author__",
+#     "__email__",
+#     "rfc3339_timestamp",
+#     "as_datetime",
+#     "as_unixtime",
+#     "as_protobuf",
+#     "as_date_string",
+#     "today",
+#     "timediff",
+#     "utcnow",
+#     "now",
+# ]
+
+module_.__dict__.update(
+    {
+        **{k: v for k, v in original_module.__dict__.items() if k in module_.__all__},
+        "__str__": original_module.__str__,
+        "__repr__": original_module.__repr__,
+    }
+)
+
+module_.__spec__ = original_module.__spec__
+module_.__path__ = original_module.__path__
+module_.__annotations__ = original_module.__annotations__
+module_.__cached__ = original_module.__cached__
+module_.__doc__ = original_module.__doc__
+module_.__file__ = original_module.__file__
+module_.__name__ = original_module.__name__
+module_.__package__ = original_module.__package__
+
+sys.modules[__name__] = module_
+
+# module_.__dict__["__str__"] = original_module.__str__
+# module_.__dict__["__repr__"] = original_module.__repr__
+#
+# del sys
