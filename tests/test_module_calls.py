@@ -1,11 +1,13 @@
 import datetime
+from types import ModuleType
 
 
 def test_module() -> None:
     import utcnow
 
     # Test types
-    assert type(utcnow) is utcnow._module  # type: ignore
+    assert isinstance(utcnow, ModuleType)  # type: ignore
+    assert utcnow.__class__ is ModuleType
     assert len(str(utcnow)) == 27
     assert isinstance(repr(utcnow), str)
     assert len(repr(utcnow)) == 27

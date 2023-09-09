@@ -60,15 +60,13 @@ from __future__ import annotations
 
 import sys
 
-if not getattr(sys.modules[__name__], "__original_module__", None):
+if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original_module__", None):
+    import datetime as datetime_
     import functools
     import re
     import sys
     import time as time_
-    from datetime import datetime as datetime_
-    from datetime import timedelta as timedelta_
-    from datetime import timezone as timezone_
-    from datetime import tzinfo as tzinfo_
+    from datetime import datetime, timedelta, timezone, tzinfo
     from decimal import Decimal
     from numbers import Real
     from types import FunctionType, ModuleType
@@ -77,12 +75,10 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
     from .__version_data__ import __version__, __version_info__
     from .protobuf import TimestampProtobufMessage
 
-    str_ = str
+    __author__: str = "Carl Oscar Aaro"
+    __email__: str = "hello@carloscar.com"
 
-    __author__: str_ = "Carl Oscar Aaro"
-    __email__: str_ = "hello@carloscar.com"
-
-    _SENTINEL = object()
+    NOW = TODAY = object()
 
     # the following formats are accepted as date and date+time as string formatted input values.
     # the library also accepts numeric values (int / float), specified as unixtime, or datetime objects.
@@ -130,7 +126,7 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
     }
 
     # datetime.timezone.utc
-    utc = UTC = timezone_.utc
+    utc = UTC = timezone.utc
 
     CT = TypeVar("CT", bound=Callable)
 
@@ -153,9 +149,9 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
         return False
 
     def _init_modifier(
-        value: Union[str, datetime_, object, int, float, Decimal, Real, bytes, TimestampProtobufMessage],
+        value: Union[str, datetime, object, int, float, Decimal, Real, bytes, TimestampProtobufMessage],
         modifier: Optional[Union[str, int, float]] = 0,
-    ) -> Tuple[Union[str, datetime_, object, int, float, Decimal, Real], Union[int, float]]:
+    ) -> Tuple[Union[str, datetime, object, int, float, Decimal, Real], Union[int, float]]:
         """
         Normalizes the input value + modifier tuple.
 
@@ -174,9 +170,9 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
 
     @functools.lru_cache(maxsize=128, typed=True)
     def _init_modifier_lru(
-        value: Union[str, datetime_, object, int, bytes, float, Decimal, Real],
+        value: Union[str, datetime, object, int, bytes, float, Decimal, Real],
         modifier: Optional[Union[str, int, float]] = 0,
-    ) -> Tuple[Union[str, datetime_, object, int, float, Decimal, Real], Union[int, float]]:
+    ) -> Tuple[Union[str, datetime, object, int, float, Decimal, Real], Union[int, float]]:
         """
         Normalizes the input value + modifier tuple.
 
@@ -195,15 +191,15 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
             value = value_.seconds + round(value_.nanos * 1e-9, 9)
 
         if (
-            value is not _SENTINEL
+            value is not NOW
             and value
-            and str_(value)[0] in ("+", "-")
+            and str(value)[0] in ("+", "-")
             and not modifier
             and isinstance(value, str)
             and value[-1] in MODIFIER_MUL
         ):
             modifier = value
-            value = _SENTINEL
+            value = NOW
 
         if modifier is None:
             modifier = 0
@@ -225,13 +221,13 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
             else:
                 modifier = int(modifier) * modifier_mul
 
-        if value == "now":
-            value = _SENTINEL
+        if isinstance(value, str) and str(value).lower() in ("now", "today"):
+            value = NOW
 
         return value, modifier
 
     @functools.lru_cache(maxsize=128, typed=True)
-    def _transform_value(value: Union[str, datetime_, object, int, float, Decimal, Real]) -> str_:
+    def _transform_value(value: Union[str, datetime, object, int, float, Decimal, Real]) -> str:
         """Transforms the input value to a timestamp string in RFC3339 format.
 
         Args:
@@ -240,20 +236,20 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
         Returns:
             The transformed value as a string in RFC3339 format.
         """
-        str_value: str_
+        str_value: str
         try:
             if isinstance(value, str):
                 str_value = value.strip()
             elif isinstance(value, (int, float)):
-                return datetime_.fromtimestamp(value, tz=UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
+                return datetime.fromtimestamp(value, tz=UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
             elif isinstance(value, (Decimal, Real)):
                 str_value = (
-                    datetime_.fromtimestamp(float(value), tz=UTC)
+                    datetime.fromtimestamp(float(value), tz=UTC)
                     .isoformat(timespec="microseconds")
                     .replace("+00:00", "Z")
                 )
             else:
-                str_value = str_(value).strip()
+                str_value = str(value).strip()
 
             if (
                 str_value
@@ -265,7 +261,7 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
                 and _is_numeric(str_value)
             ):
                 str_value = (
-                    datetime_.fromtimestamp(float(str_value), tz=UTC)
+                    datetime.fromtimestamp(float(str_value), tz=UTC)
                     .isoformat(timespec="microseconds")
                     .replace("+00:00", "Z")
                 )
@@ -277,7 +273,7 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
         if PREFERRED_FORMAT_REGEX.match(str_value):
             if int(str_value[8:10]) >= 30 or (int(str_value[5:7]) == 2 and int(str_value[8:10]) >= 28):
                 try:
-                    dt_value = datetime_.strptime(str_value[0:10], "%Y-%m-%d")
+                    dt_value = datetime.strptime(str_value[0:10], "%Y-%m-%d")
                 except ValueError:
                     raise ValueError(
                         f"The input value '{value}' (type: {value.__class__}) does not match allowed input formats"
@@ -293,7 +289,7 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
 
         for format_ in _ACCEPTED_INPUT_FORMAT_VALUES:
             try:
-                dt_value = datetime_.strptime(str_value, format_)
+                dt_value = datetime.strptime(str_value, format_)
             except ValueError:
                 continue
 
@@ -315,7 +311,7 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
         return dt_value.astimezone(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
     @functools.lru_cache(maxsize=128)
-    def _timestamp_to_datetime(value: str) -> datetime_:
+    def _timestamp_to_datetime(value: str) -> datetime:
         """Transforms the input value to a datetime object.
 
         Args:
@@ -325,7 +321,7 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
             The transformed value as a datetime object.
         """
         value = _transform_value(value)
-        return datetime_.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z")
+        return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z")
 
     @functools.lru_cache(maxsize=128)
     def _timestamp_to_unixtime(value: str) -> float:
@@ -360,7 +356,7 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
         )
 
     @functools.lru_cache(maxsize=128)
-    def _timezone_from_string(value: str) -> Optional[tzinfo_]:
+    def _timezone_from_string(value: str) -> Optional[tzinfo]:
         """Converts a string to a timezone object.
 
         Args:
@@ -394,11 +390,11 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
 
             modifier = 1 if value[0] == "+" else -1
 
-            td = timedelta_(hours=int(m.group(1)), minutes=int(m.group(2)))
-            if td.days == 1 and td == timedelta_(days=1):
-                td = timedelta_(days=1, microseconds=-1)
+            td = timedelta(hours=int(m.group(1)), minutes=int(m.group(2)))
+            if td.days == 1 and td == timedelta(days=1):
+                td = timedelta(days=1, microseconds=-1)
 
-            return timezone_(modifier * td)
+            return timezone(modifier * td)
 
         return None
 
@@ -414,9 +410,9 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
 
         def __call__(
             self,
-            value: Union[str, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+            value: Union[str, datetime, object, int, float, Decimal, Real] = NOW,
             modifier: Optional[Union[str, int, float]] = 0,
-        ) -> str_:
+        ) -> str:
             """Transforms the input value to a timestamp string in RFC3339 format.
 
             Args:
@@ -433,9 +429,13 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
             """
             value, modifier = _init_modifier(value, modifier)
 
-            if value is _SENTINEL:
+            if value is NOW:
                 return (
-                    (datetime_.now(UTC) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier))
+                    (
+                        datetime_.datetime.now(UTC)
+                        if not modifier
+                        else datetime_.datetime.now(UTC) + timedelta(seconds=modifier)
+                    )
                     .isoformat(timespec="microseconds")
                     .replace("+00:00", "Z")
                 )
@@ -443,21 +443,23 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
                 _transform_value(value) if not modifier else _transform_value(_timestamp_to_unixtime(value) + modifier)
             )
 
+    T = TypeVar("T")
+
     class now_(_baseclass):
-        def __new__(cls, *args: Any) -> now_:
+        def __new__(cls: Type[T], *args: Any) -> T:
             result = object.__new__(cls, *args)
             return result
 
-        def __str__(self) -> str_:
-            return datetime_.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
+        def __str__(self) -> str:
+            return datetime_.datetime.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
-        def __repr__(self) -> str_:
-            return datetime_.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
+        def __repr__(self) -> str:
+            return datetime_.datetime.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
     class utcnow_(_baseclass):
         now = type("now", (now_,), {})()
 
-        def __new__(cls, *args: Any) -> utcnow_:
+        def __new__(cls: Type[T], *args: Any) -> T:
             result = object.__new__(cls, *args)
 
             for attr in dir(cls):
@@ -478,10 +480,10 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
             return result
 
         @staticmethod
-        def as_string(
-            value: Union[str, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+        def rfc3339_timestamp(
+            value: Union[str, datetime, object, int, float, Decimal, Real] = NOW,
             modifier: Optional[Union[str, int, float]] = 0,
-        ) -> str_:
+        ) -> str:
             """Transforms the input value to a timestamp string in RFC3339 format.
 
             Args:
@@ -514,9 +516,13 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
             """
             value, modifier = _init_modifier(value, modifier)
 
-            if value is _SENTINEL:
+            if value is NOW:
                 return (
-                    (datetime_.now(UTC) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier))
+                    (
+                        datetime_.datetime.now(UTC)
+                        if not modifier
+                        else datetime_.datetime.now(UTC) + timedelta(seconds=modifier)
+                    )
                     .isoformat(timespec="microseconds")
                     .replace("+00:00", "Z")
                 )
@@ -526,9 +532,9 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
 
         @staticmethod
         def as_datetime(
-            value: Union[str, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+            value: Union[str, datetime, object, int, float, Decimal, Real] = NOW,
             modifier: Optional[Union[str, int, float]] = 0,
-        ) -> datetime_:
+        ) -> datetime:
             """Transforms the input value to a datetime object.
 
             Args:
@@ -550,14 +556,22 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
             """
             value, modifier = _init_modifier(value, modifier)
 
-            if value is _SENTINEL:
-                # 'datetime.datetime.now(UTC)' is faster than (deprecated) 'datetime.datetime.utcnow().replace(tzinfo=UTC)'
-                return datetime_.now(UTC) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier)
-            return _timestamp_to_datetime(value) if not modifier else datetime_.now(UTC) + timedelta_(seconds=modifier)
+            if value is NOW:
+                # 'datetime.datetime_.datetime.now(UTC)' is faster than (deprecated) 'datetime.datetime.utcnow().replace(tzinfo=UTC)'
+                return (
+                    datetime_.datetime.now(UTC)
+                    if not modifier
+                    else datetime_.datetime.now(UTC) + timedelta(seconds=modifier)
+                )
+            return (
+                _timestamp_to_datetime(value)
+                if not modifier
+                else datetime_.datetime.now(UTC) + timedelta(seconds=modifier)
+            )
 
         @staticmethod
         def as_unixtime(
-            value: Union[str, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+            value: Union[str, datetime, object, int, float, Decimal, Real] = NOW,
             modifier: Optional[Union[str, int, float]] = 0,
         ) -> float:
             """Transforms the input value to a float value representing a timestamp as unixtime.
@@ -585,13 +599,13 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
             """
             value, modifier = _init_modifier(value, modifier)
 
-            if value is _SENTINEL:
+            if value is NOW:
                 return time_.time() + modifier
             return _timestamp_to_unixtime(value) + modifier
 
         @staticmethod
         def as_protobuf(
-            value: Union[str, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
+            value: Union[str, datetime, object, int, float, Decimal, Real] = NOW,
             modifier: Optional[Union[str, int, float]] = 0,
         ) -> TimestampProtobufMessage:
             """Transforms the input value to a google.protobuf.Timestamp protobuf message.
@@ -619,7 +633,7 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
             """
             value, modifier = _init_modifier(value, modifier)
 
-            if value is _SENTINEL:
+            if value is NOW:
                 unixtime_value = time_.time() + modifier
                 seconds = int(unixtime_value)
                 nanos = round(int((unixtime_value - seconds) * 1e6)) * 1000
@@ -635,9 +649,9 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
 
         @staticmethod
         def timediff(
-            begin: Union[str, datetime_, object, int, float, Decimal, Real],
-            end: Union[str, datetime_, object, int, float, Decimal, Real],
-            unit: str_ = "seconds",
+            begin: Union[str, datetime, object, int, float, Decimal, Real],
+            end: Union[str, datetime, object, int, float, Decimal, Real],
+            unit: str = "seconds",
         ) -> float:
             """Calculate the time difference between two timestamps.
 
@@ -683,9 +697,9 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
 
         @staticmethod
         def as_date_string(
-            value: Union[str, datetime_, object, int, float, Decimal, Real] = _SENTINEL,
-            tz: Optional[Union[str, tzinfo_]] = None,
-        ) -> str_:
+            value: Union[str, datetime, object, int, float, Decimal, Real] = TODAY,
+            tz: Optional[Union[str, tzinfo]] = None,
+        ) -> str:
             """Transforms the input value to a string representing a date (YYYY-mm-dd) without timespec or timezone.
 
             Args:
@@ -716,11 +730,11 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
                 >>> utcnow.as_date_string()
                 "2023-09-07"  # current date
             """
-            date_tz: Optional[tzinfo_] = None
+            date_tz: Optional[tzinfo] = None
 
             if not tz:
                 date_tz = UTC
-            elif isinstance(tz, tzinfo_):
+            elif isinstance(tz, tzinfo):
                 date_tz = tz
             elif isinstance(tz, str):
                 date_tz = _timezone_from_string(tz)
@@ -730,32 +744,63 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
                     f"Unknown timezone value '{tz}' (type: {tz.__class__.__name__}) - use value of type 'datetime.tzinfo' or an utcoffset string value"
                 )
 
-            if value is _SENTINEL or value == "now":
-                return datetime_.now(date_tz).date().isoformat()
+            if value is TODAY or (isinstance(value, str) and str(value).lower() in ("now", "today")):
+                return datetime_.datetime.now(date_tz).date().isoformat()
 
             return _timestamp_to_datetime(value).astimezone(date_tz).date().isoformat()
 
-        as_str = as_string
-        as_rfc3339 = as_string
-        to_string = as_string
-        to_str = as_string
-        to_rfc3339 = as_string
-        get_string = as_string
-        get_str = as_string
-        get_rfc3339 = as_string
-        get = as_string
-        string = as_string
-        str = as_string
-        rfc3339 = as_string
-        timestamp_rfc3339 = as_string
-        ts_rfc3339 = as_string
-        rfc3339_timestamp = as_string
-        rfc3339_ts = as_string
-        utcnow_rfc3339 = as_string
-        rfc3339_utcnow = as_string
-        now_rfc3339 = as_string
-        rfc3339_now = as_string
-        get_now = as_string
+        @staticmethod
+        def today(
+            tz: Optional[Union[str, tzinfo]] = None,
+        ) -> str:
+            """Returns a string representing today's date (YYYY-mm-dd) without timespec or timezone.
+
+            Args:
+                tz: An optional timezone value that is used to return today's date in the specific timezone.
+                    If not specified, UTC timezone will be applied. Note that the timezone value will not be
+                    represented in the returned value, only the current date (YYYY-mm-dd) in the specified timezone.
+
+            Returns:
+                A string representing today's date (YYYY-mm-dd) without timespec or timezone.
+
+            Raises:
+                ValueError: If the input value does not match allowed input formats.
+
+            Examples:
+                >>> import pytz
+                >>> import utcnow
+                >>> utcnow.rfc3339_timestamp()
+                "2023-09-07T23:31:25.134196Z"  # current time
+                >>> utcnow.today()
+                "2023-09-07"  # current date
+                >>> timezone = pytz.timezone("Europe/Stockholm")  # UTC+02:00
+                >>> utcnow.today(tz=timezone)
+                "2023-09-08"  # current date in Europe/Stockholm timezone
+                >>> utcnow.today(tz="+01:00")
+                "2023-09-08"  # current date in a timezone with UTC offset +01:00
+            """
+            return utcnow_.as_date_string(tz=tz)
+
+        as_string = rfc3339_timestamp
+        as_str = rfc3339_timestamp
+        as_rfc3339 = rfc3339_timestamp
+        to_string = rfc3339_timestamp
+        to_str = rfc3339_timestamp
+        to_rfc3339 = rfc3339_timestamp
+        get_string = rfc3339_timestamp
+        get_str = rfc3339_timestamp
+        get_rfc3339 = rfc3339_timestamp
+        get = rfc3339_timestamp
+        string = rfc3339_timestamp
+        rfc3339 = rfc3339_timestamp
+        timestamp_rfc3339 = rfc3339_timestamp
+        ts_rfc3339 = rfc3339_timestamp
+        rfc3339_ts = rfc3339_timestamp
+        utcnow_rfc3339 = rfc3339_timestamp
+        rfc3339_utcnow = rfc3339_timestamp
+        now_rfc3339 = rfc3339_timestamp
+        rfc3339_now = rfc3339_timestamp
+        get_now = rfc3339_timestamp
 
         as_date = as_datetime
         as_dt = as_datetime
@@ -765,7 +810,6 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
         get_datetime = as_datetime
         get_date = as_datetime
         get_dt = as_datetime
-        datetime = as_datetime
         date = as_datetime
         dt = as_datetime
 
@@ -810,7 +854,6 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
         get_protobuf_timestamp = as_protobuf
         get_proto_timestamp = as_protobuf
         get_pb = as_protobuf
-        protobuf = as_protobuf
         proto = as_protobuf
         protobuf_timestamp = as_protobuf
         proto_timestamp = as_protobuf
@@ -832,26 +875,38 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
         get_datestring = as_date_string
         get_datestr = as_date_string
         get_date_string = as_date_string
-        get_today = as_date_string
-        get_today_date = as_date_string
-        get_todays_date = as_date_string
-        get_date_today = as_date_string
-        date_today = as_date_string
-        today_date = as_date_string
-        todays_date = as_date_string
-        today = as_date_string
         date_string = as_date_string
         datestring = as_date_string
         date_str = as_date_string
         datestr = as_date_string
 
-        def __str__(self) -> str_:
-            return self.as_string()
+        get_today = today
+        get_today_date = today
+        get_todays_date = today
+        get_date_today = today
+        date_today = as_date_string
+        today_date = today
+        todays_date = today
 
-        def __repr__(self) -> str_:
-            return self.as_string()
+        def __str__(self) -> str:
+            return self.rfc3339_timestamp()
 
-    utcnow = now = type("utcnow", (utcnow_,), {})()
+        def __repr__(self) -> str:
+            return self.rfc3339_timestamp()
+
+    def staticmethod_(func: CT) -> CT:
+        return cast(CT, staticmethod(func))
+
+    utcnow_type = type(
+        "utcnow",
+        (utcnow_,),
+        {
+            "str": staticmethod_(utcnow_.rfc3339_timestamp),
+            "datetime": staticmethod_(utcnow_.as_datetime),
+            "protobuf": staticmethod_(utcnow_.as_protobuf),
+        },
+    )
+    utcnow = now = utcnow_type()
 
     rfc3339_timestamp = utcnow.rfc3339_timestamp
     as_datetime = utcnow.as_datetime
@@ -861,27 +916,8 @@ if not getattr(sys.modules[__name__], "__original_module__", None):
     today = utcnow.today
     timediff = utcnow.timediff
 
-    __all__ = [
-        "__version__",
-        "__version_info__",
-        "__author__",
-        "__email__",
-        "rfc3339_timestamp",
-        "as_datetime",
-        "as_unixtime",
-        "as_protobuf",
-        "as_date_string",
-        "today",
-        "timediff",
-        "utcnow",
-        "now",
-    ]
-
-    def staticmethod_(func: CT) -> CT:
-        return cast(CT, staticmethod(func))
-
     code = """\
-def __repr__(self) -> str_:
+def __repr__(self) -> str:
     try:
         return self.__dict__.get(self.__name__).__repr__()
     except AttributeError:
@@ -914,12 +950,37 @@ module = type(
                 )
             )
         },
+        "_is_numeric": staticmethod_(_is_numeric),
+        "_timestamp_to_datetime": staticmethod_(_timestamp_to_datetime),
+        "_transform_value": staticmethod_(_transform_value),
+        "NOW": NOW,
+        "TODAY": TODAY,
     },
 )
-module_ = type("module", (module,), {})(original_module.__name__, original_module.__doc__)
+module_ = module(original_module.__name__, original_module.__doc__)
 """
 
     original_module = sys.modules[__name__]  # noqa
+    setattr(
+        original_module,
+        "__all__",
+        [
+            "__version__",
+            "__version_info__",
+            "__author__",
+            "__email__",
+            "rfc3339_timestamp",
+            "as_datetime",
+            "as_unixtime",
+            "as_protobuf",
+            "as_date_string",
+            "today",
+            "timediff",
+            "utcnow",
+            "now",
+        ],
+    )
+
     code_object = compile(code, "<string>", "exec")
     globals_: Dict[str, Any] = {
         "ModuleType_": ModuleType,
@@ -928,6 +989,11 @@ module_ = type("module", (module,), {})(original_module.__name__, original_modul
         "FunctionType": FunctionType,
         "original_module": original_module,
         "cast": cast,
+        "_is_numeric": _is_numeric,
+        "_timestamp_to_datetime": _timestamp_to_datetime,
+        "_transform_value": _transform_value,
+        "NOW": NOW,
+        "TODAY": TODAY,
         "__builtins__": {
             "type": type,
             "print": print,
@@ -938,11 +1004,16 @@ module_ = type("module", (module,), {})(original_module.__name__, original_modul
             "callable": callable,
             "getattr": getattr,
             "isinstance": isinstance,
+            "setattr": setattr,
         },
     }
     locals_: Dict[str, Any] = {}
     exec(code_object, globals_, locals_)
     module_ = cast(ModuleType, locals_["module_"])
+    del globals_
+    del locals_
+    original_module.__annotations__.pop("globals_")
+    original_module.__annotations__.pop("locals_")
     module_.__dict__.update(
         {
             **{k: v for k, v in original_module.__dict__.items() if k in module_.__all__},
@@ -963,3 +1034,19 @@ module_ = type("module", (module,), {})(original_module.__name__, original_modul
 
 del sys
 del annotations
+
+__all__ = [
+    "__version__",
+    "__version_info__",
+    "__author__",
+    "__email__",
+    "rfc3339_timestamp",
+    "as_datetime",
+    "as_unixtime",
+    "as_protobuf",
+    "as_date_string",
+    "today",
+    "timediff",
+    "utcnow",
+    "now",
+]

@@ -110,7 +110,8 @@ def test_now_list_datetime() -> None:
 
 def test_utcnow_now_functionality() -> None:
     import utcnow
-    from utcnow import now, utcnow_
+    from utcnow import now
+    from utcnow import utcnow as utcnow_
 
     assert type(utcnow.now) is not str  # type: ignore
     assert not isinstance(utcnow.now, str)
