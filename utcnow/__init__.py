@@ -66,6 +66,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
     import re
     import sys
     import time as time_
+    import warnings
     from datetime import datetime, timedelta, timezone, tzinfo
     from decimal import Decimal
     from numbers import Real
@@ -443,6 +444,21 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
                 _transform_value(value) if not modifier else _transform_value(_timestamp_to_unixtime(value) + modifier)
             )
 
+    def _deprecation_decorator(func: CT, deprecated_func_name: str) -> CT:
+        @functools.wraps(func)
+        def _wrapper(*a: Any, **kw: Any) -> Any:
+            warnings.warn(
+                f"Using the '{deprecated_func_name}()' function alias is deprecated. Use the 'utcnow.{func.__name__}()' function instead.",
+                DeprecationWarning,
+            )
+            print(
+                f"Using the '{deprecated_func_name}()' function alias is deprecated. Use the 'utcnow.{func.__name__}()' function instead."
+            )
+
+            return func(*a, **kw)
+
+        return cast(CT, staticmethod(_wrapper))
+
     NT = TypeVar("NT", bound="now_")
     UT = TypeVar("UT", bound="utcnow_")
 
@@ -470,13 +486,12 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
                         not callable(getattr(result, attr)),
                         not isinstance(getattr(result, attr), FunctionType),
                         "." not in getattr(getattr(result, attr), "__qualname__", "."),
-                        getattr(getattr(result, attr), "__qualname__", ".").rsplit(".", 1)[-1] != attr,
                     )
                 ):
                     continue
 
                 func = getattr(result, attr)
-                func.__qualname__ = attr
+                func.__qualname__ = getattr(getattr(result, attr), "__qualname__", ".").rsplit(".", 1)[-1]
 
             return result
 
@@ -783,111 +798,112 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             return utcnow_.as_date_string(tz=tz)
 
         as_string = rfc3339_timestamp
-        as_str = rfc3339_timestamp
-        as_rfc3339 = rfc3339_timestamp
-        to_string = rfc3339_timestamp
-        to_str = rfc3339_timestamp
-        to_rfc3339 = rfc3339_timestamp
-        get_string = rfc3339_timestamp
-        get_str = rfc3339_timestamp
-        get_rfc3339 = rfc3339_timestamp
         get = rfc3339_timestamp
-        string = rfc3339_timestamp
-        rfc3339 = rfc3339_timestamp
-        timestamp_rfc3339 = rfc3339_timestamp
-        ts_rfc3339 = rfc3339_timestamp
-        rfc3339_ts = rfc3339_timestamp
-        utcnow_rfc3339 = rfc3339_timestamp
-        rfc3339_utcnow = rfc3339_timestamp
-        now_rfc3339 = rfc3339_timestamp
-        rfc3339_now = rfc3339_timestamp
-        get_now = rfc3339_timestamp
 
-        as_date = as_datetime
-        as_dt = as_datetime
-        to_datetime = as_datetime
-        to_date = as_datetime
-        to_dt = as_datetime
-        get_datetime = as_datetime
-        get_date = as_datetime
-        get_dt = as_datetime
-        date = as_datetime
-        dt = as_datetime
+        as_str = _deprecation_decorator(rfc3339_timestamp, "utcnow.as_str")
+        as_rfc3339 = _deprecation_decorator(rfc3339_timestamp, "utcnow.as_rfc3339")
+        to_string = _deprecation_decorator(rfc3339_timestamp, "utcnow.to_string")
+        to_str = _deprecation_decorator(rfc3339_timestamp, "utcnow.to_str")
+        to_rfc3339 = _deprecation_decorator(rfc3339_timestamp, "utcnow.to_rfc3339")
+        get_string = _deprecation_decorator(rfc3339_timestamp, "utcnow.get_string")
+        get_str = _deprecation_decorator(rfc3339_timestamp, "utcnow.get_str")
+        get_rfc3339 = _deprecation_decorator(rfc3339_timestamp, "utcnow.get_rfc3339")
+        string = _deprecation_decorator(rfc3339_timestamp, "utcnow.string")
+        rfc3339 = _deprecation_decorator(rfc3339_timestamp, "utcnow.rfc3339")
+        timestamp_rfc3339 = _deprecation_decorator(rfc3339_timestamp, "utcnow.timestamp_rfc3339")
+        ts_rfc3339 = _deprecation_decorator(rfc3339_timestamp, "utcnow.ts_rfc3339")
+        rfc3339_ts = _deprecation_decorator(rfc3339_timestamp, "utcnow.rfc3339_ts")
+        utcnow_rfc3339 = _deprecation_decorator(rfc3339_timestamp, "utcnow.utcnow_rfc3339")
+        rfc3339_utcnow = _deprecation_decorator(rfc3339_timestamp, "utcnow.rfc3339_utcnow")
+        now_rfc3339 = _deprecation_decorator(rfc3339_timestamp, "utcnow.now_rfc3339")
+        rfc3339_now = _deprecation_decorator(rfc3339_timestamp, "utcnow.rfc3339_now")
+        get_now = _deprecation_decorator(rfc3339_timestamp, "utcnow.get_now")
 
-        as_unix = as_unixtime
-        as_time = as_unixtime
-        as_timestamp = as_unixtime
-        as_ut = as_unixtime
-        as_ts = as_unixtime
-        as_float = as_unixtime
-        to_unixtime = as_unixtime
-        to_unix = as_unixtime
-        to_time = as_unixtime
-        to_timestamp = as_unixtime
-        to_ut = as_unixtime
-        to_ts = as_unixtime
-        to_float = as_unixtime
-        get_unixtime = as_unixtime
-        get_unix = as_unixtime
-        get_time = as_unixtime
-        get_timestamp = as_unixtime
-        get_ut = as_unixtime
-        get_ts = as_unixtime
-        get_float = as_unixtime
-        unixtime = as_unixtime
-        unix = as_unixtime
-        time = as_unixtime
-        timestamp = as_unixtime
-        ut = as_unixtime
-        ts = as_unixtime
+        as_date = _deprecation_decorator(as_datetime, "utcnow.as_date")
+        as_dt = _deprecation_decorator(as_datetime, "utcnow.as_dt")
+        to_datetime = _deprecation_decorator(as_datetime, "utcnow.to_datetime")
+        to_date = _deprecation_decorator(as_datetime, "utcnow.to_date")
+        to_dt = _deprecation_decorator(as_datetime, "utcnow.to_dt")
+        get_datetime = _deprecation_decorator(as_datetime, "utcnow.get_datetime")
+        get_date = _deprecation_decorator(as_datetime, "utcnow.get_date")
+        get_dt = _deprecation_decorator(as_datetime, "utcnow.get_dt")
+        date = _deprecation_decorator(as_datetime, "utcnow.date")
+        dt = _deprecation_decorator(as_datetime, "utcnow.dt")
 
-        as_proto = as_protobuf
-        as_protobuf_timestamp = as_protobuf
-        as_proto_timestamp = as_protobuf
-        as_pb = as_protobuf
-        to_protobuf = as_protobuf
-        to_proto = as_protobuf
-        to_protobuf_timestamp = as_protobuf
-        to_proto_timestamp = as_protobuf
-        to_pb = as_protobuf
-        get_protobuf = as_protobuf
-        get_proto = as_protobuf
-        get_protobuf_timestamp = as_protobuf
-        get_proto_timestamp = as_protobuf
-        get_pb = as_protobuf
-        proto = as_protobuf
-        protobuf_timestamp = as_protobuf
-        proto_timestamp = as_protobuf
-        pb = as_protobuf
+        as_unix = _deprecation_decorator(as_unixtime, "utcnow.as_unix")
+        as_time = _deprecation_decorator(as_unixtime, "utcnow.as_time")
+        as_timestamp = _deprecation_decorator(as_unixtime, "utcnow.as_timestamp")
+        as_ut = _deprecation_decorator(as_unixtime, "utcnow.as_ut")
+        as_ts = _deprecation_decorator(as_unixtime, "utcnow.as_ts")
+        as_float = _deprecation_decorator(as_unixtime, "utcnow.as_float")
+        to_unixtime = _deprecation_decorator(as_unixtime, "utcnow.to_unixtime")
+        to_unix = _deprecation_decorator(as_unixtime, "utcnow.to_unix")
+        to_time = _deprecation_decorator(as_unixtime, "utcnow.to_time")
+        to_timestamp = _deprecation_decorator(as_unixtime, "utcnow.to_timestamp")
+        to_ut = _deprecation_decorator(as_unixtime, "utcnow.to_ut")
+        to_ts = _deprecation_decorator(as_unixtime, "utcnow.to_ts")
+        to_float = _deprecation_decorator(as_unixtime, "utcnow.to_float")
+        get_unixtime = _deprecation_decorator(as_unixtime, "utcnow.get_unixtime")
+        get_unix = _deprecation_decorator(as_unixtime, "utcnow.get_unix")
+        get_time = _deprecation_decorator(as_unixtime, "utcnow.get_time")
+        get_timestamp = _deprecation_decorator(as_unixtime, "utcnow.get_timestamp")
+        get_ut = _deprecation_decorator(as_unixtime, "utcnow.get_ut")
+        get_ts = _deprecation_decorator(as_unixtime, "utcnow.get_ts")
+        get_float = _deprecation_decorator(as_unixtime, "utcnow.get_float")
+        unixtime = _deprecation_decorator(as_unixtime, "utcnow.unixtime")
+        unix = _deprecation_decorator(as_unixtime, "utcnow.unix")
+        time = _deprecation_decorator(as_unixtime, "utcnow.time")
+        timestamp = _deprecation_decorator(as_unixtime, "utcnow.timestamp")
+        ut = _deprecation_decorator(as_unixtime, "utcnow.ut")
+        ts = _deprecation_decorator(as_unixtime, "utcnow.ts")
 
-        time_diff = timediff
-        diff = timediff
-        timedelta = timediff
-        delta = timediff
+        as_proto = _deprecation_decorator(as_protobuf, "utcnow.as_proto")
+        as_protobuf_timestamp = _deprecation_decorator(as_protobuf, "utcnow.as_protobuf_timestamp")
+        as_proto_timestamp = _deprecation_decorator(as_protobuf, "utcnow.as_proto_timestamp")
+        as_pb = _deprecation_decorator(as_protobuf, "utcnow.as_pb")
+        to_protobuf = _deprecation_decorator(as_protobuf, "utcnow.to_protobuf")
+        to_proto = _deprecation_decorator(as_protobuf, "utcnow.to_proto")
+        to_protobuf_timestamp = _deprecation_decorator(as_protobuf, "utcnow.to_protobuf_timestamp")
+        to_proto_timestamp = _deprecation_decorator(as_protobuf, "utcnow.to_proto_timestamp")
+        to_pb = _deprecation_decorator(as_protobuf, "utcnow.to_pb")
+        get_protobuf = _deprecation_decorator(as_protobuf, "utcnow.get_protobuf")
+        get_proto = _deprecation_decorator(as_protobuf, "utcnow.get_proto")
+        get_protobuf_timestamp = _deprecation_decorator(as_protobuf, "utcnow.get_protobuf_timestamp")
+        get_proto_timestamp = _deprecation_decorator(as_protobuf, "utcnow.get_proto_timestamp")
+        get_pb = _deprecation_decorator(as_protobuf, "utcnow.get_pb")
+        proto = _deprecation_decorator(as_protobuf, "utcnow.proto")
+        protobuf_timestamp = _deprecation_decorator(as_protobuf, "utcnow.protobuf_timestamp")
+        proto_timestamp = _deprecation_decorator(as_protobuf, "utcnow.proto_timestamp")
+        pb = _deprecation_decorator(as_protobuf, "utcnow.pb")
 
-        as_datestring = as_date_string
-        as_date_str = as_date_string
-        as_datestr = as_date_string
-        to_date_string = as_date_string
-        to_datestring = as_date_string
-        to_date_str = as_date_string
-        to_datestr = as_date_string
-        get_date_string = as_date_string
-        get_datestring = as_date_string
-        get_datestr = as_date_string
-        get_date_string = as_date_string
-        date_string = as_date_string
-        datestring = as_date_string
-        date_str = as_date_string
-        datestr = as_date_string
+        time_diff = _deprecation_decorator(timediff, "utcnow.time_diff")
+        diff = _deprecation_decorator(timediff, "utcnow.diff")
+        timedelta = _deprecation_decorator(timediff, "utcnow.timedelta")
+        delta = _deprecation_decorator(timediff, "utcnow.delta")
 
-        get_today = today
-        get_today_date = today
-        get_todays_date = today
-        get_date_today = today
-        date_today = as_date_string
-        today_date = today
-        todays_date = today
+        as_datestring = _deprecation_decorator(as_date_string, "utcnow.as_datestring")
+        as_date_str = _deprecation_decorator(as_date_string, "utcnow.as_date_str")
+        as_datestr = _deprecation_decorator(as_date_string, "utcnow.as_datestr")
+        to_date_string = _deprecation_decorator(as_date_string, "utcnow.to_date_string")
+        to_datestring = _deprecation_decorator(as_date_string, "utcnow.to_datestring")
+        to_date_str = _deprecation_decorator(as_date_string, "utcnow.to_date_str")
+        to_datestr = _deprecation_decorator(as_date_string, "utcnow.to_datestr")
+        get_date_string = _deprecation_decorator(as_date_string, "utcnow.get_date_string")
+        get_datestring = _deprecation_decorator(as_date_string, "utcnow.get_datestring")
+        get_datestr = _deprecation_decorator(as_date_string, "utcnow.get_datestr")
+        get_date_string = _deprecation_decorator(as_date_string, "utcnow.get_date_string")
+        date_string = _deprecation_decorator(as_date_string, "utcnow.date_string")
+        datestring = _deprecation_decorator(as_date_string, "utcnow.datestring")
+        date_str = _deprecation_decorator(as_date_string, "utcnow.date_str")
+        datestr = _deprecation_decorator(as_date_string, "utcnow.datestr")
+
+        get_today = _deprecation_decorator(today, "utcnow.get_today")
+        get_today_date = _deprecation_decorator(today, "utcnow.get_today_date")
+        get_todays_date = _deprecation_decorator(today, "utcnow.get_todays_date")
+        get_date_today = _deprecation_decorator(today, "utcnow.get_date_today")
+        date_today = _deprecation_decorator(as_date_string, "utcnow.date_today")
+        today_date = _deprecation_decorator(today, "utcnow.today_date")
+        todays_date = _deprecation_decorator(today, "utcnow.todays_date")
 
         def __str__(self) -> str:
             return self.rfc3339_timestamp()
@@ -902,9 +918,9 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
         "utcnow",
         (utcnow_,),
         {
-            "str": staticmethod_(utcnow_.rfc3339_timestamp),
-            "datetime": staticmethod_(utcnow_.as_datetime),
-            "protobuf": staticmethod_(utcnow_.as_protobuf),
+            "str": _deprecation_decorator(utcnow_.rfc3339_timestamp, "utcnow.str"),
+            "datetime": _deprecation_decorator(utcnow_.as_datetime, "utcnow.datetime"),
+            "protobuf": _deprecation_decorator(utcnow_.as_protobuf, "utcnow.protobuf"),
         },
     )
     utcnow = now = utcnow_type()
