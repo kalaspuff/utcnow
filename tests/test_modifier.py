@@ -1,15 +1,19 @@
+from datetime import UTC, datetime
+
 from freezegun import freeze_time
 
 import utcnow
 
 
 def test_rfc3339_modifier() -> None:
+    assert utcnow.rfc3339_timestamp(0, "+7d") == "1970-01-08T00:00:00.000000Z"
     assert utcnow.rfc3339_timestamp("2022-10-17T15:15:22.556084Z", "+365d") == "2023-10-17T15:15:22.556084Z"
     assert utcnow.rfc3339_timestamp("2022-10-17T15:15:22.556084Z", ".4") == "2022-10-17T15:15:22.956084Z"
     assert utcnow.rfc3339_timestamp(1666019834.321119, "-10s") == "2022-10-17T15:17:04.321119Z"
 
 
 def test_unixtime_modifier() -> None:
+    assert utcnow.unixtime(0, "+7d") == 604800.0
     assert utcnow.unixtime(0, "+10s") == 10.0
     assert utcnow.unixtime(0, "+24h") == 86400.0
     assert utcnow.unixtime("now", None) < utcnow.unixtime("+1s")
@@ -21,6 +25,7 @@ def test_unixtime_modifier() -> None:
 
 
 def test_datetime_modifier() -> None:
+    assert utcnow.as_datetime(0, "+7d") == datetime(1970, 1, 8, 0, 0, 0, 0, tzinfo=UTC)
     assert utcnow.as_datetime("now", "+60s") > utcnow.as_datetime("now")
     assert utcnow.as_datetime("+60s") > utcnow.as_datetime("now")
     assert utcnow.as_datetime("-60s") < utcnow.as_datetime("now")

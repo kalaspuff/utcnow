@@ -567,7 +567,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             return (
                 _timestamp_to_datetime(value)
                 if not modifier
-                else datetime_.datetime.now(UTC) + timedelta(seconds=modifier)
+                else _timestamp_to_datetime(value) + timedelta(seconds=modifier)
             )
 
         @staticmethod
