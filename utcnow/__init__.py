@@ -70,7 +70,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
     from decimal import Decimal
     from numbers import Real
     from types import FunctionType, ModuleType
-    from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+    from typing import Any, Callable, Dict, Optional, Tuple, Type, TypeVar, Union, cast
 
     from .__version_data__ import __version__, __version_info__
     from .protobuf import TimestampProtobufMessage
@@ -458,12 +458,9 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             return datetime_.datetime.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
     class utcnow_(_baseclass):
-        __instance: Optional[utcnow_] = None
         now = type("now", (now_,), {})()
 
         def __new__(cls: Type[UT], *args: Any) -> UT:
-            if cls.__instance is not None:
-                return cast(UT, cls.__instance)
             result = object.__new__(cls, *args)
 
             for attr in dir(cls):

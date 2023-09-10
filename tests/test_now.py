@@ -144,12 +144,13 @@ def test_utcnow_now_functionality() -> None:
     assert len(repr(now)) == 27
     assert len(now()) == 27
 
-    a = utcnow.now()
-    b = utcnow.now()
-    c = utcnow.now()
-    d = utcnow.now()
-    e = utcnow.now()
-    f = utcnow.now()
+    a: str = utcnow.now()
+    b: str = utcnow.now()
+    c: str = utcnow.now()
+    d: str = utcnow.now()
+    e: str = utcnow.now()
+    f: str = utcnow.now()
+
     assert a <= b <= c <= d <= e <= f
 
     a = str(utcnow.now)

@@ -72,8 +72,8 @@ def test_timediff_birth() -> None:
     end = "2021-02-27T08:54:30.999999Z"
 
     assert utcnow.timediff(begin, end) == utcnow.timediff(utcnow.get(begin), utcnow.get(end))
-    assert utcnow.timediff(begin, end) == utcnow.timediff(utcnow.datetime(begin), utcnow.datetime(end))
-    assert utcnow.timediff(begin, end) == utcnow.timediff(utcnow.datetime(begin), utcnow.get(end))
+    assert utcnow.timediff(begin, end) == utcnow.timediff(utcnow.as_datetime(begin), utcnow.as_datetime(end))
+    assert utcnow.timediff(begin, end) == utcnow.timediff(utcnow.as_datetime(begin), utcnow.get(end))
     assert utcnow.timediff(begin, end) == utcnow.timediff(utcnow.unixtime(begin), utcnow.get(end))
     assert utcnow.timediff(begin, end) == utcnow.timediff(utcnow.unixtime(begin), utcnow.unixtime(end))
     assert utcnow.timediff(begin, end) == utcnow.timediff(begin, utcnow.unixtime(end))
