@@ -443,10 +443,11 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
                 _transform_value(value) if not modifier else _transform_value(_timestamp_to_unixtime(value) + modifier)
             )
 
-    T = TypeVar("T")
+    NT = TypeVar("NT", bound="now_")
+    UT = TypeVar("UT", bound="utcnow_")
 
     class now_(_baseclass):
-        def __new__(cls: Type[T], *args: Any) -> T:
+        def __new__(cls: Type[NT], *args: Any) -> NT:
             result = object.__new__(cls, *args)
             return result
 
@@ -457,9 +458,12 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             return datetime_.datetime.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
     class utcnow_(_baseclass):
+        __instance: Optional[utcnow_] = None
         now = type("now", (now_,), {})()
 
-        def __new__(cls: Type[T], *args: Any) -> T:
+        def __new__(cls: Type[UT], *args: Any) -> UT:
+            if cls.__instance is not None:
+                return cast(UT, cls.__instance)
             result = object.__new__(cls, *args)
 
             for attr in dir(cls):
@@ -916,6 +920,22 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
     today = utcnow.today
     timediff = utcnow.timediff
 
+    __all__ = [
+        "__version__",
+        "__version_info__",
+        "__author__",
+        "__email__",
+        "rfc3339_timestamp",
+        "as_datetime",
+        "as_unixtime",
+        "as_protobuf",
+        "as_date_string",
+        "today",
+        "timediff",
+        "utcnow",
+        "now",
+    ]
+
     code = """\
 def __repr__(self) -> str:
     try:
@@ -931,13 +951,19 @@ module = type(
         "__spec__": original_module.__spec__,
         "__path__": original_module.__path__,
         "__annotations__": original_module.__annotations__,
-        "__doc__": original_module.__doc__,
         "__file__": original_module.__file__,
         "__package__": original_module.__package__,
         "__original_module__": original_module,
         "__class__": ModuleType_,
         "__all__": original_module.__all__,
         "__call__": staticmethod_(utcnow.rfc3339_timestamp),
+        "_is_numeric": staticmethod_(_is_numeric),
+        "_timestamp_to_datetime": staticmethod_(_timestamp_to_datetime),
+        "_transform_value": staticmethod_(_transform_value),
+        "utcnow": utcnow,
+        "now": utcnow,
+        "NOW": NOW,
+        "TODAY": TODAY,
         **{
             attr: staticmethod_(getattr(utcnow, attr))
             for attr in dir(utcnow)
@@ -950,37 +976,12 @@ module = type(
                 )
             )
         },
-        "_is_numeric": staticmethod_(_is_numeric),
-        "_timestamp_to_datetime": staticmethod_(_timestamp_to_datetime),
-        "_transform_value": staticmethod_(_transform_value),
-        "NOW": NOW,
-        "TODAY": TODAY,
     },
 )
 module_ = module(original_module.__name__, original_module.__doc__)
 """
 
     original_module = sys.modules[__name__]  # noqa
-    setattr(
-        original_module,
-        "__all__",
-        [
-            "__version__",
-            "__version_info__",
-            "__author__",
-            "__email__",
-            "rfc3339_timestamp",
-            "as_datetime",
-            "as_unixtime",
-            "as_protobuf",
-            "as_date_string",
-            "today",
-            "timediff",
-            "utcnow",
-            "now",
-        ],
-    )
-
     code_object = compile(code, "<string>", "exec")
     globals_: Dict[str, Any] = {
         "ModuleType_": ModuleType,
@@ -1010,10 +1011,14 @@ module_ = module(original_module.__name__, original_module.__doc__)
     locals_: Dict[str, Any] = {}
     exec(code_object, globals_, locals_)
     module_ = cast(ModuleType, locals_["module_"])
+
     del globals_
     del locals_
-    original_module.__annotations__.pop("globals_")
-    original_module.__annotations__.pop("locals_")
+
+    if original_module.__annotations__ and isinstance(original_module.__annotations__, dict):
+        original_module.__annotations__.pop("globals_")
+        original_module.__annotations__.pop("locals_")
+
     module_.__dict__.update(
         {
             **{k: v for k, v in original_module.__dict__.items() if k in module_.__all__},
@@ -1034,19 +1039,3 @@ module_ = module(original_module.__name__, original_module.__doc__)
 
 del sys
 del annotations
-
-__all__ = [
-    "__version__",
-    "__version_info__",
-    "__author__",
-    "__email__",
-    "rfc3339_timestamp",
-    "as_datetime",
-    "as_unixtime",
-    "as_protobuf",
-    "as_date_string",
-    "today",
-    "timediff",
-    "utcnow",
-    "now",
-]

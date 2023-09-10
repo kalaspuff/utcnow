@@ -6,13 +6,14 @@ def test_module() -> None:
     import utcnow
 
     # Test types
-    assert isinstance(utcnow, ModuleType)  # type: ignore
+    assert isinstance(utcnow, ModuleType)
     assert utcnow.__class__ is ModuleType
     assert len(str(utcnow)) == 27
     assert isinstance(repr(utcnow), str)
     assert len(repr(utcnow)) == 27
 
-    # Modules aren't callable, but this one is – it's frowned upon and bad practice.
+    # Modules aren't supposed to be callable, but this one is – it's frowned upon and bad practice.
+    # In this case, it's a feature, although experimental.
     assert utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow("1984-08-01 00:00:00") == "1984-08-01T00:00:00.000000Z"
     assert utcnow("1984-08-01 12:00:00") != "1984-08-01T00:00:00.000000Z"
