@@ -449,17 +449,17 @@ utcnow.as_date_string(timestamp)
 # "2022-04-05"
 ```
 
-Bonus 🎉🎉 – calling the `utcnow.as_date_string()` function without arguments will return today's date, _based on the current time in UTC_. For some sugar to your code, the same function is also available under the name `utcnow.get_today()`.
+Bonus 🎉🎉 – calling the `utcnow.as_date_string()` function without arguments will return today's date, _based on the current time in UTC_. For some sugar to your code, the same function is also available under the name `utcnow.today()`.
 
 To get the current date in another timezone use the keyword argument `tz` to the function call. The value for `tz` should be either a `datetime.tzinfo` object or an utcoffset represented as a string (for example "+01:00", "-06:00", etc.).
 
 ```python
 import utcnow
 
-utcnow.get_today()
+utcnow.today()
 # "2022-04-05" (it's the 5th of April when typing this)
 
-utcnow.get_today(tz="+12:00")
+utcnow.today(tz="+12:00")
 # "2022-04-06" (time in UTC is currently 15:12 - adding 12 hours to that would yield 03:12 tomorrow)
 ```
 
