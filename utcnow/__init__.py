@@ -51,7 +51,11 @@ at this date.
 
 See also:
 ``utcnow.as_date_string(value, tz)``
-    Transforms the input value to a string representing a date (YYYY-mm-dd) without timespec or timezone.
+    Transforms the input value to a string representing a date (YYYY-mm-dd) without timespec or indicated timezone.
+    An optional ``tz`` argument can be used to return the date in the specific timezone.
+``utcnow.today(tz)``
+    Returns a string representing today's date (YYYY-mm-dd) without timespec or indicated timezone.
+    An optional ``tz`` argument can be used to return today's date in the specific timezone.
 ``utcnow.timediff(begin, end, unit)``
     Calculate the time difference between two timestamps.
 """
