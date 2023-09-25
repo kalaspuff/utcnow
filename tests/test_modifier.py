@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from freezegun import freeze_time
 
@@ -25,9 +25,9 @@ def test_unixtime_modifier() -> None:
 
 
 def test_datetime_modifier() -> None:
-    assert utcnow.as_datetime(0, "+7d") == datetime(1970, 1, 8, 0, 0, 0, 0, tzinfo=UTC)
+    assert utcnow.as_datetime(0, "+7d") == datetime(1970, 1, 8, 0, 0, 0, 0, tzinfo=timezone.utc)
     assert utcnow.as_datetime("2022-10-17T15:15:22.556084Z", "+365d") == datetime(
-        2023, 10, 17, 15, 15, 22, 556084, tzinfo=UTC
+        2023, 10, 17, 15, 15, 22, 556084, tzinfo=timezone.utc
     )
     assert utcnow.as_datetime("now", "+60s") > utcnow.as_datetime("now")
     assert utcnow.as_datetime("+60s") > utcnow.as_datetime("now")
