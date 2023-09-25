@@ -448,13 +448,12 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
         @functools.wraps(func)
         def _wrapper(*a: Any, **kw: Any) -> Any:
             warnings.warn(
-                f"Using the '{deprecated_func_name}()' function alias is deprecated. Use the 'utcnow.{func.__name__}()' function instead.",
+                f"Using the '{deprecated_func_name}()' function alias is deprecated. Use the 'utcnow.{getattr(func, '__name__') if getattr(func, '__name__', None) else func.__func__.__name__}()' function instead.",
                 DeprecationWarning,
             )
-            print(
-                f"Using the '{deprecated_func_name}()' function alias is deprecated. Use the 'utcnow.{func.__name__}()' function instead."
-            )
 
+            if isinstance(func, staticmethod):
+                return func.__func__(*a, **kw)
             return func(*a, **kw)
 
         return cast(CT, staticmethod(_wrapper))
