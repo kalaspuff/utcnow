@@ -6,11 +6,11 @@
 [![MIT License](https://img.shields.io/github/license/kalaspuff/utcnow.svg)](https://github.com/kalaspuff/utcnow/blob/master/LICENSE)
 [![Code coverage](https://codecov.io/gh/kalaspuff/utcnow/branch/master/graph/badge.svg)](https://codecov.io/gh/kalaspuff/utcnow/tree/master/utcnow)
 
-*Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion functionality from other timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objets and other common date utilities. Follow modern practices when developing API interfaces.*
+*Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion functionality from other timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objects and other common date utilities. Follow modern practices when developing API interfaces.*
 
-### A library for formatting timestamps as RFC3339
+### A library for formatting timestamps as RFC 3339
 
-* One preferred output format strictly following RFC3339.
+* One preferred output format strictly following RFC 3339.
 * Making it easier to follow common best practices for developers.
 * Tranforming timestamps from (or when needed, to) common interfaces such as unix timestamps, `datetime` objects, `google.protobuf.Timestamp` messages or plain text.
 * Type hinted, battle tested and supporting several versions of Python.

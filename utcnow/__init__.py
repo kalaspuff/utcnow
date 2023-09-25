@@ -1,11 +1,11 @@
 """Package for formatting arbitrary timestamps as strict RFC 3339.
 
 Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion functionality from other
-timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objets
+timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objects
 and other common date utilities.
 
 ``utcnow.rfc3339_timestamp(value, modifier)``
-    Transforms the input value to a timestamp string in RFC3339 format.
+    Transforms the input value to a timestamp string in RFC 3339 format.
 ``utcnow.as_datetime(value, modifier)``
     Transforms the input value to a datetime object.
 ``utcnow.as_unixtime(value, modifier)``
@@ -19,7 +19,7 @@ modifier: An optional modifier to be added to the Unix timestamp of the value. D
     Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
 
 Examples:
-    A few examples of transforming an arbitrary timestamp value to a RFC3339 timestamp string.
+    A few examples of transforming an arbitrary timestamp value to a RFC 3339 timestamp string.
 
     >>> import utcnow
     >>> utcnow.rfc3339_timestamp("2023-09-07 02:18:00")
@@ -235,13 +235,13 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
 
     @functools.lru_cache(maxsize=128, typed=True)
     def _transform_value(value: Union[str, datetime, object, int, float, Decimal, Real]) -> str:
-        """Transforms the input value to a timestamp string in RFC3339 format.
+        """Transforms the input value to a timestamp string in RFC 3339 format.
 
         Args:
             value: A value representing a timestamp in any of the allowed input formats.
 
         Returns:
-            The transformed value as a string in RFC3339 format.
+            The transformed value as a string in RFC 3339 format.
         """
         str_value: str
         try:
@@ -420,7 +420,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             value: Union[str, datetime, object, int, float, Decimal, Real] = NOW,
             modifier: Optional[Union[str, int, float]] = 0,
         ) -> str:
-            """Transforms the input value to a timestamp string in RFC3339 format.
+            """Transforms the input value to a timestamp string in RFC 3339 format.
 
             Args:
                 value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
@@ -429,7 +429,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
                     Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
 
             Returns:
-                The transformed value as a string in RFC3339 format.
+                The transformed value as a string in RFC 3339 format.
 
             Raises:
                 ValueError: If the input value does not match allowed input formats.
@@ -505,7 +505,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             value: Union[str, datetime, object, int, float, Decimal, Real] = NOW,
             modifier: Optional[Union[str, int, float]] = 0,
         ) -> str:
-            """Transforms the input value to a timestamp string in RFC3339 format.
+            """Transforms the input value to a timestamp string in RFC 3339 format.
 
             Args:
                 value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
@@ -514,7 +514,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
                     Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
 
             Returns:
-                The transformed value as a string in RFC3339 format.
+                The transformed value as a string in RFC 3339 format.
 
             Raises:
                 ValueError: If the input value does not match allowed input formats.
