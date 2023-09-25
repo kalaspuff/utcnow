@@ -116,10 +116,15 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
         r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt ]([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9].[0-9]{6}([Zz]|[+-]00:00|)$"
     )
 
-    # modifier multipliers: "s" (seconds), "m" (minutes), "h" (hours), "d" (days)
+    # common modifier multipliers: "s" (seconds), "m" (minutes), "h" (hours), "d" (days)
+    # precision modifier multiplicers: "ns" (nanoseconds), "us" (microseconds), "ms" (milliseconds)
     # example: a modifier value of "+10d" => add 10 days.
     # example: a modifier value of "-1h" => subtract 1 hour.
     MODIFIER_MUL = {
+        "ns": 1e-9,
+        "us": 1e-6,
+        "µs": 1e-6,
+        "ms": 1e-3,
         "s": 1,
         "m": 60,
         "h": 3600,
@@ -197,7 +202,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             and str(value)[0] in ("+", "-")
             and not modifier
             and isinstance(value, str)
-            and value[-1] in MODIFIER_MUL
+            and (value[-1] in MODIFIER_MUL or value[-2:] in MODIFIER_MUL)
         ):
             modifier = value
             value = NOW
@@ -207,14 +212,15 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
 
         if isinstance(modifier, str):
             modifier_mul: int = 1
-            modifier_mul_str = modifier[-1]
+            modifier_mul_str = modifier[-1] if modifier[-2:] not in MODIFIER_MUL else modifier[-2:]
 
             if (
                 len(modifier) > 1
                 and modifier_mul_str in MODIFIER_MUL
-                and (modifier[-2].isdigit() or modifier[-2] == ".")
+                and len(modifier) > len(modifier_mul_str)
+                and (modifier[-(len(modifier_mul_str) + 1)].isdigit() or modifier[-(len(modifier_mul_str) + 1)] == ".")
             ):
-                modifier = modifier[:-1]
+                modifier = modifier[: -len(modifier_mul_str)]
                 modifier_mul = MODIFIER_MUL[modifier_mul_str]
 
             if "." in modifier:
@@ -697,6 +703,12 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             delta = _timestamp_to_datetime(end) - _timestamp_to_datetime(begin)
             unit = unit.lower()
 
+            if unit in ("nanoseconds", "nanosecond", "nsec", "ns", "nanos", "nano", "nanosec"):
+                return delta.total_seconds() * 1e9
+            if unit in ("microseconds", "microsecond", "usec", "us", "micros", "micro", "microsec", "µs"):
+                return delta.total_seconds() * 1e6
+            if unit in ("milliseconds", "millisecond", "msec", "ms", "millis", "milli", "millisec"):
+                return delta.total_seconds() * 1e3
             if unit in ("seconds", "second", "sec", "s"):
                 return delta.total_seconds()
             if unit in ("minutes", "minute", "min", "m"):

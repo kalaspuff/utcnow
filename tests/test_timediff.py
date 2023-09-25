@@ -12,6 +12,10 @@ def test_timediff_basic() -> None:
     assert utcnow.timediff(end=1, begin=0) == 1
     assert utcnow.timediff(0, 2) == 2
     assert utcnow.timediff(0, 60) == 60
+    assert utcnow.timediff(0, 4.711, "milliseconds") == 4711.0
+    assert utcnow.timediff(0, 0.013338, "microseconds") == 13338.0
+    assert utcnow.timediff(0, 0.000042, "nanoseconds") == 42000.0
+    assert utcnow.timediff(0, 60, "seconds") == 60
     assert utcnow.timediff(0, 60, "minutes") == 1
     assert utcnow.timediff(0, 60 * 60, "minutes") == 60
     assert utcnow.timediff(0, 60 * 60, "hours") == 1
@@ -44,6 +48,8 @@ def test_timediff_comparison() -> None:
     assert round(utcnow.timediff("1984-08-01T00:50:15", "1984-08-02", "days"), 8) == round(0.96510417, 8)
 
     assert utcnow.timediff("1984-08-01T13:38:00.471100Z", "1984-08-01T13:38:00.471101Z") == 0.000001
+    assert utcnow.timediff("1984-08-01T13:38:00.471100Z", "1984-08-01T13:38:00.471101Z", "ms") == 0.001
+    assert utcnow.timediff("1984-08-01T13:38:00.471100Z", "1984-08-01T13:38:00.471101Z", "us") == 1.0
     assert utcnow.timediff("1984-08-01T13:38:00.471100Z", "1984-08-01T13:38:01") == 0.528900
     assert utcnow.timediff("1984-08-01T13:38:00.471100Z", "1984-08-01T13:38:01.000000Z") == 0.528900
     assert utcnow.timediff("1984-08-01T13:38:00.471100Z", "1984-08-01T13:38:01.000000+00:00") == 0.528900
