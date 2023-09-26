@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import functools
 from datetime import datetime, tzinfo
 from decimal import Decimal
 from numbers import Real
-from typing import Any, Optional, Union
+from typing import Any, Generic, Optional, Type, TypeVar, Union
 
 from utcnow.protobuf import TimestampProtobufMessage
 
@@ -261,6 +263,105 @@ def _transform_value(value: Union[str, datetime, object, int, float, Decimal, Re
     Returns:
         The transformed value as a string in RFC3339 format.
     """
+
+TS = TypeVar("TS", bound="TimeSynchronizer")
+
+class TimeSynchronizer(Generic[TS]):
+    """Creates a context manager that when used sets the current time in calls to the utcnow library to return
+        the deterministic value of the context manager.
+
+    Args:
+        value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
+        modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+            Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000
+            seconds). Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+    Returns:
+        The utcnow.synchronizer object initialized on the specified time and eventual modifier.
+
+    Raises:
+        ValueError: If the input value does not match allowed input formats.
+        RuntimeError: If an utcnow.synchronizer context has already been opened or if the same synchronizer
+            context is invalidly used, either multiple times or if the context has expired (replaced by a
+            more recently initiated synchronizer context).
+
+    Examples:
+        >>> import utcnow
+        >>> with utcnow.synchronizer:
+                created_time = utcnow.rfc3339_timestamp()
+                expire_time = utcnow.rfc3339_timestamp("now", "+15m")
+        >>> utcnow.timediff(created_time, expire_time, "seconds")
+        900.0
+    """
+
+    def __new__(cls: Type[TimeSynchronizer[TS]]) -> TimeSynchronizer[TS]: ...
+    def __call__(
+        self: TimeSynchronizer[TS],
+        value: Union[str, datetime, object, int, float, Decimal, Real] = NOW,
+        modifier: Optional[Union[str, int, float]] = 0,
+    ) -> TimeSynchronizer[TS]:
+        """Creates a context manager that when used sets the current time in calls to the utcnow library to return
+            the deterministic value of the context manager.
+
+        Args:
+            value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
+            modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+                Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000
+                seconds). Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+        Returns:
+            The utcnow.synchronizer object initialized on the specified time and eventual modifier.
+
+        Raises:
+            ValueError: If the input value does not match allowed input formats.
+            RuntimeError: If an utcnow.synchronizer context has already been opened or if the same synchronizer
+                context is invalidly used either multiple times or has expired and been replaced by another
+                synchronizer.
+
+        Examples:
+            >>> import utcnow
+            >>> with utcnow.synchronizer:
+                    created_time = utcnow.rfc3339_timestamp()
+                    expire_time = utcnow.rfc3339_timestamp("now", "+15m")
+            >>> utcnow.timediff(created_time, expire_time, "seconds")
+            900.0
+        """
+    def __enter__(self: TimeSynchronizer[TS]) -> TimeSynchronizer[TS]:
+        """Opens a context manager that sets the current time in calls to the utcnow library to return
+            the current time as a deterministic value either set as part of 'utcnow.synchronizer()' initation as or
+            fallback using the current time of when the context manager was opened.
+
+        Returns:
+            The utcnow.synchronizer value.
+
+        Raises:
+            RuntimeError: If an utcnow.synchronizer context has already been opened or if the same synchronizer
+                context is invalidly used either multiple times or has expired and been replaced by another
+                synchronizer.
+
+        Examples:
+            >>> import utcnow
+            >>> with utcnow.synchronizer:
+                    created_time = utcnow.rfc3339_timestamp()
+                    expire_time = utcnow.rfc3339_timestamp("now", "+15m")
+            >>> utcnow.timediff(created_time, expire_time, "seconds")
+            900.0
+        """
+    def __exit__(self, *args: Any, **kwargs: Any) -> None: ...
+    @property
+    def datetime(self) -> datetime: ...
+    @property
+    def time(self) -> float: ...
+    @property
+    def time_ns(self) -> int: ...
+    @property
+    def frozen(self) -> bool: ...
+
+class __synchronizer:
+    class synchronizer(TimeSynchronizer):
+        pass
+
+__synchronizer__ = synchronizer = TimeSynchronizer[__synchronizer.synchronizer]()
 
 class utcnow(str):
     def __repr__(self) -> str: ...
@@ -660,6 +761,8 @@ class utcnow(str):
     today_date = today
     todays_date = today
 
+    synchronizer = __synchronizer__
+
 class now(str):
     def __repr__(self) -> str: ...
     def __str__(self) -> str: ...
@@ -1058,6 +1161,8 @@ class now(str):
     today_date = today
     todays_date = today
 
+    synchronizer = __synchronizer__
+
 as_string = rfc3339_timestamp
 as_str = rfc3339_timestamp
 as_rfc3339 = rfc3339_timestamp
@@ -1179,6 +1284,7 @@ __all__ = [
     "rfc3339_timestamp",
     "timediff",
     "today",
+    "synchronizer",
     "_is_numeric",
     "_timestamp_to_datetime",
     "_transform_value",

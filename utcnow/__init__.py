@@ -58,6 +58,8 @@ See also:
     An optional ``tz`` argument can be used to return today's date in the specific timezone.
 ``utcnow.timediff(begin, end, unit)``
     Calculate the time difference between two timestamps.
+``utcnow.synchronizer``
+    Freeze the current time in ``utcnow`` with the ``utcnow.synchronizer`` context manager.
 """
 
 from __future__ import annotations
@@ -75,7 +77,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
     from decimal import Decimal
     from numbers import Real
     from types import FunctionType, ModuleType
-    from typing import Any, Callable, Dict, Optional, Tuple, Type, TypeVar, Union, cast
+    from typing import Any, Callable, Dict, Generic, Optional, Tuple, Type, TypeVar, Union, cast
 
     from .__version_data__ import __version__, __version_info__
     from .protobuf import TimestampProtobufMessage
@@ -83,6 +85,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
     __author__: str = "Carl Oscar Aaro"
     __email__: str = "hello@carloscar.com"
 
+    # sentinel
     NOW = TODAY = object()
 
     # the following formats are accepted as date and date+time as string formatted input values.
@@ -137,6 +140,213 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
 
     # datetime.timezone.utc
     utc = UTC = timezone.utc
+
+    # time synchronizer context manager
+    TS = TypeVar("TS", bound="TimeSynchronizer")
+
+    class TimeSynchronizer(Generic[TS]):
+        """Creates a context manager that when used sets the current time in calls to the utcnow library to return
+            the deterministic value of the context manager.
+
+        Args:
+            value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
+            modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+                Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000
+                seconds). Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+        Returns:
+            The utcnow.synchronizer object initialized on the specified time and eventual modifier.
+
+        Raises:
+            ValueError: If the input value does not match allowed input formats.
+            RuntimeError: If an utcnow.synchronizer context has already been opened or if the same synchronizer
+                context is invalidly used, either multiple times or if the context has expired (replaced by a
+                more recently initiated synchronizer context).
+
+        Examples:
+            >>> import utcnow
+            >>> with utcnow.synchronizer:
+                    created_time = utcnow.rfc3339_timestamp()
+                    expire_time = utcnow.rfc3339_timestamp("now", "+15m")
+            >>> utcnow.timediff(created_time, expire_time, "seconds")
+            900.0
+        """
+
+        _frozen: bool
+        _synchronizer: TimeSynchronizer[TS]
+        _controller: Optional[TimeSynchronizer[TS]]
+        _datetime: datetime_.datetime
+        _time_ns: int
+
+        def __new__(cls: Type[TS]) -> TimeSynchronizer[TS]:
+            result = super().__new__(cls)
+            result._frozen = False
+
+            if not getattr(cls, "_synchronizer", None):
+                cls._synchronizer = result
+                result._controller = None
+
+            return result
+
+        def __call__(
+            self,
+            value: Union[str, datetime, object, int, float, Decimal, Real] = NOW,
+            modifier: Optional[Union[str, int, float]] = 0,
+        ) -> TimeSynchronizer[TS]:
+            """Creates a context manager that when used sets the current time in calls to the utcnow library to return
+                the deterministic value of the context manager.
+
+            Args:
+                value: A value representing a timestamp in any of the allowed input formats, or "now" if left unset.
+                modifier: An optional modifier to be added to the Unix timestamp of the value. Defaults to 0.
+                    Can be specified in seconds (int or float) or as string, for example "+10d" (10 days => 864000
+                    seconds). Can also be set to a negative value, for example "-1h" (1 hour => -3600 seconds).
+
+            Returns:
+                The utcnow.synchronizer object initialized on the specified time and eventual modifier.
+
+            Raises:
+                ValueError: If the input value does not match allowed input formats.
+                RuntimeError: If an utcnow.synchronizer context has already been opened or if the same synchronizer
+                    context is invalidly used, either multiple times or if the context has expired (replaced by a
+                    more recently initiated synchronizer context).
+
+            Examples:
+                >>> import utcnow
+                >>> with utcnow.synchronizer:
+                        created_time = utcnow.rfc3339_timestamp()
+                        expire_time = utcnow.rfc3339_timestamp("now", "+15m")
+                >>> utcnow.timediff(created_time, expire_time, "seconds")
+                900.0
+            """
+            if self._synchronizer._frozen is True:
+                raise RuntimeError("'utcnow.synchronizer' context cannot be nested (library time already synchronized)")
+            if self._synchronizer is not self:
+                raise RuntimeError("use the main 'utcnow.synchronizer' to initialize a new context manager")
+
+            cls = type(self)
+            self._synchronizer._controller = None
+            self_ = cls()
+
+            if value is NOW and modifier == 0:
+                self_._time_ns = int(round(time_.time_ns() * 1e-3)) * 1_000
+                self_._datetime = datetime_.datetime.fromtimestamp(round(self_._time_ns * 1e-9, 6), tz=UTC)
+            else:
+                value, modifier = _init_modifier(value, modifier)
+                if value is not NOW:
+                    self_._datetime = (
+                        _timestamp_to_datetime(value)
+                        if not modifier
+                        else _timestamp_to_datetime(value) + timedelta(seconds=modifier)
+                    )
+                    self_._time_ns = int(round(self_._datetime.timestamp() * 1e6)) * 1_000
+                else:
+                    self_._time_ns = int(round(time_.time_ns() * 1e-3)) * 1_000 + int(round(modifier * 1e6)) * 1_000
+                    self_._datetime = datetime_.datetime.fromtimestamp(round(self_._time_ns * 1e-9, 6), tz=UTC)
+
+            self._synchronizer._controller = self_
+            return self_
+
+        def __enter__(
+            self,
+        ) -> TimeSynchronizer[TS]:
+            """Opens a context manager that sets the current time in calls to the utcnow library to return
+                the current time as a deterministic value either set as part of 'utcnow.synchronizer()' initation as or
+                fallback using the current time of when the context manager was opened.
+
+            Returns:
+                The utcnow.synchronizer value.
+
+            Raises:
+                RuntimeError: If an utcnow.synchronizer context has already been opened or if the same synchronizer
+                    context is invalidly used either multiple times or has expired and been replaced by another
+                    synchronizer.
+
+            Examples:
+                >>> import utcnow
+                >>> with utcnow.synchronizer:
+                        created_time = utcnow.rfc3339_timestamp()
+                        expire_time = utcnow.rfc3339_timestamp("now", "+15m")
+                >>> utcnow.timediff(created_time, expire_time, "seconds")
+                900.0
+            """
+            if self._frozen is True or self._synchronizer._frozen is True:
+                raise RuntimeError("'utcnow.synchronizer' context cannot be nested (library time already synchronized)")
+
+            if self._synchronizer is not self:
+                if self._synchronizer._controller is not self:
+                    raise RuntimeError(
+                        "'utcnow.synchronizer' context must be initiated from the newly created child synchronizer"
+                    )
+
+                self._frozen = True
+                self._synchronizer._time_ns = self._time_ns
+                self._synchronizer._datetime = self._datetime
+                return self._synchronizer.__enter__()
+
+            if self._synchronizer._controller is not None and self._synchronizer._controller._frozen is False:
+                self._synchronizer._controller = None
+
+            if self._synchronizer._controller is None:
+                self._time_ns = int(round(time_.time_ns() * 1e-3)) * 1_000
+                self._datetime = datetime_.datetime.fromtimestamp(round(self._time_ns * 1e-9, 6), tz=UTC)
+
+            self._frozen = True
+            return self
+
+        def __exit__(self, *args: Any, **kwargs: Any) -> None:
+            if (
+                self._synchronizer is not self
+                and self._synchronizer._controller is self
+                and self._synchronizer._frozen is True
+            ):
+                self._synchronizer.__exit__(*args, **kwargs)
+            elif self._synchronizer is self and self._frozen is True:
+                self._frozen = False
+                self._controller = None
+
+        def __repr__(self) -> str:
+            if self._synchronizer is not self:
+                value = self._datetime.isoformat(timespec="microseconds").replace("+00:00", "Z")
+                if self._synchronizer._controller is not self:
+                    if self._frozen:
+                        return (
+                            f"<utcnow.synchronizer [child: {hex(id(self))}] (deactivated context) timestamp='{value}'>"
+                        )
+                    return f"<utcnow.synchronizer [child: {hex(id(self))}] (expired) timestamp='{value}'>"
+                if self._frozen is True and self._synchronizer._frozen is True:
+                    return f"<utcnow.synchronizer [child: {hex(id(self))}] (active context) timestamp='{value}'>"
+                return f"<utcnow.synchronizer [child: {hex(id(self))}] (pending context) timestamp='{value}'>"
+
+            if self._frozen:
+                value = self._datetime.isoformat(timespec="microseconds").replace("+00:00", "Z")
+                return f"<utcnow.synchronizer [main: {hex(id(self))}] (active context) timestamp='{value}'>"
+
+            return f"<utcnow.synchronizer [main: {hex(id(self))}]>"
+
+        def __eq__(self, other: Any) -> bool:
+            return bool(other is self)
+
+        @property
+        def frozen(self) -> bool:
+            return self._frozen
+
+        @property
+        def datetime(self) -> datetime_.datetime:
+            return self._datetime if self._frozen is True else datetime_.datetime.now(UTC)
+
+        @property
+        def time(self) -> float:
+            return round(self._time_ns * 1e-9 if self._frozen is True else self.time_ns * 1e-9, 6)
+
+        @property
+        def time_ns(self) -> float:
+            return self._time_ns if self._frozen is True else int(round(time_.time_ns() * 1e-3)) * 1_000
+
+    __synchronizer: Type[TimeSynchronizer] = type(
+        "synchronizer", (TimeSynchronizer,), {"__doc__": TimeSynchronizer.__doc__}
+    )
+    __synchronizer__ = synchronizer = TimeSynchronizer.__new__(__synchronizer)
 
     CT = TypeVar("CT", bound=Callable)
 
@@ -357,7 +567,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             The transformed value as a google.protobuf.Timestamp message.
         """
         seconds = int(unixtime_value)
-        nanos = round(int((unixtime_value - seconds) * 1e6)) * 1000
+        nanos = int(round((unixtime_value - seconds) * 1e6)) * 1_000
         if nanos < 0:
             seconds -= 1
             nanos += 1_000_000_000
@@ -442,11 +652,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
 
             if value is NOW:
                 return (
-                    (
-                        datetime_.datetime.now(UTC)
-                        if not modifier
-                        else datetime_.datetime.now(UTC) + timedelta(seconds=modifier)
-                    )
+                    (synchronizer.datetime if not modifier else synchronizer.datetime + timedelta(seconds=modifier))
                     .isoformat(timespec="microseconds")
                     .replace("+00:00", "Z")
                 )
@@ -477,10 +683,10 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             return result
 
         def __str__(self) -> str:
-            return datetime_.datetime.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
+            return synchronizer.datetime.isoformat(timespec="microseconds").replace("+00:00", "Z")
 
         def __repr__(self) -> str:
-            return datetime_.datetime.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
+            return synchronizer.datetime.isoformat(timespec="microseconds").replace("+00:00", "Z")
 
     class utcnow_(_baseclass):
         now = type("now", (now_,), {})()
@@ -543,11 +749,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
 
             if value is NOW:
                 return (
-                    (
-                        datetime_.datetime.now(UTC)
-                        if not modifier
-                        else datetime_.datetime.now(UTC) + timedelta(seconds=modifier)
-                    )
+                    (synchronizer.datetime if not modifier else synchronizer.datetime + timedelta(seconds=modifier))
                     .isoformat(timespec="microseconds")
                     .replace("+00:00", "Z")
                 )
@@ -582,12 +784,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             value, modifier = _init_modifier(value, modifier)
 
             if value is NOW:
-                # 'datetime.datetime_.datetime.now(UTC)' is faster than (deprecated) 'datetime.datetime.utcnow().replace(tzinfo=UTC)'
-                return (
-                    datetime_.datetime.now(UTC)
-                    if not modifier
-                    else datetime_.datetime.now(UTC) + timedelta(seconds=modifier)
-                )
+                return synchronizer.datetime if not modifier else synchronizer.datetime + timedelta(seconds=modifier)
             return (
                 _timestamp_to_datetime(value)
                 if not modifier
@@ -625,7 +822,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             value, modifier = _init_modifier(value, modifier)
 
             if value is NOW:
-                return time_.time() + modifier
+                return synchronizer.time + modifier
             return _timestamp_to_unixtime(value) + modifier
 
         @staticmethod
@@ -659,9 +856,9 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
             value, modifier = _init_modifier(value, modifier)
 
             if value is NOW:
-                unixtime_value = time_.time() + modifier
+                unixtime_value = synchronizer.time + modifier
                 seconds = int(unixtime_value)
-                nanos = round(int((unixtime_value - seconds) * 1e6)) * 1000
+                nanos = int(round((unixtime_value - seconds) * 1e6)) * 1_000
                 if nanos < 0:
                     seconds -= 1
                     nanos += 1_000_000_000
@@ -704,11 +901,16 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
                 >>> utcnow.timediff(0, 7200, unit="hours")
                 2.0
             """
-            delta = _timestamp_to_datetime(end) - _timestamp_to_datetime(begin)
+            if synchronizer.frozen is False:
+                with synchronizer:
+                    delta = utcnow_.as_datetime(end) - utcnow_.as_datetime(begin)
+            else:
+                delta = utcnow_.as_datetime(end) - utcnow_.as_datetime(begin)
+
             unit = unit.lower()
 
             if unit in ("nanoseconds", "nanosecond", "nsec", "ns", "nanos", "nano", "nanosec"):
-                return delta.total_seconds() * 1e9
+                return int(delta.total_seconds() * 1e6) * 1_000
             if unit in ("microseconds", "microsecond", "usec", "us", "micros", "micro", "microsec", "µs"):
                 return delta.total_seconds() * 1e6
             if unit in ("milliseconds", "millisecond", "msec", "ms", "millis", "milli", "millisec"):
@@ -776,7 +978,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
                 )
 
             if value is TODAY or (isinstance(value, str) and str(value).lower() in ("now", "today")):
-                return datetime_.datetime.now(date_tz).date().isoformat()
+                return datetime_.datetime.fromtimestamp(synchronizer.time, tz=date_tz).date().isoformat()
 
             return _timestamp_to_datetime(value).astimezone(date_tz).date().isoformat()
 
@@ -811,6 +1013,8 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
                 "2023-09-08"  # current date in a timezone with UTC offset +01:00
             """
             return utcnow_.as_date_string(tz=tz)
+
+        synchronizer = synchronizer
 
         as_string = rfc3339_timestamp
         get = rfc3339_timestamp
@@ -962,6 +1166,7 @@ if __name__ not in sys.modules or not getattr(sys.modules[__name__], "__original
         "timediff",
         "utcnow",
         "now",
+        "synchronizer",
     ]
 
     code = """\
@@ -992,6 +1197,7 @@ module = type(
         "now": utcnow,
         "NOW": NOW,
         "TODAY": TODAY,
+        "synchronizer": synchronizer,
         **{
             attr: staticmethod_(getattr(utcnow, attr))
             for attr in dir(utcnow)
@@ -1023,6 +1229,7 @@ module_ = module(original_module.__name__, original_module.__doc__)
         "_transform_value": _transform_value,
         "NOW": NOW,
         "TODAY": TODAY,
+        "synchronizer": synchronizer,
         "__builtins__": {
             "type": type,
             "print": print,

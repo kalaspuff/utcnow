@@ -85,6 +85,16 @@ def test_timediff_birth() -> None:
     assert utcnow.timediff(begin, end) == utcnow.timediff(begin, utcnow.unixtime(end))
 
 
+def test_timediff_frozen_now() -> None:
+    import utcnow
+
+    assert utcnow.timediff("now", "now") == 0
+    assert utcnow.timediff("now", "+1h") == 3600.0
+    assert utcnow.timediff("+2h", "+3600s") == -3600.0
+    assert utcnow.timediff("now", "+1us") == 0.000001
+    assert utcnow.timediff("-50us", "+3.049ms", "us") == 3099.0
+
+
 def test_timediff_invalid_unit() -> None:
     import utcnow
 

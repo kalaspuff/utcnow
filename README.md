@@ -496,7 +496,6 @@ milliseconds = utcnow.timediff(begin, end, "microseconds")  # diff in microsecon
 
 nanoseconds = utcnow.timediff(begin, end, "nanoseconds")  # diff in nanoseconds (alias: "ns")
 # 16200000000000.0
-
 ```
 
 ```python
@@ -510,6 +509,120 @@ answer = utcnow.timediff(0, 1234567890)
 # This can also be calculated by using the power of subtraction.
 also_the_answer = 1234567890 - 0
 # 1234567890
+```
+
+### Freeze the current time in `utcnow` with `utcnow.synchronizer`
+
+There's a context manager available at `utcnow.synchronizer` to freeze the current time of `utcnow` to a specific value of your choice or to the current time when entering the context manager.
+
+This has been added to accomodate for the use-case of needing to fetch the current time in different places as part of a call chain, where it's also either difficult or you're unable to pass the initial timestamp value as an argument down the chain, but you want to receive the exact same timestamp from `utcnow` to be returned for each call, although some microseconds would have passed since last call.
+
+```python
+timestamp_before = utcnow.get()
+
+with utcnow.synchronizer:
+    # the current time (fetched through utcnow) is now frozen to the time when the
+    # context manager was opened.
+    timestamp_in_context = utcnow.get()
+
+    # even when sleeping or awaiting, the time will stay frozen for as long as
+    # we haven't exited the context.
+    sleep(1)
+    timestamp_1s_later = utcnow.get()  # same value as timestamp_in_context
+
+timestamp_after = utcnow.get()
+
+# timestamp_before      -> '2023-09-25T22:53:04.733040Z'
+# timestamp_in_context  -> '2023-09-25T22:53:04.733076Z' (timestamp_before + 36µs)
+# timestamp_1s_later    -> '2023-09-25T22:53:04.733076Z' (timestamp_before + 36µs)
+# timestamp_after       -> '2023-09-25T22:53:05.738224Z' (timestamp_before + ~1s)
+```
+
+The `utcnow.synchronizer(value, modifier)` can also be initialized with a specific timestamp value to freeze the current time to, instead of the current time when entering the context manager. The same kind of arguments as for `utcnow.rfc3339_timestamp()` (`utcnow.get()`) can be used also for `utcnow.synchronizer`.
+
+```python
+with utcnow.synchronizer("2000-01-01"):
+    # the current time (fetched through utcnow) is now frozen to UTC midnight,
+    # new years eve 2000.
+
+    timestamp_in_context = utcnow.get()
+    # '2000-01-01T00:00:00.000000Z'
+
+    datetime_in_context = utcnow.as_datetime()
+    # datetime.datetime(2000, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)
+
+    unixtime_in_context = utcnow.as_unixtime()
+    # 946684800.0
+
+    timestamp_in_context_plus_24h = utcnow.get("now", "+24h")
+    # '2000-01-02T00:00:00.000000Z'
+```
+
+#### An example of how `utcnow.synchronizer` can be used to freeze the creation time of an object and its children
+
+A common use-case for `utcnow.synchronizer` is to freeze the creation time of an object and its children, for example when creating a bunch of objects in a chunk, if we are expected to apply the exact same creation time of all objects in the chunk using the same value.
+
+`SomeModel` is a simple class that stores `created_at` when the object is initiated. Objects of the type may also contain a list of `items`, which in pratice is children of the same type. If creating a parent `SomeModel` object with two children stored to its `items` list all together in a chunk (for example as part of a storage API request), we may want to use the same timestamp for all three objects (the parent and the children).
+
+```python
+class SomeModel:
+    _created_at: str
+    items: List[SomeModel]
+
+    def __init__(self, items: Optional[List[SomeModel]] = None) -> None:
+        self._created_at = utcnow.rfc3339_timestamp()
+        self.items = items if items is not None else []
+
+    @property
+    def created_at(self) -> str:
+        return self._created_at
+
+    def __repr__(self) -> str:
+        base_ = f"{type(self).__name__} [object at {hex(id(self))}], created_at='{self._created_at}'"
+        if self.items:
+            return f"<{base_}, items={self.items}>"
+        return f"<{base_}>"
+
+
+# without freezing the current time, the timestamps would be different for each item and
+# the parent although they were created in the same chunk - this may be desired in a bunch
+# of cases, but not always.
+
+a = SomeModel(items=[
+    SomeModel(),
+    SomeModel(),
+])
+# a = <SomeModel [object at 0x103a01350], created_at='2023-09-25T23:35:50.371100Z', items=[
+#     <SomeModel [object at 0x1039ff590], created_at='2023-09-25T23:35:50.371078Z'>,
+#     <SomeModel [object at 0x103a01290], created_at='2023-09-25T23:35:50.371095Z'>
+# ]>
+
+with utcnow.synchronizer:
+    b = SomeModel(items=[
+        SomeModel(),
+        SomeModel(),
+    ])
+# b = <SomeModel [object at 0x103a01350], created_at='2023-09-25T23:35:50.371100Z', items=[
+#     <SomeModel [object at 0x1039ff590], created_at='2023-09-25T23:35:50.371100Z'>,
+#     <SomeModel [object at 0x103a01290], created_at='2023-09-25T23:35:50.371100Z'>
+# ]>
+
+```
+
+It's not possible to chain `utcnow.synchronizer` context managers to freeze the current time to different values at different points in the call chain. If a `utcnow.synchronizer` context is already opened a second attempt to create or open a context will result in a raised exception.
+
+```python
+with utcnow.synchronizer:
+    # this is ok
+    with utcnow.synchronizer:
+        # we'll never get here
+        ...
+
+# Traceback (most recent call last):
+#   File "<stdin>", line 2, in <module>
+#   File ".../.../.../utcnow/__init__.py", line 245, in __enter__
+#     raise RuntimeError("'utcnow.synchronizer' context cannot be nested (library time already synchronized)")
+# RuntimeError: 'utcnow.synchronizer' context cannot be nested (library time already synchronized)
 ```
 
 ## Finally
