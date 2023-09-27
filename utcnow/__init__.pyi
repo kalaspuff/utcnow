@@ -4,8 +4,7 @@ import functools
 from datetime import datetime, tzinfo
 from decimal import Decimal
 from numbers import Real
-from types import EllipsisType, FunctionType, MethodType, MethodWrapperType, WrapperDescriptorType
-from typing import Any, Generic, Optional, Type, TypeVar, Union, cast
+from typing import Any, Generic, Optional, Type, TypeVar, Union
 
 from utcnow.protobuf import TimestampProtobufMessage
 
