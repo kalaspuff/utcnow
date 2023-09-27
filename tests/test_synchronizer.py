@@ -44,10 +44,9 @@ def test_synchronizer_timediff() -> None:
 
 
 def test_synchronizer_now() -> None:
-    with utcnow.synchronizer:
+    with utcnow.synchronizer("now"):
         created_time = utcnow.rfc3339_timestamp()
         expire_time = utcnow.rfc3339_timestamp("now", "+15m")
-
     assert utcnow.timediff(created_time, expire_time, "seconds") == 900.0
 
 

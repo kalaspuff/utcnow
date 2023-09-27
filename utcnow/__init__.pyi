@@ -4,7 +4,8 @@ import functools
 from datetime import datetime, tzinfo
 from decimal import Decimal
 from numbers import Real
-from typing import Any, Generic, Optional, Type, TypeVar, Union
+from types import EllipsisType, FunctionType, MethodType, MethodWrapperType, WrapperDescriptorType
+from typing import Any, Generic, Optional, Type, TypeVar, Union, cast
 
 from utcnow.protobuf import TimestampProtobufMessage
 
@@ -295,6 +296,7 @@ class TimeSynchronizer(Generic[TS]):
     """
 
     def __new__(cls: Type[TimeSynchronizer[TS]]) -> TimeSynchronizer[TS]: ...
+    def __init__(self) -> None: ...
     def __call__(
         self: TimeSynchronizer[TS],
         value: Union[str, datetime, object, int, float, Decimal, Real] = NOW,
@@ -357,11 +359,26 @@ class TimeSynchronizer(Generic[TS]):
     @property
     def frozen(self) -> bool: ...
 
-class __synchronizer:
-    class synchronizer(TimeSynchronizer):
-        pass
+class TimeSynchronizerResult(TimeSynchronizer[TS]):
+    def __new__(cls: Type[TimeSynchronizerResult[TS]]) -> TimeSynchronizerResult[TS]: ...
+    def __eq__(self, other: Any) -> bool:
+        return (
+            True
+            if (
+                other is Type[TimeSynchronizerResult[TS]]
+                or other is TimeSynchronizer[TS]
+                or other is Type[TimeSynchronizer[TS]]
+                or other is TimeSynchronizerResult[TS]
+                or other is TimeSynchronizerResult[TimeSynchronizer[TS]]
+                or other is Type[TimeSynchronizerResult[TimeSynchronizer[TS]]]
+            )
+            else False
+        )
 
-__synchronizer__ = synchronizer = TimeSynchronizer[__synchronizer.synchronizer]()
+class __synchronizer(TimeSynchronizer[TS], metaclass=type):
+    pass
+
+synchronizer = __synchronizer__ = synchronizer__ = __synchronizer.__new__(__synchronizer)
 
 class utcnow(str):
     def __repr__(self) -> str: ...
