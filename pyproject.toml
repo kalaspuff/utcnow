@@ -104,8 +104,16 @@ warn_return_any = true
 warn_unreachable = true
 
 [tool.flake8]
-ignore = ["E203", "E501", "W503", "E231", "E221"]
+ignore = ["E203", "E501", "W503", "E231", "E221", "E704", "E301", "E302", "E305"]
 exclude = ["utcnow.egg-info", ".git", ".mypy_cache", ".pytest_cache", ".venv", ".vscode", "__pycache__", "build", "dist", "tmp"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:Using the 'utcnow[.](get_today)[(][)]' function alias is deprecated. Use the 'utcnow[.]today[(][)]' function instead.:DeprecationWarning:utcnow",
+    "ignore:Using the 'utcnow[.](unixtime)[(][)]' function alias is deprecated. Use the 'utcnow[.]as_unixtime[(][)]' function instead.:DeprecationWarning:utcnow",
+    "ignore:Using the 'utcnow[.](as_string|as_str|as_rfc3339|to_string|to_str|to_rfc3339|get_string|get_str|get_rfc3339|string|rfc3339|str)[(][)]' function alias is deprecated. Use the 'utcnow[.]rfc3339_timestamp[(][)]' function instead.:DeprecationWarning:utcnow",
+    "ignore:Using the 'utcnow[.](as_date|to_datetime|to_date|get_datetime|get_date|date|datetime)[(][)]' function alias is deprecated. Use the 'utcnow[.]as_datetime[(][)]' function instead.:DeprecationWarning:utcnow",
+]
 
 [tool.coverage.run]
 omit = ["tests/*"]

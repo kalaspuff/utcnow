@@ -1,22 +1,25 @@
 import datetime
+from types import ModuleType
 
 
 def test_module() -> None:
     import utcnow
 
     # Test types
-    assert type(utcnow) is utcnow._module  # type: ignore
+    assert isinstance(utcnow, ModuleType)
+    assert utcnow.__class__ is ModuleType
     assert len(str(utcnow)) == 27
     assert isinstance(repr(utcnow), str)
     assert len(repr(utcnow)) == 27
 
-    # Modules aren't callable, but this one is – it's frowned upon and bad practice.
-    assert utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"
-    assert utcnow("1984-08-01 00:00:00") == "1984-08-01T00:00:00.000000Z"
-    assert utcnow("1984-08-01 12:00:00") != "1984-08-01T00:00:00.000000Z"
-    assert datetime.datetime.strptime(utcnow(), "%Y-%m-%dT%H:%M:%S.%f%z")
+    # Modules aren't supposed to be callable, but this one is – it's frowned upon and bad practice.
+    # In this case, it's a feature, although experimental.
+    assert utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"  # type: ignore
+    assert utcnow("1984-08-01 00:00:00") == "1984-08-01T00:00:00.000000Z"  # type: ignore
+    assert utcnow("1984-08-01 12:00:00") != "1984-08-01T00:00:00.000000Z"  # type: ignore
+    assert datetime.datetime.strptime(utcnow(), "%Y-%m-%dT%H:%M:%S.%f%z")  # type: ignore
     assert datetime.datetime.strptime(str(utcnow), "%Y-%m-%dT%H:%M:%S.%f%z")
-    assert utcnow(datetime.datetime(2021, 4, 30, 8, 0)) == "2021-04-30T08:00:00.000000Z"
+    assert utcnow(datetime.datetime(2021, 4, 30, 8, 0)) == "2021-04-30T08:00:00.000000Z"  # type: ignore
 
     # Testing module functions
     assert utcnow.utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"
@@ -33,7 +36,6 @@ def test_module() -> None:
     assert utcnow.get_rfc3339("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.get("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
-    assert utcnow.str("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.rfc3339("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.utcnow("1984-08-01") == "1984-08-01T00:00:00.000000Z"
     assert utcnow.utcnow.as_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"
@@ -44,7 +46,6 @@ def test_module() -> None:
     assert datetime.datetime.strptime(utcnow.as_string(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(utcnow.as_str(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(utcnow.string(), "%Y-%m-%dT%H:%M:%S.%f%z")
-    assert datetime.datetime.strptime(utcnow.str(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(utcnow.utcnow.as_string(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(utcnow.utcnow.as_str(), "%Y-%m-%dT%H:%M:%S.%f%z")
     assert datetime.datetime.strptime(utcnow.utcnow.string(), "%Y-%m-%dT%H:%M:%S.%f%z")
@@ -67,9 +68,6 @@ def test_module() -> None:
         2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
     )
     assert utcnow.get_date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
-        2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
-    )
-    assert utcnow.datetime("2021-04-30T08:00:10.000000Z") == datetime.datetime(
         2021, 4, 30, 8, 0, 10, tzinfo=datetime.timezone.utc
     )
     assert utcnow.date("2021-04-30T08:00:10.000000Z") == datetime.datetime(
@@ -146,8 +144,9 @@ def test_module() -> None:
     )
 
     # Testing function imports
-    from utcnow import as_date_string, as_str, as_string
-    from utcnow import str as str_
+    from utcnow import as_date_string, as_str
+    from utcnow import as_string
+    from utcnow import as_string as str_
     from utcnow import string
 
     assert as_string("1984-08-01") == "1984-08-01T00:00:00.000000Z"

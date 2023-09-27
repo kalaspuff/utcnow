@@ -66,50 +66,62 @@ def test_sorted_timestamp_list() -> None:
     assert list_alphabetical_order_reversed != values
     assert list_alphabetical_order != list_alphabetical_order_reversed
 
-    list_datetime_order = sorted(values, key=utcnow.datetime)
-    list_rfc3799_timestamp_order = sorted(values, key=utcnow.str)
+    list_datetime_order = sorted(values, key=utcnow.as_datetime)
+    list_rfc3799_timestamp_order = sorted(values, key=utcnow.rfc3339_timestamp)
 
     assert list_datetime_order == list_rfc3799_timestamp_order
 
-    assert sorted(list_alphabetical_order_reversed, key=utcnow.datetime) != list_datetime_order
-    assert sorted(list_alphabetical_order_reversed, key=utcnow.str) != list_rfc3799_timestamp_order
+    assert sorted(list_alphabetical_order_reversed, key=utcnow.as_datetime) != list_datetime_order
+    assert sorted(list_alphabetical_order_reversed, key=utcnow.rfc3339_timestamp) != list_rfc3799_timestamp_order
 
     assert sorted(list_alphabetical_order_reversed) == sorted(list_alphabetical_order)
-    assert sorted(list_alphabetical_order_reversed, key=utcnow.datetime) != sorted(
-        list_alphabetical_order, key=utcnow.datetime
+    assert sorted(list_alphabetical_order_reversed, key=utcnow.as_datetime) != sorted(
+        list_alphabetical_order, key=utcnow.as_datetime
     )
-    assert sorted(list_alphabetical_order_reversed, key=utcnow.str) != sorted(list_alphabetical_order, key=utcnow.str)
+    assert sorted(list_alphabetical_order_reversed, key=utcnow.rfc3339_timestamp) != sorted(
+        list_alphabetical_order, key=utcnow.rfc3339_timestamp
+    )
 
-    assert sorted(sorted(list_alphabetical_order_reversed), key=utcnow.datetime) == sorted(
-        sorted(list_alphabetical_order), key=utcnow.datetime
+    assert sorted(sorted(list_alphabetical_order_reversed), key=utcnow.as_datetime) == sorted(
+        sorted(list_alphabetical_order), key=utcnow.as_datetime
     )
-    assert sorted(sorted(list_alphabetical_order_reversed), key=utcnow.str) == sorted(
-        sorted(list_alphabetical_order), key=utcnow.str
+    assert sorted(sorted(list_alphabetical_order_reversed), key=utcnow.rfc3339_timestamp) == sorted(
+        sorted(list_alphabetical_order), key=utcnow.rfc3339_timestamp
     )
 
     list_output_datetimes_reordered = list(
-        map(utcnow.datetime, sorted(list_alphabetical_order_reversed, key=utcnow.datetime))
+        map(utcnow.as_datetime, sorted(list_alphabetical_order_reversed, key=utcnow.as_datetime))
     )
-    list_output_datetimes_ordered = list(map(utcnow.datetime, sorted(list_alphabetical_order, key=utcnow.datetime)))
-    list_output_strings_reordered = list(map(utcnow.str, sorted(list_alphabetical_order_reversed, key=utcnow.str)))
-    list_output_strings_ordered = list(map(utcnow.str, sorted(list_alphabetical_order, key=utcnow.str)))
+    list_output_datetimes_ordered = list(
+        map(utcnow.as_datetime, sorted(list_alphabetical_order, key=utcnow.as_datetime))
+    )
+    list_output_strings_reordered = list(
+        map(utcnow.rfc3339_timestamp, sorted(list_alphabetical_order_reversed, key=utcnow.rfc3339_timestamp))
+    )
+    list_output_strings_ordered = list(
+        map(utcnow.rfc3339_timestamp, sorted(list_alphabetical_order, key=utcnow.rfc3339_timestamp))
+    )
 
     assert list_output_datetimes_reordered == list_output_datetimes_ordered
     assert list_output_strings_reordered == list_output_strings_ordered
 
-    assert sorted(map(utcnow.datetime, values)) == list_output_datetimes_reordered == list_output_datetimes_ordered
-    assert sorted(map(utcnow.str, values)) == list_output_strings_reordered == list_output_strings_reordered
+    assert sorted(map(utcnow.as_datetime, values)) == list_output_datetimes_reordered == list_output_datetimes_ordered
+    assert (
+        sorted(map(utcnow.rfc3339_timestamp, values)) == list_output_strings_reordered == list_output_strings_reordered
+    )
 
-    expected_list = sorted(map(utcnow.str, values))
+    expected_list = sorted(map(utcnow.rfc3339_timestamp, values))
 
     for _ in range(0, 20):
         shuffled_values = values[:]
         random.shuffle(shuffled_values)
 
-        assert sorted(map(utcnow.str, shuffled_values)) == expected_list
-        assert sorted(map(utcnow.datetime, shuffled_values)) == list(map(utcnow.datetime, expected_list))
+        assert sorted(map(utcnow.rfc3339_timestamp, shuffled_values)) == expected_list
+        assert sorted(map(utcnow.as_datetime, shuffled_values)) == list(map(utcnow.as_datetime, expected_list))
         assert sorted(map(utcnow.unixtime, shuffled_values)) == list(map(utcnow.unixtime, expected_list))
 
-        assert list(map(utcnow.str, sorted(shuffled_values, key=utcnow.str))) == expected_list
-        assert list(map(utcnow.str, sorted(shuffled_values, key=utcnow.datetime))) == expected_list
-        assert list(map(utcnow.str, sorted(shuffled_values, key=utcnow.unixtime))) == expected_list
+        assert (
+            list(map(utcnow.rfc3339_timestamp, sorted(shuffled_values, key=utcnow.rfc3339_timestamp))) == expected_list
+        )
+        assert list(map(utcnow.rfc3339_timestamp, sorted(shuffled_values, key=utcnow.as_datetime))) == expected_list
+        assert list(map(utcnow.rfc3339_timestamp, sorted(shuffled_values, key=utcnow.unixtime))) == expected_list

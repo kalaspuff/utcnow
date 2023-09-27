@@ -2,7 +2,7 @@
 import sys
 from typing import List, Optional
 
-from utcnow import rfc3339_timestamp, unixtime
+from utcnow import as_unixtime, rfc3339_timestamp
 
 
 def error_message(message: str, usage: Optional[str] = None) -> str:
@@ -62,7 +62,7 @@ def cli_entrypoint(argv: Optional[List[str]] = None) -> int:
             from_value, to_value = argv
 
             try:
-                unixtime_from = unixtime(from_value)
+                unixtime_from = as_unixtime(from_value)
             except ValueError:
                 print(
                     error_message(f"invalid input value for 'from' argument: \"{from_value}\".", usage), file=sys.stderr
@@ -70,7 +70,7 @@ def cli_entrypoint(argv: Optional[List[str]] = None) -> int:
                 return 1
 
             try:
-                unixtime_to = unixtime(to_value)
+                unixtime_to = as_unixtime(to_value)
             except ValueError:
                 print(error_message(f"invalid input value for 'to' argument: \"{to_value}\".", usage), file=sys.stderr)
                 return 1
@@ -106,7 +106,7 @@ def cli_entrypoint(argv: Optional[List[str]] = None) -> int:
                 argv.pop(argv.index("--"))
 
             if not argv:
-                print(rfc3339_timestamp() if output_unixtime is False else str(unixtime()))
+                print(rfc3339_timestamp() if output_unixtime is False else str(as_unixtime()))
             else:
                 values = [
                     (
@@ -123,7 +123,7 @@ def cli_entrypoint(argv: Optional[List[str]] = None) -> int:
                 output = ""
                 for value in values:
                     try:
-                        output += rfc3339_timestamp(value) if output_unixtime is False else str(unixtime(value))
+                        output += rfc3339_timestamp(value) if output_unixtime is False else str(as_unixtime(value))
                         output += "\n"
                     except ValueError:
                         print(error_message(f'invalid input value: "{value}".'), file=sys.stderr)

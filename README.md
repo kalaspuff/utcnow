@@ -6,11 +6,11 @@
 [![MIT License](https://img.shields.io/github/license/kalaspuff/utcnow.svg)](https://github.com/kalaspuff/utcnow/blob/master/LICENSE)
 [![Code coverage](https://codecov.io/gh/kalaspuff/utcnow/branch/master/graph/badge.svg)](https://codecov.io/gh/kalaspuff/utcnow/tree/master/utcnow)
 
-*Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion functionality from other timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objets and other common date utilities. Follow modern practices when developing API interfaces.*
+*Timestamps as RFC 3339 (Date & Time on the Internet) formatted strings with conversion functionality from other timestamp formats or for timestamps on other timezones. Additionally converts timestamps from datetime objects and other common date utilities. Follow modern practices when developing API interfaces.*
 
-### A library for formatting timestamps as RFC3339
+### A library for formatting timestamps as RFC 3339
 
-* One preferred output format strictly following RFC3339.
+* One preferred output format strictly following RFC 3339.
 * Making it easier to follow common best practices for developers.
 * Tranforming timestamps from (or when needed, to) common interfaces such as unix timestamps, `datetime` objects, `google.protobuf.Timestamp` messages or plain text.
 * Type hinted, battle tested and supporting several versions of Python.
@@ -69,7 +69,7 @@ utcnow.get("1989-12-13 08:35 UTC")
 > "Why UTC? It's not even a timezone for our markets."
 
 > **Devs (and wikipedia):**
-> "_Coordinated Universal Time_ or _Universal Time Coordinated_, UTC for short, is still currently _the primary time standard_ and is not affected by daylight saving time, which is usually not something that servers or software developers would want to work around."
+> "*Coordinated Universal Time* or *Universal Time Coordinated*, UTC for short, is still currently *the primary time standard* and is not affected by daylight saving time, which is usually not something that servers or software developers would want to work around."
 >
 > "It's pretty simple – modern internet applications shouldn't use any other timezone in their databases, logs, API:s or other computer to computer interfaces."
 
@@ -81,7 +81,7 @@ Good timestamps and UTC – really no wild and crazy opinions. Generailly this l
 
 **The following ruleset are applied to timestamps returned by `utcnow` when requesting a string based format:**
 
-* Timestamps follow RFC 3339 (Date and Time on the Internet: Timestamps): https://tools.ietf.org/html/rfc3339.
+* Timestamps follow RFC 3339 (Date and Time on the Internet: Timestamps): <https://tools.ietf.org/html/rfc3339>.
 * Timestamps are converted to UTC timezone which we'll note in the timestamp with the "Z" syntax instead of the also accepted "+00:00". "Z" stands for UTC+0 or "Zulu time" and refers to the zone description of zero hours.
 * Timestamps are expressed as a date-time, including the full date (the "T" between the date and the time is optional in RFC 3339 (but not in ISO 8601) and usually describes the beginning of the time part.
 * Timestamps are 27 characters long in the format: "YYYY-MM-DDTHH:mm:ss.ffffffZ". 4 digit year, 2 digit month, 2 digit days. "T", 2 digit hours, 2 digit minutes, 2 digit seconds, 6 fractional second digits (microseconds -> nanoseconds), followed by the timezone identifier for UTC: "Z".
@@ -89,7 +89,6 @@ Good timestamps and UTC – really no wild and crazy opinions. Generailly this l
 `utcnow` is defined to return timestamps with 6 fractional second digits, which means timestamps down to the microsecond level. Having a six-digit fraction of a second is currently the most common way that timestamps are shown at this date.
 
 When using a fixed length return value for string based timestamps it'll even make the returned strings comparable to each other.
-
 
 ### Where to use this – for what kind of applications or interfaces
 
@@ -101,15 +100,14 @@ If your work require a complex mix and match back and forth using different time
 
 Note that this library is built with backend developers in mind and while these date-time formatted timestamps are more readable than unix timestamps, they still usually shouldn't be used within user interfaces, however since these format of timestamps are so common basically any library will be able to convert back and forth into whatever your human users would expect, to improve readability – useful for frontend applications, app user interfaces, etc. Also, using a standard like this, the frontend devs won't banish you for changing formatting of timestamps within API responses across different services.
 
-
 ## Supported input values for timestamp conversion
 
 This library aims at going for simplicity by being explicit about the choices allowed to make. `utcnow` however allows the conversion methods to be called with the following kind of argument values:
+
 * RFC 3339 compliant strings, which at the very least must include the full date, but could omit the time part of a date-time, leaving only the date, or by not including the seconds, microseconds or even laving out the timezone information – `utcnow` supports all of the use-cases of RFC 3339 inputs and then converts the input into an even more complete RFC 3339 timestamp in UTC timezone.
 * The most common format for handling dates and datetimes in Python, the builtin `datetime.datetime` object values (both timezone aware values, as well as values that aren't timezone aware, as for which we'll assume UTC).
 * Also supporting object values from other commonly used libraries, such as `arrow`.
 * As a bonus – Unix time, mainly for convinience (`time.time()`) (we have many names for the things we love: epoch time, posix time, seconds since epoch, 2038-bug on 32-bit unsigned ints to time-travel back to the first radio-transmission across the atlantic, there will be movies about this ).
-
 
 ## Can also be used on the command-line
 
@@ -147,7 +145,6 @@ code ~$ utcnow "2022-02-28 10:10:59.100+02:00" "1984-08-01 15:00"
     utcnow --version                 | short: -v   show installed version
 ```
 
-
 ## A neat side-effect of defaulted string output – comparison as strings
 
 > If date and time components are ordered from least precise to most precise, then a useful property is achieved.  Assuming that the time zones of the dates and times are the same (e.g., all in UTC), expressed using the same string (e.g., all "Z" or all "+00:00"), and all times have the same number of fractional second digits, then the date and time strings may be sorted as strings and a time-ordered sequence will result. he presence of optional punctuation would violate this characteristic.
@@ -163,7 +160,6 @@ Here follows a few examples of the problems with having to work with mismatching
 "2022-08-01T13:51Z"                    >  "2022-08-01T13:51:30.000000Z"          # True  😵
 ```
 
-
 *Using `utcnow` on the same set of timestamps, which returns a string value for comparison.*
 
 ```python
@@ -175,7 +171,6 @@ utcnow("2022-08-01T14:00:10+01:00")    >  utcnow("2022-08-01T13:51:30.000000Z") 
 utcnow("2022-08-01T13:51Z")            >  utcnow("2022-08-01T13:51:30.000000Z")  # False 😻
 ```
 
-
 *This shown the returned values from the `utcnow` calls, and for what the comparisons is actually evaluated on.*
 
 ```python
@@ -184,7 +179,6 @@ utcnow("2022-08-01T13:51Z")            >  utcnow("2022-08-01T13:51:30.000000Z") 
 "2022-08-01T13:00:10.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # False 🥇
 "2022-08-01T13:51:00.000000Z"          >  "2022-08-01T13:51:30.000000Z"          # False 😻
 ```
-
 
 ## Transformation examples
 
@@ -225,17 +219,18 @@ utcnow.get("2021-02-28 10:10:59.123987Z")       # "2021-02-28T10:10:59.123987Z"
 utcnow.get("2021-02-28 10:10:59.123987 UTC")    # "2021-02-28T10:10:59.123987Z"
 ```
 
-
 ## Installation
+
 Like you would install any other Python package, use `pip`, `poetry`, `pipenv` or your weapon of choice.
+
 ```
-$ pip install utcnow
+pip install utcnow
 ```
 
 To install with Protocol Buffers support, specify the `protobuf` extras.
 
 ```
-$ pip install utcnow[protobuf]
+pip install utcnow[protobuf]
 ```
 
 ## Usage and examples
@@ -430,7 +425,7 @@ msg = utcnow.as_protobuf("1984-08-01 22:30:47.234003Z")
 Note that the `protobuf` package has to be installed to make use of the above functionality. For convenience, it's also possible to install `utcnow` with `protobuf` support using the `protobuf` extras.
 
 ```
-$ pip install utcnow[protobuf]
+pip install utcnow[protobuf]
 ```
 
 ### Get the date part as a string from a timestamp
@@ -449,17 +444,17 @@ utcnow.as_date_string(timestamp)
 # "2022-04-05"
 ```
 
-Bonus 🎉🎉 – calling the `utcnow.as_date_string()` function without arguments will return today's date, _based on the current time in UTC_. For some sugar to your code, the same function is also available under the name `utcnow.get_today()`.
+Bonus 🎉🎉 – calling the `utcnow.as_date_string()` function without arguments will return today's date, *based on the current time in UTC*. For some sugar to your code, the same function is also available under the name `utcnow.today()`.
 
 To get the current date in another timezone use the keyword argument `tz` to the function call. The value for `tz` should be either a `datetime.tzinfo` object or an utcoffset represented as a string (for example "+01:00", "-06:00", etc.).
 
 ```python
 import utcnow
 
-utcnow.get_today()
+utcnow.today()
 # "2022-04-05" (it's the 5th of April when typing this)
 
-utcnow.get_today(tz="+12:00")
+utcnow.today(tz="+12:00")
 # "2022-04-06" (time in UTC is currently 15:12 - adding 12 hours to that would yield 03:12 tomorrow)
 ```
 
@@ -481,14 +476,26 @@ seconds = utcnow.timediff(begin, end)
 # just divides the number of seconds with the value relative to the unit. If not
 # specified, the default unit "seconds" will be applied.
 
-minutes = utcnow.timediff(begin, end, "minutes")
+seconds = utcnow.timediff(begin, end, "seconds")  # diff in seconds (alias: "s")
+# 16200.0
+
+minutes = utcnow.timediff(begin, end, "minutes")  # diff in minutes (alias: "m")
 # 270.0
 
-hours = utcnow.timediff(begin, end, "hours")
+hours = utcnow.timediff(begin, end, "hours")  # diff in hours (alias: "h")
 # 4.5
 
-days = utcnow.timediff(begin, end, "days")
+days = utcnow.timediff(begin, end, "days")  # diff in days (alias: "d")
 # 0.1875
+
+milliseconds = utcnow.timediff(begin, end, "milliseconds")  # diff in milliseconds (alias: "ms")
+# 162000000.0
+
+milliseconds = utcnow.timediff(begin, end, "microseconds")  # diff in microseconds (alias: "us")
+# 16200000000.0
+
+nanoseconds = utcnow.timediff(begin, end, "nanoseconds")  # diff in nanoseconds (alias: "ns")
+# 16200000000000.0
 ```
 
 ```python
@@ -504,15 +511,127 @@ also_the_answer = 1234567890 - 0
 # 1234567890
 ```
 
+### Freeze the current time in `utcnow` with `utcnow.synchronizer`
+
+There's a context manager available at `utcnow.synchronizer` to freeze the current time of `utcnow` to a specific value of your choice or to the current time when entering the context manager.
+
+This has been added to accomodate for the use-case of needing to fetch the current time in different places as part of a call chain, where it's also either difficult or you're unable to pass the initial timestamp value as an argument down the chain, but you want to receive the exact same timestamp from `utcnow` to be returned for each call, although some microseconds would have passed since last call.
+
+```python
+timestamp_before = utcnow.get()
+
+with utcnow.synchronizer:
+    # the current time (fetched through utcnow) is now frozen to the time when the
+    # context manager was opened.
+    timestamp_in_context = utcnow.get()
+
+    # even when sleeping or awaiting, the time will stay frozen for as long as
+    # we haven't exited the context.
+    sleep(1)
+    timestamp_1s_later = utcnow.get()  # same value as timestamp_in_context
+
+timestamp_after = utcnow.get()
+
+# timestamp_before      -> '2023-09-25T22:53:04.733040Z'
+# timestamp_in_context  -> '2023-09-25T22:53:04.733076Z' (timestamp_before + 36µs)
+# timestamp_1s_later    -> '2023-09-25T22:53:04.733076Z' (timestamp_before + 36µs)
+# timestamp_after       -> '2023-09-25T22:53:05.738224Z' (timestamp_before + ~1s)
+```
+
+The `utcnow.synchronizer(value, modifier)` can also be initialized with a specific timestamp value to freeze the current time to, instead of the current time when entering the context manager. The same kind of arguments as for `utcnow.rfc3339_timestamp()` (`utcnow.get()`) can be used also for `utcnow.synchronizer`.
+
+```python
+with utcnow.synchronizer("2000-01-01"):
+    # the current time (fetched through utcnow) is now frozen to UTC midnight,
+    # new years eve 2000.
+
+    timestamp_in_context = utcnow.get()
+    # '2000-01-01T00:00:00.000000Z'
+
+    datetime_in_context = utcnow.as_datetime()
+    # datetime.datetime(2000, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)
+
+    unixtime_in_context = utcnow.as_unixtime()
+    # 946684800.0
+
+    timestamp_in_context_plus_24h = utcnow.get("now", "+24h")
+    # '2000-01-02T00:00:00.000000Z'
+```
+
+#### An example of how `utcnow.synchronizer` can be used to freeze the creation time of an object and its children
+
+A common use-case for `utcnow.synchronizer` is to freeze the creation time of an object and its children, for example when creating a bunch of objects in a chunk, if we are expected to apply the exact same creation time of all objects in the chunk using the same value.
+
+`SomeModel` is a simple class that stores `created_at` when the object is initiated. Objects of the type may also contain a list of `items`, which in pratice is children of the same type. If creating a parent `SomeModel` object with two children stored to its `items` list all together in a chunk (for example as part of a storage API request), we may want to use the same timestamp for all three objects (the parent and the children).
+
+```python
+class SomeModel:
+    _created_at: str
+    items: List[SomeModel]
+
+    def __init__(self, items: Optional[List[SomeModel]] = None) -> None:
+        self._created_at = utcnow.rfc3339_timestamp()
+        self.items = items if items is not None else []
+
+    @property
+    def created_at(self) -> str:
+        return self._created_at
+
+    def __repr__(self) -> str:
+        base_ = f"{type(self).__name__} [object at {hex(id(self))}], created_at='{self._created_at}'"
+        if self.items:
+            return f"<{base_}, items={self.items}>"
+        return f"<{base_}>"
+
+
+# without freezing the current time, the timestamps would be different for each item and
+# the parent although they were created in the same chunk - this may be desired in a bunch
+# of cases, but not always.
+
+a = SomeModel(items=[
+    SomeModel(),
+    SomeModel(),
+])
+# a = <SomeModel [object at 0x103a01350], created_at='2023-09-25T23:35:50.371100Z', items=[
+#     <SomeModel [object at 0x1039ff590], created_at='2023-09-25T23:35:50.371078Z'>,
+#     <SomeModel [object at 0x103a01290], created_at='2023-09-25T23:35:50.371095Z'>
+# ]>
+
+with utcnow.synchronizer:
+    b = SomeModel(items=[
+        SomeModel(),
+        SomeModel(),
+    ])
+# b = <SomeModel [object at 0x103a01350], created_at='2023-09-25T23:35:50.371100Z', items=[
+#     <SomeModel [object at 0x1039ff590], created_at='2023-09-25T23:35:50.371100Z'>,
+#     <SomeModel [object at 0x103a01290], created_at='2023-09-25T23:35:50.371100Z'>
+# ]>
+
+```
+
+It's not possible to chain `utcnow.synchronizer` context managers to freeze the current time to different values at different points in the call chain. If a `utcnow.synchronizer` context is already opened a second attempt to create or open a context will result in a raised exception.
+
+```python
+with utcnow.synchronizer:
+    # this is ok
+    with utcnow.synchronizer:
+        # we'll never get here
+        ...
+
+# Traceback (most recent call last):
+#   File "<stdin>", line 2, in <module>
+#   File ".../.../.../utcnow/__init__.py", line 245, in __enter__
+#     raise RuntimeError("'utcnow.synchronizer' context cannot be nested (library time already synchronized)")
+# RuntimeError: 'utcnow.synchronizer' context cannot be nested (library time already synchronized)
+```
 
 ## Finally
 
 This is not a fullblown date library at all – it's lightweight, convenient utility package and should mostly just be used to output the date-time timestamp we want and at times convert values from other parts into our fixed length string format `YYYY-MM-DDTHH:mm:ss.ffffffZ` (or as `%Y-%m-%dT%H:%M:%SZ` as if used with `datetime.datetime.strftime` on a naive `datetime` value or a `datetime` value in UTC). Always uses UTC in output and always appends the UTC timezone as a `Z` to the string (instead of using `+00:00`, which a tz-aware `datetime` would do when used with `datetime.isoformat()`).
 
-Use `utcnow` when you need to store date-time timestamps (and also preferably _internet_ date-time timestamps) in any datastore as a string, using them in API responses (JSON responses usually) or when your services are adding timestamps in their log outputs.
+Use `utcnow` when you need to store date-time timestamps (and also preferably *internet* date-time timestamps) in any datastore as a string, using them in API responses (JSON responses usually) or when your services are adding timestamps in their log outputs.
 
-Wether you choose to use this library or anything else, or just specify _this is how we do it_ in a documement, it'll be worth it. It's never too late to start aligning your formatting standards and interfaces.
-
+Wether you choose to use this library or anything else, or just specify *this is how we do it* in a documement, it'll be worth it. It's never too late to start aligning your formatting standards and interfaces.
 
 ## TLDR?
 
